@@ -1,0 +1,781 @@
+{% extends 'base.html' %} {% load static %} {% block title %} {{ page_title }} {% endblock %} 
+{% block meta_description %} {% endblock %} {% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6" data-aos="fade-up">Notre Blog</h1>
+      <p
+        class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto"
+        data-aos="fade-up"
+        data-aos-delay="200"
+      >
+        Conseils, astuces et actualités sur la peinture
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Search and Filters -->
+<section class="py-8 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+      <!-- Search -->
+      <div class="relative flex-1 max-w-md">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Rechercher des articles..."
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <svg
+          class="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="filter-buttons flex flex-wrap gap-2">
+        <button class="filter-btn filter-btn-active" data-category="all">Tous</button>
+        {% for category in categories %}
+        <button class="filter-btn filter-btn-inactive" data-category="{{ category.slug }}">
+          {{ category.nom }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Article -->
+{% if featured_article %}
+<section class="py-12 bg-white" id="featuredArticle">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Article en Vedette</h2>
+
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div class="md:flex">
+        <div class="md:w-1/2">
+          <img
+            src="{{ featured_article.image.url }}"
+            alt="{{ featured_article.titre }}"
+            class="w-full h-64 md:h-full object-cover"
+          />
+        </div>
+        <div class="md:w-1/2 p-8">
+          <div class="flex items-center mb-4">
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+              {{ featured_article.categorie.nom }}
+            </span>
+            <span class="ml-4 text-gray-500 text-sm">
+              {{ featured_article.date_publication|date:"d F Y" }}
+            </span>
+          </div>
+
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">
+            <a
+              href="{% url 'blog:blog_detail' featured_article.slug %}"
+              class="hover:text-blue-600 transition-colors"
+            >
+              {{ featured_article.titre }}
+            </a>
+          </h3>
+
+          <p class="text-gray-600 mb-6">{{ featured_article.resume }}</p>
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <img
+                src="{{ featured_article.auteur.avatar.url }}"
+                alt="{{ featured_article.auteur.get_full_name }}"
+                class="w-10 h-10 rounded-full mr-3"
+              />
+              <div>
+                <p class="font-medium text-gray-900">{{ featured_article.auteur.get_full_name }}</p>
+                <p class="text-sm text-gray-500">
+                  {{ featured_article.temps_lecture }} min de lecture
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="{% url 'blog:blog_detail' featured_article.slug %}"
+              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Lire l'article
+              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Articles Grid -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">Tous nos Articles</h2>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="hidden flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span class="ml-3 text-gray-700">Chargement...</span>
+    </div>
+
+    <!-- Articles Grid -->
+    <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for article in articles %}
+      <article
+        class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+      >
+        <div class="relative">
+          <img
+            src="{{ article.image.url }}"
+            alt="{{ article.titre }}"
+            class="w-full h-48 object-cover"
+          />
+          <div class="absolute top-4 left-4">
+            <span
+              class="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-2 py-1 rounded-full"
+            >
+              {{ article.categorie.nom }}
+            </span>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex items-center text-sm text-gray-500 mb-3">
+            <span class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              {{ article.date_publication|date:"d M Y" }}
+            </span>
+            <span class="mx-2">•</span>
+            <span class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              {{ article.temps_lecture }} min
+            </span>
+          </div>
+
+          <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+            <a
+              href="{% url 'blog:blog_detail' article.slug %}"
+              class="hover:text-blue-600 transition-colors"
+            >
+              {{ article.titre }}
+            </a>
+          </h3>
+
+          <p class="text-gray-600 mb-4 line-clamp-3">{{ article.resume }}</p>
+
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <img
+                src="{{ article.auteur.avatar.url }}"
+                alt="{{ article.auteur.get_full_name }}"
+                class="w-8 h-8 rounded-full mr-3"
+              />
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ article.auteur.get_full_name }}</p>
+                <p class="text-xs text-gray-500">{{ article.vues }} vues</p>
+              </div>
+            </div>
+
+            <a
+              href="{% url 'blog:blog_detail' article.slug %}"
+              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm"
+            >
+              Lire plus
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <!-- No Results -->
+    <div id="noResults" class="hidden text-center py-12">
+      <div class="max-w-md mx-auto">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.007-5.824-2.562M15 6.306a7.962 7.962 0 00-6 0m6 0V4a2 2 0 00-2-2h-2a2 2 0 00-2 2v2.306"
+          />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
+        <p class="mt-1 text-sm text-gray-500">Essayez de modifier vos critères de recherche.</p>
+        <div class="mt-6">
+          <button
+            onclick="resetFilters()"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Réinitialiser les filtres
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center items-center space-x-2 mt-12">
+      <button
+        id="prevBtn"
+        class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Précédent
+      </button>
+
+      <div id="pageNumbers" class="flex space-x-1">
+        <!-- Page numbers will be inserted here by JavaScript -->
+      </div>
+
+      <button
+        id="nextBtn"
+        class="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Suivant
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Sidebar with Recent Articles (Optional) -->
+<aside
+  class="hidden lg:block fixed right-4 top-1/2 transform -translate-y-1/2 w-80 bg-white rounded-xl shadow-lg p-6 z-40"
+>
+  <h3 class="text-lg font-bold text-gray-900 mb-4">Articles Récents</h3>
+  <div class="recent-articles-list space-y-4">
+    <!-- Recent articles will be loaded here by JavaScript -->
+  </div>
+</aside>
+
+<style>
+  /* Custom styles for blog page */
+  .filter-btn {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .filter-btn-active {
+    @apply bg-blue-600 text-white shadow-md;
+  }
+
+  .filter-btn-inactive {
+    @apply bg-white text-gray-700 border border-gray-300 hover:bg-gray-50;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Pagination styles */
+  .page-btn {
+    @apply px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 hover:bg-gray-50;
+  }
+
+  .page-btn.active {
+    @apply bg-blue-600 text-white border-blue-600;
+  }
+
+  /* Loading animation */
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .loading-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+</style>
+
+<script>
+  // Blog functionality
+  const API_BASE_URL = "{% url 'blog:blog_list' %}";
+  let currentPage = 1;
+  let currentCategory = 'all';
+  let searchQuery = '';
+  let totalPages = 1;
+
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', function () {
+    initializeEventListeners();
+    loadArticles();
+    loadRecentArticles();
+  });
+
+  function initializeEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', function (e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchQuery = e.target.value;
+          currentPage = 1;
+          loadArticles();
+        }, 500);
+      });
+    }
+
+    // Category filters
+    document.querySelectorAll('[data-category]').forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const category = this.dataset.category;
+
+        // Update active state
+        document.querySelectorAll('[data-category]').forEach((b) => {
+          b.classList.remove('filter-btn-active');
+          b.classList.add('filter-btn-inactive');
+        });
+
+        this.classList.remove('filter-btn-inactive');
+        this.classList.add('filter-btn-active');
+
+        // Update filter and reload
+        currentCategory = category;
+        currentPage = 1;
+        loadArticles();
+      });
+    });
+
+    // Newsletter form
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+      newsletterForm.addEventListener('submit', handleNewsletterSubmit);
+    }
+
+    // Pagination
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          loadArticles();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          loadArticles();
+        }
+      });
+    }
+  }
+
+  async function loadArticles() {
+    showLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: currentPage,
+        page_size: 9,
+      });
+
+      if (currentCategory !== 'all') {
+        params.append('categorie', currentCategory);
+      }
+
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      const response = await fetch(`${API_BASE_URL}/articles/?${params}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        updateArticlesGrid(data.results);
+        updatePagination(data);
+      } else {
+        showError('Erreur lors du chargement des articles');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      showError('Erreur de connexion');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function updateArticlesGrid(articles) {
+    const grid = document.getElementById('articlesGrid');
+    const noResults = document.getElementById('noResults');
+
+    if (!articles.length) {
+      grid.innerHTML = '';
+      noResults.classList.remove('hidden');
+      return;
+    }
+
+    noResults.classList.add('hidden');
+
+    grid.innerHTML = articles
+      .map(
+        (article) => `
+      <article class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+        <div class="relative">
+          <img src="${article.image || '/static/images/placeholder-blog.jpg'}" 
+              alt="${article.titre}" 
+              class="w-full h-48 object-cover"
+              onerror="this.src='/static/images/placeholder-blog.jpg'">
+          <div class="absolute top-4 left-4">
+            <span class="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-2 py-1 rounded-full">
+              ${article.categorie?.nom || 'Non catégorisé'}
+            </span>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-center text-sm text-gray-500 mb-3">
+            <span class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+              ${formatDate(article.date_publication)}
+            </span>
+            <span class="mx-2">•</span>
+            <span class="flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+              </svg>
+              ${article.temps_lecture} min
+            </span>
+          </div>
+          
+          <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+            <a href="/blog/${article.slug}/" class="hover:text-blue-600 transition-colors">
+              ${article.titre}
+            </a>
+          </h3>
+          
+          <p class="text-gray-600 mb-4 line-clamp-3">${article.resume || ''}</p>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <img src="${article.auteur?.avatar || '/static/images/default-avatar.jpg'}" 
+                  alt="${article.auteur?.nom || 'Auteur'}" 
+                  class="w-8 h-8 rounded-full mr-3"
+                  onerror="this.src='/static/images/default-avatar.jpg'">
+              <div>
+                <p class="text-sm font-medium text-gray-900">${article.auteur?.nom || 'Auteur'}</p>
+                <p class="text-xs text-gray-500">${article.vues || 0} vues</p>
+              </div>
+            </div>
+            
+            <a href="/blog/${article.slug}/" 
+              class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+              Lire plus
+              <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </article>
+    `
+      )
+      .join('');
+  }
+
+  function updatePagination(data) {
+    totalPages = Math.ceil(data.count / 9);
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    // Update button states
+    if (prevBtn) {
+      prevBtn.disabled = currentPage <= 1;
+    }
+
+    if (nextBtn) {
+      nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    // Generate page numbers
+    if (pageNumbers) {
+      let paginationHTML = '';
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          paginationHTML += `
+            <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                    onclick="goToPage(${i})">${i}</button>
+          `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          paginationHTML += '<span class="px-2 text-gray-500">...</span>';
+        }
+      }
+
+      pageNumbers.innerHTML = paginationHTML;
+    }
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    loadArticles();
+  }
+
+  async function loadRecentArticles() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/articles/recent/`);
+      if (response.ok) {
+        const articles = await response.json();
+        updateRecentArticlesSidebar(articles);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des articles récents:', error);
+    }
+  }
+
+  function updateRecentArticlesSidebar(articles) {
+    const sidebar = document.querySelector('.recent-articles-list');
+    if (!sidebar || !articles.length) return;
+
+    sidebar.innerHTML = articles
+      .slice(0, 5)
+      .map(
+        (article) => `
+      <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+        <img src="${article.image || '/static/images/placeholder-blog.jpg'}" 
+            alt="${article.titre}" 
+            class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+            onerror="this.src='/static/images/placeholder-blog.jpg'">
+              <div class="flex-1 min-w-0">
+          <h4 class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+            <a href="/blog/${article.slug}/" class="hover:text-blue-600 transition-colors">
+              ${article.titre}
+            </a>
+          </h4>
+          <p class="text-xs text-gray-500">${formatDate(article.date_publication)}</p>
+          <div class="flex items-center mt-1">
+            <span class="text-xs text-gray-400">${article.vues || 0} vues</span>
+            <span class="mx-1 text-gray-300">•</span>
+            <span class="text-xs text-gray-400">${article.temps_lecture} min</span>
+          </div>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+  }
+
+  async function handleNewsletterSubmit(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('emailNewsletter').value;
+    const btn = document.getElementById('newsletterBtn');
+    const originalText = btn.textContent;
+
+    btn.textContent = 'Inscription...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        showSuccess('Inscription réussie ! Merci de votre intérêt.');
+        document.getElementById('emailNewsletter').value = '';
+      } else {
+        const data = await response.json();
+        showError(data.message || "Erreur lors de l'inscription");
+      }
+    } catch (error) {
+      showError('Erreur de connexion');
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  }
+
+  function showLoading(show) {
+    const spinner = document.getElementById('loadingSpinner');
+    const grid = document.getElementById('articlesGrid');
+
+    if (show) {
+      spinner.classList.remove('hidden');
+      grid.style.opacity = '0.5';
+    } else {
+      spinner.classList.add('hidden');
+      grid.style.opacity = '1';
+    }
+  }
+
+  function showError(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className =
+      'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+    }, 100);
+
+    // Remove after 5 seconds
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 5000);
+  }
+
+  function showSuccess(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className =
+      'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+    }, 100);
+
+    // Remove after 5 seconds
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 5000);
+  }
+
+  function resetFilters() {
+    currentCategory = 'all';
+    searchQuery = '';
+    currentPage = 1;
+
+    // Reset UI
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('[data-category]').forEach((btn) => {
+      btn.classList.remove('filter-btn-active');
+      btn.classList.add('filter-btn-inactive');
+    });
+    document.querySelector('[data-category="all"]').classList.remove('filter-btn-inactive');
+    document.querySelector('[data-category="all"]').classList.add('filter-btn-active');
+
+    loadArticles();
+  }
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    };
+    return date.toLocaleDateString('fr-FR', options);
+  }
+
+  // Smooth scroll for anchor links
+  document.addEventListener('click', function (e) {
+    if (e.target.matches('a[href^="#"]')) {
+      e.preventDefault();
+      const target = document.querySelector(e.target.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  });
+
+  // Lazy loading for images
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('loading-pulse');
+          observer.unobserve(img);
+        }
+      });
+    });
+
+    document.querySelectorAll('img[data-src]').forEach((img) => {
+      img.classList.add('loading-pulse');
+      imageObserver.observe(img);
+    });
+  }
+</script>
+
+{% endblock %}

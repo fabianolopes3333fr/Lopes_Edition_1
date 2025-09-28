@@ -1,0 +1,921 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nuancier Peinture - Catalogue de Couleurs | {{ empresa.nome }}{% endblock %}
+{% block extra_css %}
+<style>
+
+  /* Gradient Text Fix */
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+    display: inline-block;
+    position: relative;
+  }
+
+  /* Fallback for browsers that don't support background-clip: text */
+  @supports not (-webkit-background-clip: text) {
+    .hero-gradient-text {
+      color: #a855f7;
+      background: none;
+      -webkit-text-fill-color: initial;
+    }
+  }
+  
+  .color-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .color-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .color-sample {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+  }
+
+  .color-card:hover .color-sample {
+    border-color: #3b82f6;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+
+  .color-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .color-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+  }
+
+  .color-modal.active .modal-content {
+    transform: scale(1);
+  }
+
+  .filter-dropdown-btn {
+    min-width: 200px;
+    justify-content: space-between;
+  }
+
+  .dropdown-menu-content {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .dropdown-menu-content.hidden {
+    animation: fadeOut 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  .filter-option {
+    color: #333;
+  }
+
+  .filter-option.active {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .filter-option.active:hover {
+    background-color: #2563eb;
+  }
+
+  @media (max-width: 768px) {
+    .modal-content {
+      margin: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .filter-dropdown-btn {
+      min-width: auto;
+      width: 100%;
+    }
+
+    .dropdown-menu-content {
+      left: 0;
+      right: 0;
+      min-width: auto;
+    }
+
+    #colorsGrid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .hero-gradient-text {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+    .resp{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+
+    }
+  }
+
+  @media (min-width: 640px) {
+    #colorsGrid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  @media (min-width: 768px) {
+    #colorsGrid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #colorsGrid {
+      grid-template-columns: repeat(7, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #colorsGrid {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  }
+
+  @media (min-width: 1536px) {
+    #colorsGrid {
+      grid-template-columns: repeat(10, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-section bg-primary-gradient text-white relative py-20 lg:py-32">
+  <!-- Background Video/Image -->
+    <div class="absolute inset-0 z-0 animate-fade-in">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/80 to-purple-900/90 z-10"></div>
+      <div class="w-full h-full bg-cover bg-center bg-fixed"
+        style="background-image: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%)"></div>
+    </div>
+
+    <!-- Floating Elements -->
+    <div class="absolute inset-0 z-5">
+      <div class="floating-element absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-float animate-fade-in-scale" style="animation-delay: 1s">
+      </div>
+      <div class="floating-element absolute top-40 right-20 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl animate-float-delayed animate-fade-in-scale" style="animation-delay: 1.5s">
+      </div>
+      <div class="floating-element absolute bottom-32 left-1/4 w-16 h-16 bg-purple-400/20 rounded-full blur-xl animate-float-slow animate-fade-in-scale" style="animation-delay: 2s">
+      </div>
+    </div>
+
+  <!-- Header -->
+  <div class="container-custom relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+      <h1 class="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-6 leading-tight">
+          <div class="resp flex flex-col md:flex-row justify-center items-center gap-4">
+            <span class="animate-fade-in-up" style="animation-delay: 0.3s">Nuancier</span>
+            <span class="hero-gradient-text animate-fade-in-up" style="animation-delay: 0.6s">
+              PEINTURE
+            </span>
+          </div>
+        </h1>
+
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up text-center"
+          style="animation-delay: 0.9s">
+          Découvrez notre large gamme de couleurs de peinture.
+          <span class="block mt-2">
+          Choisissez parmi nos collections professionnelles.</span>
+        </p>
+      
+    </div>
+  </div>
+</section>
+
+<!-- Filtres et Recherche -->
+<div class="bg-white border-b sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Barre de recherche -->
+    <div class="mb-6">
+      <div class="max-w-md mx-auto">
+        <input type="text" id="searchInput" placeholder="Rechercher une couleur..." class="search-input" />
+      </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="text-center">
+      <div class="relative inline-block">
+        <button id="filterDropdownBtn"
+          class="filter-dropdown-btn bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
+          <span id="selectedFilterText">Toutes les couleurs</span>
+          <i class="fas fa-chevron-down transition-transform duration-200" id="dropdownIcon"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="filterDropdown"
+          class="dropdown-menu-content absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[250px] max-h-80 overflow-y-auto z-50 hidden">
+          <div class="p-2">
+            <button
+              class="filter-option w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md transition-colors active"
+              data-filter="all">
+              <i class="fas fa-palette mr-2 text-gray-500"></i>
+              Toutes les couleurs
+            </button>
+            {% for categoria in categorias %}
+            <button class="filter-option w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md transition-colors"
+              data-filter="{{ categoria.slug }}">
+              <i class="{{ categoria.icone }} mr-2"></i>
+              {{ categoria.nome }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso sobre calibragem -->
+<div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <i class="fas fa-info-circle text-blue-400"></i>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-blue-700">
+          <strong>Note importante :</strong> La représentation des teintes peut varier considérablement en fonction du
+          calibrage de votre écran.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grid de Couleurs -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div id="colorsGrid"
+    class="grid grid-cols-3 gap-3 lg:gap-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10">
+    <!-- As cores serão inseridas aqui via JavaScript -->
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <p class="mt-4 text-gray-600">Chargement des couleurs...</p>
+  </div>
+
+  <!-- Sem resultados -->
+  <div id="noResults" class="text-center py-12 hidden">
+    <i class="fas fa-palette text-gray-400 text-6xl mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune couleur trouvée</h3>
+    <p class="text-gray-600">Essayez de modifier votre recherche ou les filtres</p>
+  </div>
+</div>
+
+<!-- Modal de Couleur -->
+<div id="colorModal" class="color-modal">
+  <div class="modal-content">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-900">Détails de la couleur</h2>
+      <button id="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Échantillon de couleur -->
+      <div class="text-center">
+        <div id="modalColorSample" class="w-32 h-32 mx-auto rounded-lg border-2 border-gray-200 shadow-lg"></div>
+      </div>
+
+      <!-- Informations -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+          <p id="modalColorName" class="text-lg font-semibold text-gray-900"></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Code</label>
+            <p id="modalColorCode" class="font-mono text-gray-900"></p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+            <p id="modalColorCategory" class="text-gray-900"></p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valeur RGB</label>
+          <p id="modalColorRGB" class="font-mono text-gray-900"></p>
+        </div>
+
+        <div id="modalColorDescription" class="hidden">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <p class="text-gray-600"></p>
+        </div>
+      </div>
+
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4 border-t">
+        <button id="downloadSampleBtn"
+          class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+          <i class="fas fa-download mr-2"></i>
+          Télécharger échantillon
+        </button>
+        <button id="requestQuoteBtn"
+          class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+          <i class="fas fa-envelope mr-2"></i>
+          Demander devis
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Variáveis globais
+  let allColors = [];
+  let filteredColors = [];
+  let currentFilter = 'all';
+
+  // Dados de exemplo (substitua pela chamada da API real)
+
+
+  // Inicialização
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM carregado, inicializando...');
+    loadColors();
+    setupEventListeners();
+  });
+
+  // Carregar cores da API
+  async function loadColors() {
+    try {
+      showLoading(true);
+
+      // Simular carregamento da API
+      // Em produção, substitua por: const response = await fetch('/api/couleurs/');
+      const response = await fetch('/api/couleurs/');
+      const data = await response.json(); // Simular delay
+
+      // Usar dados mock por enquanto
+      allColors = data.couleurs;
+      filteredColors = [...allColors];
+
+      console.log('Cores carregadas:', allColors);
+      renderColors();
+      showLoading(false);
+    } catch (error) {
+      console.error('Erro ao carregar cores:', error);
+      showLoading(false);
+      showNoResults(true);
+    }
+  }
+
+  // Configurar event listeners
+  function setupEventListeners() {
+    console.log('Configurando event listeners...');
+
+    // Dropdown de filtros
+    const dropdownBtn = document.getElementById('filterDropdownBtn');
+    const dropdown = document.getElementById('filterDropdown');
+    const dropdownIcon = document.getElementById('dropdownIcon');
+
+    if (dropdownBtn && dropdown && dropdownIcon) {
+      dropdownBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+        dropdownIcon.style.transform = dropdown.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+      });
+
+      // Fechar dropdown ao clicar fora
+      document.addEventListener('click', function (e) {
+        if (!dropdownBtn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+          dropdownIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+
+      // Opções de filtro
+      document.querySelectorAll('.filter-option').forEach(option => {
+        option.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const filter = this.dataset.filter;
+          const text = this.textContent.trim();
+
+          console.log('Filtro selecionado:', filter);
+
+          // Atualizar UI
+          document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById('selectedFilterText').textContent = text;
+          dropdown.classList.add('hidden');
+          dropdownIcon.style.transform = 'rotate(0deg)';
+
+          // Aplicar filtro
+          currentFilter = filter;
+          applyFilters();
+        });
+      });
+    }
+
+    // Busca
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', debounce(function () {
+        console.log('Busca:', this.value);
+        applyFilters();
+      }, 300));
+    }
+
+    // Modal
+    setupModal();
+  }
+
+  // Aplicar filtros
+  function applyFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+    console.log('Aplicando filtros - Categoria:', currentFilter, 'Busca:', searchTerm);
+
+    filteredColors = allColors.filter(color => {
+      // Filtro por categoria
+      const categoryMatch = currentFilter === 'all' || color.category.toLowerCase().includes(currentFilter);
+
+      // Filtro por busca
+      const searchMatch = !searchTerm ||
+        color.name.toLowerCase().includes(searchTerm) ||
+        color.code.toLowerCase().includes(searchTerm) ||
+        color.category.toLowerCase().includes(searchTerm);
+
+      return categoryMatch && searchMatch;
+    });
+
+    console.log('Cores filtradas:', filteredColors.length);
+    renderColors();
+  }
+
+  // Renderizar cores
+  function renderColors() {
+    const grid = document.getElementById('colorsGrid');
+
+    if (!grid) {
+      console.error('Grid não encontrado');
+      return;
+    }
+
+    if (filteredColors.length === 0) {
+      showNoResults(true);
+      grid.innerHTML = '';
+      return;
+    }
+
+    showNoResults(false);
+
+    grid.innerHTML = filteredColors.map(color => `
+    <div class="color-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300" 
+         data-color='${JSON.stringify(color)}'>
+      <div class="color-sample" style="background-color: ${color.rgb};"></div>
+      <div class="p-3">
+        <h3 class="font-semibold text-sm text-gray-900 mb-1 truncate" title="${color.name}">
+          ${color.name}
+        </h3>
+        <p class="text-xs text-gray-600 font-mono">${color.code}</p>
+        ${color.popular ? '<span class="inline-block mt-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">★ Populaire</span>' : ''}
+      </div>
+    </div>
+  `).join('');
+
+    console.log('Cores renderizadas:', filteredColors.length);
+
+    // Adicionar event listeners aos cards
+    document.querySelectorAll('.color-card').forEach(card => {
+      card.addEventListener('click', function () {
+        const colorData = JSON.parse(this.dataset.color);
+        console.log('Cor clicada:', colorData);
+        openModal(colorData);
+      });
+    });
+  }
+
+  // Modal
+  function setupModal() {
+    const modal = document.getElementById('colorModal');
+    const closeBtn = document.getElementById('closeModal');
+
+    if (!modal || !closeBtn) {
+      console.error('Elementos do modal não encontrados');
+      return;
+    }
+
+    closeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      console.log('Fechando modal via botão');
+      closeModal();
+    });
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) {
+        console.log('Fechando modal via clique fora');
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        console.log('Fechando modal via ESC');
+        closeModal();
+      }
+    });
+  }
+
+  function openModal(color) {
+    console.log('Abrindo modal para:', color);
+
+    const modal = document.getElementById('colorModal');
+
+    if (!modal) {
+      console.error('Modal não encontrado');
+      return;
+    }
+
+    // Preencher dados
+    const elements = {
+      modalColorSample: document.getElementById('modalColorSample'),
+      modalColorName: document.getElementById('modalColorName'),
+      modalColorCode: document.getElementById('modalColorCode'),
+      modalColorCategory: document.getElementById('modalColorCategory'),
+      modalColorRGB: document.getElementById('modalColorRGB')
+    };
+
+    // Verificar se todos os elementos existem
+    for (const [key, element] of Object.entries(elements)) {
+      if (!element) {
+        console.error(`Elemento ${key} não encontrado`);
+        return;
+      }
+    }
+
+    // Preencher os dados
+    elements.modalColorSample.style.backgroundColor = color.rgb;
+    elements.modalColorName.textContent = color.name;
+    elements.modalColorCode.textContent = color.code;
+    elements.modalColorCategory.textContent = color.category;
+    elements.modalColorRGB.textContent = color.rgb;
+
+    // Mostrar modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
+
+    console.log('Modal aberto com sucesso');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('colorModal');
+
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = ''; // Restaurar scroll
+      console.log('Modal fechado');
+    }
+  }
+
+  // Utilitários
+  function showLoading(show) {
+    const loading = document.getElementById('loading');
+    if (loading) {
+      loading.style.display = show ? 'block' : 'none';
+    }
+  }
+
+  function showNoResults(show) {
+    const noResults = document.getElementById('noResults');
+    if (noResults) {
+      noResults.classList.toggle('hidden', !show);
+    }
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Função para converter hex para RGB (caso necessário)
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+
+  // Função para gerar mais cores de exemplo (para teste)
+  function generateMoreColors() {
+    const colors = [
+      { name: "Noir Profond", code: "RAL-9005", category: "RAL", rgb: "rgb(14, 14, 16)" },
+      { name: "Beige Sable", code: "RAL-1001", category: "RAL", rgb: "rgb(194, 178, 128)" },
+      { name: "Orange Vif", code: "RAL-2004", category: "RAL", rgb: "rgb(244, 125, 35)" },
+      { name: "Violet Royal", code: "RAL-4008", category: "RAL", rgb: "rgb(146, 39, 143)" },
+      { name: "Turquoise", code: "RAL-5018", category: "RAL", rgb: "rgb(61, 177, 222)" },
+      { name: "Vert Pomme", code: "RAL-6018", category: "RAL", rgb: "rgb(87, 160, 66)" },
+      { name: "Marron Chocolat", code: "RAL-8017", category: "RAL", rgb: "rgb(69, 53, 47)" },
+      { name: "Rose Poudré", code: "RAL-3015", category: "RAL", rgb: "rgb(234, 170, 170)" },
+      { name: "Bleu Marine", code: "RAL-5003", category: "RAL", rgb: "rgb(22, 41, 69)" },
+      { name: "Vert Olive", code: "RAL-6003", category: "RAL", rgb: "rgb(79, 102, 40)" }
+    ];
+
+    return colors;
+  }
+
+
+  // Variável global para armazenar a cor atual do modal
+  let currentModalColor = null;
+
+  // Função para gerar e baixar amostra de cor
+  function downloadColorSample(color) {
+    console.log('Gerando amostra para download:', color);
+
+    // Criar canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Definir dimensões (formato A4 em pixels para impressão)
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Fundo branco
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Cor principal (grande retângulo)
+    ctx.fillStyle = color.rgb;
+    ctx.fillRect(50, 100, 700, 300);
+
+    // Borda da cor
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(50, 100, 700, 300);
+
+    // Configurar fonte
+    ctx.fillStyle = '#333333';
+    ctx.font = 'bold 32px Arial, sans-serif';
+    ctx.textAlign = 'center';
+
+    // Título
+    ctx.fillText('ÉCHANTILLON DE COULEUR', canvas.width / 2, 60);
+
+    // Nome da cor
+    ctx.font = 'bold 28px Arial, sans-serif';
+    ctx.fillText(color.name, canvas.width / 2, 460);
+
+    // Código da cor
+    ctx.font = '24px Arial, sans-serif';
+    ctx.fillText(`Code: ${color.code}`, canvas.width / 2, 500);
+
+    // Catégorie
+    ctx.fillText(`Catégorie: ${color.category}`, canvas.width / 2, 530);
+
+    // Valeur RGB
+    ctx.font = '20px monospace';
+    ctx.fillText(`RGB: ${color.rgb}`, canvas.width / 2, 560);
+
+    // Logo/Marque (optionnel)
+    ctx.font = 'italic 18px Arial, sans-serif';
+    ctx.fillStyle = '#666666';
+    ctx.textAlign = 'right';
+    ctx.fillText('LOPES PEINTURE', canvas.width - 20, canvas.height - 20);
+
+    // Convertir para blob e fazer download
+    canvas.toBlob(function (blob) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `echantillon-${color.code.replace(/[^a-zA-Z0-9]/g, '-')}-${color.name.replace(/[^a-zA-Z0-9]/g, '-')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log('Download iniciado para:', a.download);
+    }, 'image/png', 1.0);
+  }
+
+  // Função para solicitar orçamento
+  function requestQuote(color) {
+    console.log('Solicitando orçamento para:', color);
+
+    // Criar URL com parâmetros da cor
+    const params = new URLSearchParams({
+      couleur_nom: color.name,
+      couleur_code: color.code,
+      couleur_rgb: color.rgb,
+      couleur_categorie: color.category
+    });
+
+    // Redirecionar para página de contato com parâmetros
+    window.location.href = `/contact/?${params.toString()}`;
+  }
+
+  // Atualizar a função openModal para armazenar a cor atual
+  function openModal(color) {
+    console.log('Abrindo modal para:', color);
+
+    // Armazenar cor atual
+    currentModalColor = color;
+
+    const modal = document.getElementById('colorModal');
+
+    if (!modal) {
+      console.error('Modal não encontrado');
+      return;
+    }
+
+    // Preencher dados
+    const elements = {
+      modalColorSample: document.getElementById('modalColorSample'),
+      modalColorName: document.getElementById('modalColorName'),
+      modalColorCode: document.getElementById('modalColorCode'),
+      modalColorCategory: document.getElementById('modalColorCategory'),
+      modalColorRGB: document.getElementById('modalColorRGB')
+    };
+
+    // Verificar se todos os elementos existem
+    for (const [key, element] of Object.entries(elements)) {
+      if (!element) {
+        console.error(`Elemento ${key} não encontrado`);
+        return;
+      }
+    }
+
+    // Preencher os dados
+    elements.modalColorSample.style.backgroundColor = color.rgb;
+    elements.modalColorName.textContent = color.name;
+    elements.modalColorCode.textContent = color.code;
+    elements.modalColorCategory.textContent = color.category;
+    elements.modalColorRGB.textContent = color.rgb;
+
+    // Mostrar modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    console.log('Modal aberto com sucesso');
+  }
+
+  // Atualizar a função setupModal para incluir os event listeners dos botões
+  function setupModal() {
+    const modal = document.getElementById('colorModal');
+    const closeBtn = document.getElementById('closeModal');
+    const downloadBtn = document.getElementById('downloadSampleBtn');
+    const quoteBtn = document.getElementById('requestQuoteBtn');
+
+    if (!modal || !closeBtn) {
+      console.error('Elementos do modal não encontrados');
+      return;
+    }
+
+    closeBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      console.log('Fechando modal via botão');
+      closeModal();
+    });
+
+    // Event listener para download
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (currentModalColor) {
+          downloadColorSample(currentModalColor);
+        } else {
+          console.error('Nenhuma cor selecionada');
+        }
+      });
+    }
+
+    // Event listener para solicitar orçamento
+    if (quoteBtn) {
+      quoteBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (currentModalColor) {
+          requestQuote(currentModalColor);
+        } else {
+          console.error('Nenhuma cor selecionada');
+        }
+      });
+    }
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) {
+        console.log('Fechando modal via clique fora');
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        console.log('Fechando modal via ESC');
+        closeModal();
+      }
+    });
+  }
+
+  // Atualizar a função closeModal para limpar a cor atual
+  function closeModal() {
+    const modal = document.getElementById('colorModal');
+
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      currentModalColor = null; // Limpar cor atual
+      console.log('Modal fechado');
+    }
+  }
+
+  // Adicionar mais cores aos dados mock para teste
+  if (typeof mockColors !== 'undefined') {
+    mockColors.push(...generateMoreColors());
+  }
+
+  console.log('Script carregado com sucesso');
+</script>
+
+{% endblock %}

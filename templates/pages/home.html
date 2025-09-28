@@ -1,0 +1,234 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}
+LOPES PEINTURE - Spécialiste Peinture et Décoration
+{% endblock %} 
+{% block content %}
+<!-- Hero Section -->
+{% include "components/section-hero.html" %}
+<!-- Features Section -->
+{% include "components/section-feature.html" %}
+<!-- About Section -->
+{% include "components/section-about.html" %}
+<!-- Services Section -->
+{% include "components/section-nos-services.html" %}
+<!-- Projects Preview -->
+{% include "components/section-nos-projets.html" %}
+<!-- Testimonials -->
+{% include "components/section-testimonials.html" %}
+
+
+
+
+
+
+{% endblock %} {% block extra_css %}
+{% comment %} <style>
+  /* Hero Section Enhancements */
+  .hero-gradient {
+    background: linear-gradient(135deg, #2c5aa0 0%, #1976d2 50%, #1565c0 100%);
+  }
+
+  .hero-overlay {
+    background: linear-gradient(135deg, rgba(44, 90, 160, 0.9) 0%, rgba(25, 118, 210, 0.8) 100%);
+  }
+
+  /* Animation Classes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Stats Counter */
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c5aa0;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Feature Items */
+  .feature-item {
+    transition: transform 0.3s ease;
+  }
+
+  .feature-item:hover {
+    transform: translateY(-5px);
+  }
+
+  /* Testimonial Cards */
+  .testimonial-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .testimonial-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 4rem;
+    color: #2c5aa0;
+    font-family: serif;
+    line-height: 1;
+  }
+
+  /* Process Steps */
+  .process-step {
+    position: relative;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .process-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .process-number {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #2c5aa0, #1976d2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+  }
+
+  /* Button Enhancements */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .stat-number {
+      font-size: 2rem;
+    }
+
+    .process-number {
+      width: 50px;
+      height: 50px;
+      font-size: 1.25rem;
+    }
+
+    .testimonial-card::before {
+      font-size: 3rem;
+      top: -5px;
+      left: 15px;
+    }
+  }
+</style> {% endcomment %}
+{% endblock %} {% block extra_js %}
+{% comment %} <script>
+  // Counter Animation
+  function animateCounters() {
+    const counters = document.querySelectorAll('.stat-number');
+
+    counters.forEach((counter) => {
+      const target = parseInt(counter.textContent.replace(/\D/g, ''));
+      const increment = target / 100;
+      let current = 0;
+
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+
+        const suffix = counter.textContent.includes('+')
+          ? '+'
+          : counter.textContent.includes('%')
+          ? '%'
+          : '';
+        counter.textContent = Math.floor(current) + suffix;
+      }, 20);
+    });
+  }
+
+  // Intersection Observer for animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px',
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+
+        // Trigger counter animation for stats section
+        if (entry.target.querySelector('.stat-number')) {
+          animateCounters();
+        }
+      }
+    });
+  }, observerOptions);
+
+  // Observe animated elements
+  document.addEventListener('DOMContentLoaded', () => {
+    const animatedElements = document.querySelectorAll('.animate-fade-in-up');
+    animatedElements.forEach((el) => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+
+    // Observe stats section
+    const statsSection = document.querySelector('.stat-number')?.closest('section');
+    if (statsSection) {
+      observer.observe(statsSection);
+    }
+  });
+
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    });
+  });
+</script> {% endcomment %}
+{% endblock %}

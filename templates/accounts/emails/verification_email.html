@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vérifiez votre email - Lopes Peinture</title>
+    <style>
+      body {
+        font-family: 'Open Sans', Arial, sans-serif;
+        line-height: 1.6;
+        color: #374151;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(
+          135deg,
+          rgba(30, 58, 138, 0.9) 0%,
+          rgba(55, 48, 163, 0.9) 50%,
+          rgba(88, 28, 135, 0.9) 100%
+        );
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .content {
+        padding: 30px;
+      }
+      .icon {
+        width: 60px;
+        height: 60px;
+        background-color: #dbeafe;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 24px;
+        color: #1d4ed8;
+      }
+      .btn {
+        display: inline-block;
+        background: linear-gradient(
+          135deg,
+          rgba(30, 58, 138, 0.9) 0%,
+          rgba(55, 48, 163, 0.9) 50%,
+          rgba(88, 28, 135, 0.9) 100%
+        );
+        color: white !important;
+        text-decoration: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        margin: 20px 0;
+      }
+      .info-box {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 20px 0;
+      }
+      .footer {
+        background-color: #f8fafc;
+        padding: 20px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎨 Lopes Peinture</h1>
+        <p>Bienvenue dans notre communauté !</p>
+      </div>
+
+      <div class="content">
+        <div class="icon">📧</div>
+
+        <h2>Bonjour {{ user.first_name|default:user.email }} !</h2>
+
+        <p>
+          Merci de vous être inscrit sur <strong>Lopes Peinture</strong> ! Nous sommes ravis de vous
+          compter parmi nos clients.
+        </p>
+
+        <p>
+          Pour finaliser votre inscription et accéder à tous nos services, veuillez vérifier votre
+          adresse email en cliquant sur le bouton ci-dessous :
+        </p>
+
+        <div style="text-align: center">
+          <a href="{{ verification_url }}" class="btn">Vérifier mon email</a>
+        </div>
+
+        <div class="info-box">
+          <strong>🔍 Pourquoi vérifier votre email ?</strong>
+          <ul style="margin: 8px 0 0 0; padding-left: 20px">
+            <li>Sécuriser votre compte</li>
+            <li>Recevoir les notifications importantes</li>
+            <li>Accéder à votre espace client personnel</li>
+            <li>Suivre vos projets de peinture</li>
+          </ul>
+        </div>
+
+        <h3>🎨 Ce qui vous attend :</h3>
+        <ul>
+          <li><strong>Demandes de devis</strong> - Obtenez rapidement un devis personnalisé</li>
+          <li><strong>Suivi de projets</strong> - Consultez l'avancement de vos travaux</li>
+          <li><strong>Galerie d'inspiration</strong> - Découvrez nos réalisations</li>
+          <li><strong>Conseils d'experts</strong> - Profitez de notre expertise</li>
+        </ul>
+
+        <p>Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :</p>
+        <p
+          style="
+            word-break: break-all;
+            background-color: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+          "
+        >
+          {{ verification_url }}
+        </p>
+
+        <p><strong>Note :</strong> Ce lien de vérification expire dans 24 heures.</p>
+      </div>
+
+      <div class="footer">
+        <p><strong>Lopes Peinture</strong> - Votre expert en peinture et décoration depuis 2008</p>
+        <p>📞 01 23 45 67 89 | 📧 contact@lopespeinture.fr</p>
+        <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+      </div>
+    </div>
+  </body>
+</html>

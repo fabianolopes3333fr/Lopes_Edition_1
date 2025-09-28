@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Lopes Peinture{% endblock %}</title>
+    <style>
+      /* Reset styles */
+      body,
+      table,
+      td,
+      p,
+      a,
+      li,
+      blockquote {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+      }
+
+      /* Base styles */
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #f8fafc;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+
+      .email-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      .email-header h1 {
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .email-header p {
+        color: #e2e8f0;
+        font-size: 16px;
+        margin: 10px 0 0 0;
+      }
+
+      .email-content {
+        padding: 40px 30px;
+      }
+
+      .email-content h2 {
+        color: #2d3748;
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 20px 0;
+      }
+
+      .email-content p {
+        color: #4a5568;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px 0;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 14px 28px;
+        background-color: #4299e1;
+        color: #ffffff !important;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        text-align: center;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn:hover {
+        background-color: #3182ce;
+      }
+
+      .btn-container {
+        text-align: center;
+        margin: 30px 0;
+      }
+
+      .info-box {
+        background-color: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .info-box p {
+        margin: 0;
+        color: #2b6cb0;
+      }
+
+      .warning-box {
+        background-color: #fef5e7;
+        border-left: 4px solid #ed8936;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+      }
+
+      .warning-box p {
+        margin: 0;
+        color: #c05621;
+      }
+
+      .email-footer {
+        background-color: #2d3748;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .email-footer p {
+        color: #a0aec0;
+        font-size: 14px;
+        margin: 0 0 10px 0;
+      }
+
+      .email-footer a {
+        color: #4299e1;
+        text-decoration: none;
+      }
+
+      .social-links {
+        margin: 20px 0;
+      }
+
+      .social-links a {
+        display: inline-block;
+        margin: 0 10px;
+        color: #a0aec0;
+        font-size: 20px;
+        text-decoration: none;
+      }
+
+      .divider {
+        height: 1px;
+        background-color: #e2e8f0;
+        margin: 30px 0;
+      }
+
+      /* Responsive */
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          width: 100% !important;
+        }
+
+        .email-header,
+        .email-content,
+        .email-footer {
+          padding: 20px !important;
+        }
+
+        .email-header h1 {
+          font-size: 24px !important;
+        }
+
+        .email-content h2 {
+          font-size: 20px !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+      <tr>
+        <td>
+          <div class="email-container">
+            <!-- Header -->
+            <div class="email-header">
+              <h1>{% block header_title %}Lopes Peinture{% endblock %}</h1>
+              <p>
+                {% block header_subtitle %}Spécialiste en peinture intérieure et extérieure{%
+                endblock %}
+              </p>
+            </div>
+
+            <!-- Content -->
+            <div class="email-content">{% block content %}{% endblock %}</div>
+
+            <!-- Footer -->
+            <div class="email-footer">
+              <p><strong>Lopes Peinture</strong></p>
+              <p>ST SAUVEUR 31790 - France</p>
+              <p>Téléphone: +33 07 69 27 37 76</p>
+              <p>Email: contact@lopespeinture.fr</p>
+
+              <div class="social-links">
+                <a href="#" title="Facebook">📘</a>
+                <a href="#" title="Instagram">📷</a>
+                <a href="#" title="LinkedIn">💼</a>
+              </div>
+
+              <div class="divider"></div>
+
+              <p style="font-size: 12px">
+                Vous recevez cet email car vous avez un compte sur notre site.<br />
+                Si vous ne souhaitez plus recevoir ces emails,
+                <a href="#">cliquez ici pour vous désabonner</a>.
+              </p>
+
+              <p style="font-size: 12px; margin-top: 20px">
+                © {{ current_year }} Lopes Peinture. Tous droits réservés.
+              </p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

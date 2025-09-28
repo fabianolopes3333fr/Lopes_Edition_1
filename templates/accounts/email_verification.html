@@ -1,0 +1,113 @@
+{% extends 'accounts/../accounts/base_auth.html' %} {% load static %} {% block title %}Vérification Email -
+Lopes Peinture{% endblock %} {% block content %}
+<div class="text-center">
+  <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
+    <i class="fas fa-envelope text-blue-600 text-2xl"></i>
+  </div>
+
+  <h2 class="text-3xl font-bold text-gray-900 mb-4">Vérifiez votre email</h2>
+
+  <div class="max-w-md mx-auto">
+    <p class="text-gray-600 mb-6">
+      Nous avons envoyé un lien de vérification à <strong>{{ email }}</strong>. Cliquez sur le lien
+      dans l'email pour activer votre compte.
+    </p>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-info-circle text-blue-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-700">
+            Vérifiez également votre dossier spam si vous ne recevez pas l'email dans les prochaines
+            minutes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <button
+        onclick="resendEmail()"
+        id="resendBtn"
+        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <i class="fas fa-paper-plane mr-2"></i>
+        Renvoyer l'email
+      </button>
+
+      <a
+        href="{% url 'accounts:login' %}"
+        class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Retour à la connexion
+      </a>
+    </div>
+
+    <div class="mt-6 text-center">
+      <p class="text-sm text-gray-500">
+        Vous avez déjà vérifié votre email ?
+        <a href="{% url 'accounts:login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+          Se connecter
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let resendCooldown = 0;
+
+  function resendEmail() {
+    if (resendCooldown > 0) return;
+
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Envoi en cours...';
+
+    fetch('{% url "accounts:resend_verification" %}', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: '{{ email }}',
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification('Email de vérification renvoyé avec succès', 'success');
+          startCooldown();
+        } else {
+          showNotification(data.error || "Erreur lors de l'envoi", 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Renvoyer l\'email';
+        }
+      })
+      .catch((error) => {
+        showNotification('Erreur de connexion', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Renvoyer l\'email';
+      });
+  }
+
+  function startCooldown() {
+    resendCooldown = 60;
+    const btn = document.getElementById('resendBtn');
+
+    const interval = setInterval(() => {
+      btn.innerHTML = `<i class="fas fa-clock mr-2"></i>Attendre ${resendCooldown}s`;
+      resendCooldown--;
+
+      if (resendCooldown < 0) {
+        clearInterval(interval);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Renvoyer l\'email';
+      }
+    }, 1000);
+  }
+</script>
+{% endblock %}

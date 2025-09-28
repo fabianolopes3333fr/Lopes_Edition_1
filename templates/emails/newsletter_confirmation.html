@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation d'inscription - Lopes Peinture</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #3b82f6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f9fafb;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Lopes Peinture</h1>
+        <p>Merci pour votre inscription !</p>
+    </div>
+    
+    <div class="content">
+        <h2>Bonjour, {{ subscriber.prenom }}</h2>
+        
+        <p>Nous vous remercions de vous être inscrit(e) à notre newsletter !</p>
+        
+        <p>Vous recevrez désormais nos dernières actualités, conseils de peinture, et offres spéciales directement dans votre boîte e-mail.</p>
+        
+        <p>Voici ce que vous pouvez attendre de nous :</p>
+        <ul>
+            <li>Conseils d'experts en peinture</li>
+            <li>Tendances couleurs et décoration</li>
+            <li>Offres spéciales et promotions</li>
+            <li>Actualités de notre entreprise</li>
+        </ul>
+        
+        <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+        
+        <p>Cordialement,<br>
+        L'équipe Lopes Peinture</p>
+    </div>
+    
+    <div class="footer">
+        <p>Lopes Peinture - ST SAUVEUR 31790, France</p>
+        <p>Téléphone: +33 07 69 27 37 76 | Email: contact@lopespeinture.fr</p>
+        <p>Si vous ne souhaitez plus recevoir nos e-mails, vous pouvez vous désabonner à tout moment.</p>
+    </div>
+</body>
+</html>

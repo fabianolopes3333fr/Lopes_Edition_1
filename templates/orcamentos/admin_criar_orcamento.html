@@ -1,0 +1,509 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .section-divider {
+        border-top: 2px solid #f3f4f6;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .field-label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .field-required {
+        color: #ef4444;
+    }
+
+    .field-help {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .form-grid-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .preview-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pendente {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header with navigation -->
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                   class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour à la demande
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ page_title }}</h1>
+            <p class="mt-2 text-gray-600">Créer un devis pour la demande {{ solicitacao.numero }}</p>
+        </div>
+
+        <!-- Résumé de la demande -->
+        <div class="summary-card">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Demande {{ solicitacao.numero }}</h2>
+                    <p class="text-gray-600 mt-1">{{ solicitacao.nome_solicitante }}</p>
+                </div>
+                <span class="status-badge status-{{ solicitacao.status }}">
+                    {{ solicitacao.get_status_display }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Service:</span>
+                    <p class="text-gray-900">{{ solicitacao.get_tipo_servico_display }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Localisation:</span>
+                    <p class="text-gray-900">{{ solicitacao.cidade }}, {{ solicitacao.cep }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Budget max:</span>
+                    <p class="text-gray-900">
+                        {% if solicitacao.orcamento_maximo %}
+                            {{ solicitacao.orcamento_maximo }}€
+                        {% else %}
+                            Non spécifié
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de création du devis -->
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Messages d'erreur globaux -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Erreurs détectées</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                {{ form.non_field_errors }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Section 1: Informations générales -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-file-invoice text-blue-600 mr-3"></i>
+                        Informations générales
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid">
+                        <!-- Titre -->
+                        <div class="field-group">
+                            <label for="{{ form.titulo.id_for_label }}" class="field-label">
+                                Titre du devis <span class="field-required">*</span>
+                            </label>
+                            {{ form.titulo }}
+                            {% if form.titulo.help_text %}
+                                <p class="field-help">{{ form.titulo.help_text }}</p>
+                            {% endif %}
+                            {% if form.titulo.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="field-group">
+                            <label for="{{ form.descricao.id_for_label }}" class="field-label">
+                                Description des travaux <span class="field-required">*</span>
+                            </label>
+                            {{ form.descricao }}
+                            {% if form.descricao.help_text %}
+                                <p class="field-help">{{ form.descricao.help_text }}</p>
+                            {% endif %}
+                            {% if form.descricao.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Conditions et délais -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>
+                        Conditions et délais
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid form-grid-2">
+                        <!-- Délai d'exécution -->
+                        <div class="field-group">
+                            <label for="{{ form.prazo_execucao.id_for_label }}" class="field-label">
+                                Délai d'exécution (jours) <span class="field-required">*</span>
+                            </label>
+                            {{ form.prazo_execucao }}
+                            {% if form.prazo_execucao.help_text %}
+                                <p class="field-help">{{ form.prazo_execucao.help_text }}</p>
+                            {% endif %}
+                            {% if form.prazo_execucao.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.prazo_execucao.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Validité du devis -->
+                        <div class="field-group">
+                            <label for="{{ form.validade_orcamento.id_for_label }}" class="field-label">
+                                Validité du devis <span class="field-required">*</span>
+                            </label>
+                            {{ form.validade_orcamento }}
+                            {% if form.validade_orcamento.help_text %}
+                                <p class="field-help">{{ form.validade_orcamento.help_text }}</p>
+                            {% endif %}
+                            {% if form.validade_orcamento.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.validade_orcamento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Conditions de paiement -->
+                        <div class="field-group">
+                            <label for="{{ form.condicoes_pagamento.id_for_label }}" class="field-label">
+                                Conditions de paiement <span class="field-required">*</span>
+                            </label>
+                            {{ form.condicoes_pagamento }}
+                            {% if form.condicoes_pagamento.help_text %}
+                                <p class="field-help">{{ form.condicoes_pagamento.help_text }}</p>
+                            {% endif %}
+                            {% if form.condicoes_pagamento.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.condicoes_pagamento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Remise et observations -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-percentage text-blue-600 mr-3"></i>
+                        Remise et observations
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid">
+                        <!-- Remise -->
+                        <div class="field-group">
+                            <label for="{{ form.desconto.id_for_label }}" class="field-label">
+                                Remise (%)
+                            </label>
+                            {{ form.desconto }}
+                            {% if form.desconto.help_text %}
+                                <p class="field-help">{{ form.desconto.help_text }}</p>
+                            {% endif %}
+                            {% if form.desconto.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.desconto.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Observations -->
+                        <div class="field-group">
+                            <label for="{{ form.observacoes.id_for_label }}" class="field-label">
+                                Observations particulières
+                            </label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.help_text %}
+                                <p class="field-help">{{ form.observacoes.help_text }}</p>
+                            {% endif %}
+                            {% if form.observacoes.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations importantes -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Informations importantes</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Après création, vous pourrez ajouter des éléments détaillés au devis</li>
+                                <li>Le statut de la demande passera automatiquement à "En cours d'élaboration"</li>
+                                <li>Un numéro unique sera généré automatiquement pour ce devis</li>
+                                <li>Le client sera notifié par email une fois le devis finalisé</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                   class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>
+                    Annuler
+                </a>
+
+                <div class="flex space-x-3">
+                    <button type="button" id="preview-btn"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                        <i class="fas fa-eye mr-2"></i>
+                        Aperçu
+                    </button>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Créer le devis
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Section d'aperçu (masquée par défaut) -->
+        <div id="preview-section" class="hidden mt-8">
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-eye text-blue-600 mr-3"></i>
+                        Aperçu du devis
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="preview-section" id="preview-content">
+                        <p class="text-gray-500 text-center py-8">
+                            Cliquez sur "Aperçu" pour voir le rendu du devis
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const previewBtn = document.getElementById('preview-btn');
+    const previewSection = document.getElementById('preview-section');
+    const previewContent = document.getElementById('preview-content');
+
+    // Função de prévia
+    previewBtn.addEventListener('click', function() {
+        const formData = new FormData(document.querySelector('form'));
+
+        // Mostrar seção de prévia
+        previewSection.classList.remove('hidden');
+
+        // Gerar conteúdo da prévia
+        const titre = formData.get('titulo') || 'Sans titre';
+        const description = formData.get('descricao') || 'Aucune description';
+        const delai = formData.get('prazo_execucao') || 'Non spécifié';
+        const validite = formData.get('validade_orcamento') || 'Non spécifiée';
+        const conditions = formData.get('condicoes_pagamento') || 'Non spécifiées';
+        const remise = formData.get('desconto') || '0';
+        const observations = formData.get('observacoes') || 'Aucune observation';
+
+        previewContent.innerHTML = `
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">${titre}</h3>
+                    <p class="text-gray-600 text-sm">Devis pour: {{ solicitacao.nome_solicitante }}</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Description des travaux</h4>
+                        <p class="text-gray-700 text-sm bg-white p-3 rounded border">${description}</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <span class="font-medium text-gray-900">Délai d'exécution:</span>
+                            <span class="text-gray-700"> ${delai} jours</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-900">Validité:</span>
+                            <span class="text-gray-700"> ${validite}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-900">Remise:</span>
+                            <span class="text-gray-700"> ${remise}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-2">Conditions de paiement</h4>
+                    <p class="text-gray-700 text-sm bg-white p-3 rounded border">${conditions}</p>
+                </div>
+
+                ${observations !== 'Aucune observation' ? `
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-2">Observations particulières</h4>
+                        <p class="text-gray-700 text-sm bg-blue-50 p-3 rounded border border-blue-200">${observations}</p>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        // Scroll vers la prévia
+        previewSection.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Validação de formulário em tempo real
+    const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required]');
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('border-red-300');
+                this.classList.remove('border-gray-300');
+            } else {
+                this.classList.remove('border-red-300');
+                this.classList.add('border-gray-300');
+            }
+        });
+    });
+
+    // Auto-resize textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}

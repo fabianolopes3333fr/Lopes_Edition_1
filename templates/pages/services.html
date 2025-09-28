@@ -1,0 +1,1264 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Nos Services de Peinture - Intérieur & Extérieur | Lopes Peinture{% endblock %} 
+{% block extra_css %}
+<style>
+  /* Hero Section */
+  .hero-section {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('{% static "images/services-hero-bg.jpg" %}') center/cover;
+    opacity: 0.2;
+    z-index: 1;
+    
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Service Cards */
+  .service-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+  }
+
+  .service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+  }
+
+  .service-icon {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    transition: all 0.3s ease;
+  }
+
+  .service-card:hover .service-icon {
+    transform: scale(1.1);
+  }
+
+  /* Process Steps */
+  .process-step {
+    position: relative;
+  }
+
+  .process-step::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .process-step:last-child::after {
+    display: none;
+  }
+
+  /* Map Section */
+  .map-container {
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Portfolio Grid */
+  .portfolio-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    aspect-ratio: 4/3;
+  }
+
+  .portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9));
+    opacity: 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+  }
+
+  /* Scroll to Section Button */
+  .scroll-to-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .scroll-to-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .process-step::after {
+      display: none;
+    }
+
+    .map-container {
+      height: 300px;
+    }
+  }
+
+  /* Additional CSS for enhanced styling */
+  .scroll-to-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .scroll-to-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .service-icon {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  }
+
+  .portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(139, 92, 246, 0.9));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    padding: 2rem;
+  }
+
+  .portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+  }
+
+  .portfolio-item {
+    transition: all 0.3s ease;
+  }
+
+  .map-container {
+    height: 400px;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .scroll-to-btn {
+      bottom: 1rem;
+      right: 1rem;
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .map-container {
+      height: 300px;
+    }
+
+    .hero-section h1 {
+      font-size: 2.5rem;
+    }
+
+    .hero-section p {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* Loading animation for form */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .fa-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Custom focus styles */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #3b82f6;
+    border-color: transparent;
+  }
+
+  /* Gradient text animation */
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .bg-clip-text {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
+
+  /* Service card hover effects */
+  .service-card {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-color: #e5e7eb;
+  }
+
+  /* Process step animations */
+  .process-step {
+    position: relative;
+  }
+
+  .process-step::after {
+    content: '';
+    position: absolute;
+    top: 2.5rem;
+    right: -2rem;
+    width: 4rem;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    opacity: 0.3;
+  }
+
+  .process-step:last-child::after {
+    display: none;
+  }
+
+  @media (max-width: 1024px) {
+    .process-step::after {
+      display: none;
+    }
+  }
+
+  /* Form enhancements */
+  .form-group {
+    position: relative;
+  }
+
+  .form-group input:focus + label,
+  .form-group select:focus + label,
+  .form-group textarea:focus + label {
+    color: #3b82f6;
+  }
+
+  /* Success message styling */
+  .success-message {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .error-message {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+</style>
+{% endblock %} 
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-white py-20 lg:py-32">
+  <div class="container-custom hero-content">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl lg:text-6xl font-bold mb-6 animate-fade-in-up">
+        Nos Services de
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300"
+          >Peinture</span
+        >
+      </h1>
+      <p
+        class="text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto mb-8 animate-fade-in-up"
+        style="animation-delay: 0.2s"
+      >
+        Des solutions complètes pour tous vos projets de peinture, intérieure et extérieure, avec un
+        savoir-faire professionnel et des matériaux de qualité.
+      </p>
+      <div
+        class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up"
+        style="animation-delay: 0.4s"
+      >
+        <button
+          onclick="scrollToSection('services-grid')"
+          class="btn bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+        >
+          <i class="fas fa-paint-brush mr-2"></i>
+          Découvrir Nos Services
+        </button>
+        <a
+          href="#contact"
+          class="btn border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300"
+        >
+          <i class="fas fa-phone mr-2"></i>
+          Nous Contacter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services Grid Section -->
+<section id="services-grid" class="py-20 lg:py-32 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Section Header -->
+    <div class="text-center mb-16">
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-6"
+      >
+        <i class="fas fa-paint-brush text-2xl text-white"></i>
+      </div>
+      <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        Nos
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+          >Services</span
+        >
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Une gamme complète de services pour transformer vos espaces avec expertise et créativité
+      </p>
+    </div>
+
+    
+    <!-- Services Grid -->
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+  <!-- Service 1: Peinture Intérieure -->
+  <div class="service-card bg-white rounded-2xl p-8 text-center flex flex-col h-full">
+    <div
+      class="service-icon w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="fas fa-home text-2xl text-white"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Peinture Intérieure</h3>
+    <p class="text-gray-600 mb-6 flex-grow">
+      Transformation complète de vos espaces intérieurs avec des finitions impeccables.
+    </p>
+    <ul class="text-sm text-gray-600 space-y-2 mb-6">
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Préparation des surfaces
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Peintures écologiques
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Finitions personnalisées
+      </li>
+    </ul>
+    <div class="text-2xl font-bold text-blue-600 mb-4">À partir de 25€/m²</div>
+    <button
+      onclick="scrollToSection('contact')"
+      class="btn bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-lg w-full mt-auto"
+    >
+      Demander un Devis
+    </button>
+  </div>
+
+  <!-- Service 2: Peinture Extérieure -->
+  <div class="service-card bg-white rounded-2xl p-8 text-center flex flex-col h-full">
+    <div
+      class="service-icon w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="fas fa-building text-2xl text-white"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Peinture Extérieure</h3>
+    <p class="text-gray-600 mb-6 flex-grow">
+      Protection et embellissement de vos façades avec des produits haute qualité.
+    </p>
+    <ul class="text-sm text-gray-600 space-y-2 mb-6">
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Nettoyage haute pression
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Peintures anti-UV
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Garantie longue durée
+      </li>
+    </ul>
+    <div class="text-2xl font-bold text-green-600 mb-4">À partir de 35€/m²</div>
+    <button
+      onclick="scrollToSection('contact')"
+      class="btn bg-green-600 text-white hover:bg-green-700 px-6 py-3 rounded-lg w-full mt-auto"
+    >
+      Demander un Devis
+    </button>
+  </div>
+
+  <!-- Service 3: Décoration -->
+  <div class="service-card bg-white rounded-2xl p-8 text-center flex flex-col h-full">
+    <div
+      class="service-icon w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="fas fa-palette text-2xl text-white"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Décoration</h3>
+    <p class="text-gray-600 mb-6 flex-grow">
+      Conseils personnalisés et réalisation de vos projets décoratifs uniques.
+    </p>
+    <ul class="text-sm text-gray-600 space-y-2 mb-6">
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Conseil en couleurs
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Techniques spéciales
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Effets décoratifs
+      </li>
+    </ul>
+    <div class="text-2xl font-bold text-purple-600 mb-4">À partir de 45€/m²</div>
+    <button
+      onclick="scrollToSection('contact')"
+      class="btn bg-purple-600 text-white hover:bg-purple-700 px-6 py-3 rounded-lg w-full mt-auto"
+    >
+      Demander un Devis
+    </button>
+  </div>
+
+  <!-- Service 4: Rénovation -->
+  <div class="service-card bg-white rounded-2xl p-8 text-center flex flex-col h-full">
+    <div
+      class="service-icon w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="fas fa-tools text-2xl text-white"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Rénovation</h3>
+    <p class="text-gray-600 mb-6 flex-grow">
+      Remise à neuf complète de vos espaces avec expertise professionnelle.
+    </p>
+    <ul class="text-sm text-gray-600 space-y-2 mb-6">
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Diagnostic complet
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Réparations incluses
+      </li>
+      <li class="flex items-center">
+        <i class="fas fa-check text-green-500 mr-2"></i>Suivi personnalisé
+      </li>
+    </ul>
+    <div class="text-2xl font-bold text-orange-600 mb-4">Sur devis</div>
+    <button
+      onclick="scrollToSection('contact')"
+      class="btn bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-lg w-full mt-auto"
+    >
+      Demander un Devis
+    </button>
+  </div>
+</div>
+
+    <!-- Stats Section -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+      <div class="bg-white rounded-xl p-6 shadow-lg">
+        <div class="text-4xl font-bold text-blue-600 mb-2">500+</div>
+        <p class="text-gray-600 font-medium">Projets Réalisés</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-lg">
+        <div class="text-4xl font-bold text-green-600 mb-2">10</div>
+        <p class="text-gray-600 font-medium">Années d'Expérience</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-lg">
+        <div class="text-4xl font-bold text-purple-600 mb-2">98%</div>
+        <p class="text-gray-600 font-medium">Clients Satisfaits</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-lg">
+        <div class="text-4xl font-bold text-orange-600 mb-2">24h</div>
+        <p class="text-gray-600 font-medium">Garantie Service</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process Section -->
+{% comment %} <section class="py-20 lg:py-32 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        Notre
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+          >Processus</span
+        >
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Une approche méthodique pour garantir des résultats exceptionnels à chaque projet
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="process-step text-center">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6"
+        >
+          1
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Consultation Gratuite</h3>
+        <p class="text-gray-600">
+          Évaluation de vos besoins et conseils personnalisés pour votre projet.
+        </p>
+      </div>
+
+      <div class="process-step text-center">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6"
+        >
+          2
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Devis Détaillé</h3>
+        <p class="text-gray-600">
+          Proposition transparente avec détail des travaux et des matériaux.
+        </p>
+      </div>
+
+      <div class="process-step text-center">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6"
+        >
+          3
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Réalisation</h3>
+        <p class="text-gray-600">
+          Exécution professionnelle avec respect des délais et de la qualité.
+        </p>
+      </div>
+
+      <div class="process-step text-center">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6"
+        >
+          4
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Contrôle Qualité</h3>
+        <p class="text-gray-600">
+          Vérification finale et nettoyage pour votre entière satisfaction.
+        </p>
+      </div>
+    </div>
+  </div>
+</section> {% endcomment %}
+{% include "components/section-process.html" %}
+
+<!-- Portfolio Section -->
+<section id="portfolio" class="py-20 lg:py-32 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        Nos
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+          >Réalisations</span
+        >
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Découvrez quelques-uns de nos projets récents qui témoignent de notre savoir-faire
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      <!-- Portfolio Item 1 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/maison-moderne-1.jpg' %}"
+            alt="Rénovation maison moderne"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Rénovation Maison Moderne</h3>
+            <p class="text-white text-center mb-4">Peinture intérieure complète - Toulouse</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Rénovation Maison Moderne</h3>
+          <p class="text-gray-600 text-sm">Peinture intérieure • 150m² • 2023</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 2 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/facade-villa.jpg' %}"
+            alt="Façade villa"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Façade Villa Contemporaine</h3>
+            <p class="text-white text-center mb-4">Peinture extérieure - Colomiers</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Façade Villa Contemporaine</h3>
+          <p class="text-gray-600 text-sm">Peinture extérieure • 200m² • 2023</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 3 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/appartement-design.jpg' %}"
+            alt="Appartement design"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Appartement Design</h3>
+            <p class="text-white text-center mb-4">Décoration intérieure - Blagnac</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Appartement Design</h3>
+          <p class="text-gray-600 text-sm">Décoration intérieure • 80m² • 2023</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 4 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/bureau-entreprise.jpg' %}"
+            alt="Bureau entreprise"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Bureaux d'Entreprise</h3>
+            <p class="text-white text-center mb-4">Peinture professionnelle - Toulouse</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Bureaux d'Entreprise</h3>
+          <p class="text-gray-600 text-sm">Peinture professionnelle • 300m² • 2023</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 5 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/maison-traditionnelle.jpg' %}"
+            alt="Maison traditionnelle"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Maison Traditionnelle</h3>
+            <p class="text-white text-center mb-4">Rénovation complète - Muret</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Maison Traditionnelle</h3>
+          <p class="text-gray-600 text-sm">Rénovation complète • 180m² • 2023</p>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 6 -->
+      <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg">
+        <div class="relative">
+          <img
+            src="{% static 'images/portfolio/restaurant-moderne.jpg' %}"
+            alt="Restaurant moderne"
+            class="w-full h-64 object-cover"
+          />
+          <div class="portfolio-overlay">
+            <h3 class="text-xl font-bold text-white mb-2">Restaurant Moderne</h3>
+            <p class="text-white text-center mb-4">Décoration thématique - Toulouse</p>
+            <button class="btn bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg">
+              Voir le Projet
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Restaurant Moderne</h3>
+          <p class="text-gray-600 text-sm">Décoration thématique • 120m² • 2023</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio CTA -->
+    <div class="text-center">
+      {% comment %} <!-- <a
+        href="{% url 'home:portfolio' %}"
+        class="btn bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+      >
+        <i class="fas fa-images mr-2"></i>
+        Voir Tous Nos Projets
+      </a> --> {% endcomment %}
+    </div>
+  </div>
+</section>
+
+<!-- Map Section -->
+<section id="map" class="py-20 lg:py-32 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+        Notre
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"
+          >Zone d'Intervention</span
+        >
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Nous intervenons dans toute la région Toulousaine et ses environs
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Map -->
+      <div class="map-container">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d46302.65823555!2d1.3628!3d43.6047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12aebb6fec7552ff%3A0x406f69c2f411030!2sToulouse%2C%20France!5e0!3m2!1sen!2sfr!4v1635789012345!5m2!1sen!2sfr"
+          width="100%"
+          height="100%"
+          style="border: 0"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        >
+        </iframe>
+      </div>
+
+      <!-- Zone Info -->
+      <div class="space-y-8">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">Zones d'Intervention</h3>
+          <p class="text-gray-600 mb-6">
+            Basés à Saint-Sauveur, nous intervenons dans un rayon de 50km autour de Toulouse pour
+            tous vos projets de peinture et décoration.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-blue-50 rounded-xl p-6">
+            <h4 class="font-bold text-gray-900 mb-3">
+              <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+              Toulouse Métropole
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• Toulouse Centre</li>
+              <li>• Colomiers</li>
+              <li>• Blagnac</li>
+              <li>• Tournefeuille</li>
+            </ul>
+          </div>
+
+          <div class="bg-green-50 rounded-xl p-6">
+            <h4 class="font-bold text-gray-900 mb-3">
+              <i class="fas fa-map-marker-alt text-green-600 mr-2"></i>
+              Périphérie
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li>• Muret</li>
+              <li>• Saint-Gaudens</li>
+              <li>• Montauban</li>
+              <li>• Auch</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+          <h4 class="font-bold mb-2">
+            <i class="fas fa-clock mr-2"></i>
+            Délais d'Intervention
+          </h4>
+          <p class="text-blue-100">
+            Devis gratuit sous 48h • Intervention sous 48h pour les urgences
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-20 lg:py-32 bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl lg:text-5xl font-bold mb-6">
+        Contactez
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
+          >Nous</span
+        >
+      </h2>
+      <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+        Prêt à démarrer votre projet ? Contactez-nous pour un devis gratuit et personnalisé
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-12 rounded-xl" style="display: flex; justify-content: center; " >
+        <!-- Quick Actions -->
+        <div class="bg-gray-800  p-6  rounded-xl" >
+          <h4 class="font-bold text-white mb-4">Actions Rapides</h4>
+          <div class="space-y-3   ">
+            <a
+              href="tel:+33769273776"
+              class="flex items-center justify-between bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors"
+            >
+              <span><i class="fas fa-phone mr-2"></i>Appeler Maintenant</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a
+              href="https://wa.me/33634623320"
+              class="flex items-center justify-between bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors"
+            >
+              <span><i class="fab fa-whatsapp mr-2"></i>WhatsApp</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            
+          </div>
+        </div>
+      
+
+      <!-- Contact Form -->
+      {% comment %} <div id="contact-form" class="bg-white rounded-2xl p-8 text-gray-900">
+        <h3 class="text-2xl font-bold mb-6">Demander un Devis Gratuit</h3>
+
+        <form class="space-y-6" method="POST" action="{% url 'home:contact' %}">
+          {% csrf_token %}
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="prenom" class="block text-sm font-medium text-gray-700 mb-2"
+                >Prénom *</label
+              >
+              <input
+                type="text"
+                id="prenom"
+                name="prenom"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label for="nom" class="block text-sm font-medium text-gray-700 mb-2">Nom *</label>
+              <input
+                type="text"
+                id="nom"
+                name="nom"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2"
+                >Email *</label
+              >
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label for="telephone" class="block text-sm font-medium text-gray-700 mb-2"
+                >Téléphone</label
+              >
+              <input
+                type="tel"
+                id="telephone"
+                name="telephone"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="ville" class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
+            <input
+              type="text"
+              id="ville"
+              name="ville"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label for="type_service" class="block text-sm font-medium text-gray-700 mb-2"
+              >Type de Service *</label
+            >
+            <select
+              id="type_service"
+              name="type_service"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionnez un service</option>
+              <option value="peinture_interieure">Peinture Intérieure</option>
+              <option value="peinture_exterieure">Peinture Extérieure</option>
+              <option value="decoration">Décoration</option>
+              <option value="renovation">Rénovation</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="surface" class="block text-sm font-medium text-gray-700 mb-2"
+              >Surface approximative (m²)</label
+            >
+            <input
+              type="number"
+              id="surface"
+              name="surface"
+              min="1"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-medium text-gray-700 mb-2"
+              >Description du Projet *</label
+            >
+            <textarea
+              id="message"
+              name="message"
+              rows="4"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Décrivez votre projet en détail..."
+            ></textarea>
+          </div>
+
+          <div>
+            <label for="budget" class="block text-sm font-medium text-gray-700 mb-2"
+              >Budget Prévisionnel</label
+            >
+            <select
+              id="budget"
+              name="budget"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionnez votre budget</option>
+              <option value="moins_1000">Moins de 1 000€</option>
+              <option value="1000_3000">1 000€ - 3 000€</option>
+              <option value="3000_5000">3 000€ - 5 000€</option>
+              <option value="5000_10000">5 000€ - 10 000€</option>
+              <option value="plus_10000">Plus de 10 000€</option>
+            </select>
+          </div>
+
+          <div class="flex items-start">
+            <input type="checkbox" id="rgpd" name="rgpd" required class="mt-1 mr-3" />
+            <label for="rgpd" class="text-sm text-gray-600">
+              J'accepte que mes données soient utilisées pour me recontacter concernant ma demande.
+              *
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
+          >
+            <i class="fas fa-paper-plane mr-2"></i>
+            Envoyer ma Demande
+          </button>
+        </form>
+      </div> {% endcomment %}
+    </div>
+
+    <!-- Guarantees -->
+    <div class="mt-16 grid md:grid-cols-3 gap-8 text-center">
+      <div class="bg-gray-800 rounded-xl p-6">
+        <div
+          class="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-shield-alt text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">Garantie Qualité</h4>
+        <p class="text-gray-300 text-sm">Tous nos travaux sont garantis 2 ans</p>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6">
+        <div
+          class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-clock text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">Réponse Rapide</h4>
+        <p class="text-gray-300 text-sm">Devis gratuit sous 24h</p>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6">
+        <div
+          class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-euro-sign text-2xl text-white"></i>
+        </div>
+        <h4 class="font-bold text-white mb-2">Prix Transparent</h4>
+        <p class="text-gray-300 text-sm">Aucun coût caché, devis détaillé</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+{% endblock %} {% block extra_js %}
+<script>
+  // Smooth scroll function
+  function scrollToSection(sectionId) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }
+
+  // Scroll to top function
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
+
+  // Show/hide scroll to top button
+  window.addEventListener('scroll', function () {
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    if (window.pageYOffset > 300) {
+      scrollToTopBtn.style.display = 'flex';
+    } else {
+      scrollToTopBtn.style.display = 'none';
+    }
+  });
+
+  // Form validation and enhancement
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#contact-form form');
+    const typeServiceSelect = document.getElementById('type_service');
+    const surfaceInput = document.getElementById('surface');
+
+    // Auto-focus on surface when service is selected
+    typeServiceSelect.addEventListener('change', function () {
+      if (this.value) {
+        surfaceInput.focus();
+      }
+    });
+
+    // Form submission with loading state
+    form.addEventListener('submit', function (e) {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Envoi en cours...';
+      submitBtn.disabled = true;
+
+      // Re-enable button after 3 seconds if form doesn't submit
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }, 3000);
+    });
+  });
+
+  // Portfolio hover effects
+  document.addEventListener('DOMContentLoaded', function () {
+    const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+    portfolioItems.forEach((item) => {
+      item.addEventListener('mouseenter', function () {
+        this.style.transform = 'translateY(-10px)';
+      });
+
+      item.addEventListener('mouseleave', function () {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+  });
+
+  // Service cards animation on scroll
+  function animateOnScroll() {
+    const cards = document.querySelectorAll('.service-card, .process-step, .portfolio-item');
+
+    cards.forEach((card) => {
+      const cardTop = card.getBoundingClientRect().top;
+      const cardVisible = 150;
+
+      if (cardTop < window.innerHeight - cardVisible) {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }
+    });
+  }
+
+  // Initialize cards as hidden
+  document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.service-card, .process-step, .portfolio-item');
+    cards.forEach((card) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = 'all 0.6s ease';
+    });
+
+    // Animate on scroll
+    window.addEventListener('scroll', animateOnScroll);
+    animateOnScroll(); // Initial check
+  });
+
+  // Add navigation dots for sections
+  function createNavigationDots() {
+    const sections = ['services', 'portfolio', 'map', 'contact'];
+    const nav = document.createElement('div');
+    nav.className = 'fixed  right-8 top-1/2 transform -translate-y-1/2 z-50 space-y-4';
+    nav.style.display = 'none';
+
+    sections.forEach((section, index) => {
+      const dot = document.createElement('button');
+      dot.className =
+        ''; //w-3 h-3 rounded-full bg-gray-400 hover:bg-blue-600 transition-colors duration-300 
+      dot.onclick = () => scrollToSection(section);
+      dot.title = section.charAt(0).toUpperCase() + section.slice(1);
+      nav.appendChild(dot);
+    });
+
+    document.body.appendChild(nav);
+
+    // Show navigation dots after scrolling past hero
+    window.addEventListener('scroll', function () {
+      if (window.pageYOffset > window.innerHeight * 0.5) {
+        nav.style.display = 'block';
+      } else {
+        nav.style.display = 'none';
+      }
+    });
+  }
+
+  // Initialize navigation dots
+  document.addEventListener('DOMContentLoaded', createNavigationDots);
+
+  // Add click tracking for analytics
+  function trackClick(action, label) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'click', {
+        event_category: 'Services Page',
+        event_label: label,
+        value: action,
+      });
+    }
+  }
+
+  // Track service card clicks
+  document.addEventListener('DOMContentLoaded', function () {
+    const serviceButtons = document.querySelectorAll('.service-card button');
+    serviceButtons.forEach((btn, index) => {
+      btn.addEventListener('click', function () {
+        const serviceName = this.closest('.service-card').querySelector('h3').textContent;
+        trackClick('service_cta_click', serviceName);
+      });
+    });
+  });
+</script>
+
+<style>
+  
+</style>
+{% endblock %}

@@ -1,0 +1,391 @@
+min-height: 120px;
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Demander un Devis: {{ projeto.titulo }} - LOPES PEINTURE{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <!-- Header avec navigation -->
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'orcamentos:cliente_projeto_detail' projeto.uuid %}"
+           class="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200">
+            <i class="fas fa-arrow-left text-lg"></i>
+        </a>
+        <div class="flex-1">
+            <nav class="text-sm text-gray-600 mb-2">
+                <a href="{% url 'orcamentos:cliente_projetos' %}" class="hover:text-blue-600 transition-colors">Mes Projets</a>
+                <span class="mx-2">/</span>
+                <a href="{% url 'orcamentos:cliente_projeto_detail' projeto.uuid %}" class="hover:text-blue-600 transition-colors">{{ projeto.titulo }}</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-900 font-medium">Demander un Devis</span>
+            </nav>
+            <h1 class="text-3xl font-bold text-gray-900">Demander un Devis</h1>
+        </div>
+    </div>
+
+    <!-- Informações do projeto -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-8 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+
+        <div class="flex items-start justify-between mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-blue-900 mb-3">{{ projeto.titulo }}</h2>
+                <p class="text-blue-700 leading-relaxed">{{ projeto.descricao|truncatewords:20 }}</p>
+            </div>
+            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold shadow-md
+                {% if projeto.status == 'planejando' %}bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
+                {% elif projeto.status == 'em_andamento' %}bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
+                {% elif projeto.status == 'concluido' %}bg-gradient-to-r from-green-100 to-green-200 text-green-800
+                {% elif projeto.status == 'pausado' %}bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800
+                {% else %}bg-gradient-to-r from-red-100 to-red-200 text-red-800{% endif %}">
+                {{ projeto.get_status_display }}
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">{{ projeto.cidade_projeto }}, {{ projeto.cep_projeto }}</span>
+            </div>
+
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-tag text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">{{ projeto.get_tipo_servico_display }}</span>
+            </div>
+
+            {% if projeto.area_aproximada %}
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-ruler-combined text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">{{ projeto.area_aproximada }} m²</span>
+            </div>
+            {% endif %}
+
+            {% if projeto.numero_comodos %}
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-door-open text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">{{ projeto.numero_comodos }} pièce{{ projeto.numero_comodos|pluralize }}</span>
+            </div>
+            {% endif %}
+
+            {% if projeto.orcamento_estimado %}
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-euro-sign text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">Budget: €{{ projeto.orcamento_estimado }}</span>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center gap-3 p-4 bg-white/70 rounded-xl backdrop-blur-sm">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                </div>
+                <span class="text-blue-800 font-medium">{{ projeto.get_urgencia_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações sobre demandas anteriores -->
+    {% if projeto.solicitacoes_orcamento.exists %}
+    <div class="bg-gradient-to-r from-yellow-50 to-orange-100 border-2 border-yellow-200 rounded-2xl p-6 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 to-orange-600"></div>
+
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-info-circle text-white"></i>
+            </div>
+            <div>
+                <h3 class="font-semibold text-yellow-900 mb-2">Demandes de devis existantes</h3>
+                <p class="text-yellow-800 text-sm mb-4 leading-relaxed">
+                    Ce projet a déjà {{ projeto.solicitacoes_orcamento.count }} demande{{ projeto.solicitacoes_orcamento.count|pluralize }} de devis.
+                </p>
+                <div class="space-y-3">
+                    {% for solicitacao in projeto.solicitacoes_orcamento.all|slice:":3" %}
+                    <div class="flex items-center justify-between bg-white/80 rounded-xl px-4 py-3 backdrop-blur-sm">
+                        <span class="text-yellow-900 font-medium">Demande #{{ solicitacao.numero }}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                {% if solicitacao.status == 'pendente' %}bg-yellow-200 text-yellow-800
+                                {% elif solicitacao.status == 'em_elaboracao' %}bg-blue-200 text-blue-800
+                                {% elif solicitacao.status == 'enviado' %}bg-green-200 text-green-800
+                                {% else %}bg-gray-200 text-gray-800{% endif %}">
+                                {{ solicitacao.get_status_display }}
+                            </span>
+                            <span class="text-yellow-700 text-xs font-medium">{{ solicitacao.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if projeto.solicitacoes_orcamento.count > 3 %}
+                <p class="text-yellow-700 text-xs mt-3 font-medium">+ {{ projeto.solicitacoes_orcamento.count|add:"-3" }} autre{{ projeto.solicitacoes_orcamento.count|add:"-3"|pluralize }}...</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire de demande -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
+
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-file-invoice-dollar text-white text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">Nouvelle Demande de Devis</h2>
+                <p class="text-gray-600 text-sm">Les informations de votre projet seront automatiquement incluses</p>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-8" id="devis-form">
+            {% csrf_token %}
+
+            <!-- Informations automatiques -->
+            <div class="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-2xl p-6">
+                <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-blue-600"></i>
+                    Informations automatiquement incluses
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Nom:</span>
+                        <span class="text-gray-900">{{ user.first_name }} {{ user.last_name }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Email:</span>
+                        <span class="text-gray-900">{{ user.email }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Projet:</span>
+                        <span class="text-gray-900">{{ projeto.titulo }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Type:</span>
+                        <span class="text-gray-900">{{ projeto.get_tipo_servico_display }}</span>
+                    </div>
+                    <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Localisation:</span>
+                        <span class="text-gray-900">{{ projeto.endereco_projeto }}, {{ projeto.cidade_projeto }}</span>
+                    </div>
+                    {% if projeto.area_aproximada %}
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-700">Surface:</span>
+                        <span class="text-gray-900">{{ projeto.area_aproximada }} m²</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informations complémentaires -->
+            <div class="space-y-4">
+                <label class="block text-sm font-semibold text-gray-700">
+                    Informations complémentaires pour ce devis
+                </label>
+                <div class="mb-3">
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Précisez des détails spécifiques pour cette demande de devis (matériaux souhaités, délais particuliers, questions spéciales, etc.)
+                    </p>
+                </div>
+                {{ form.observacoes }}
+                {% if form.observacoes.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Options supplémentaires -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+
+                <h3 class="font-semibold text-blue-900 mb-6 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-blue-600"></i>
+                    Options pour ce devis
+                </h3>
+                <div class="space-y-4">
+                    <label class="flex items-start gap-4 p-4 bg-white/70 rounded-xl backdrop-blur-sm hover:bg-white/90 transition-all duration-300 cursor-pointer">
+                        <input type="checkbox" name="visite_technique" class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1" checked>
+                        <div>
+                            <span class="font-semibold text-blue-900 block">Visite technique recommandée</span>
+                            <p class="text-sm text-blue-700 mt-1">Pour un devis plus précis, nous recommandons une visite sur site (gratuite)</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-4 p-4 bg-white/70 rounded-xl backdrop-blur-sm hover:bg-white/90 transition-all duration-300 cursor-pointer">
+                        <input type="checkbox" name="urgente" class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1" {% if projeto.urgencia == 'alta' or projeto.urgencia == 'critica' %}checked{% endif %}>
+                        <div>
+                            <span class="font-semibold text-blue-900 block">Demande urgente</span>
+                            <p class="text-sm text-blue-700 mt-1">Réponse prioritaire sous 4h (frais d'urgence peuvent s'appliquer)</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-4 p-4 bg-white/70 rounded-xl backdrop-blur-sm hover:bg-white/90 transition-all duration-300 cursor-pointer">
+                        <input type="checkbox" name="comparaisons" class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1">
+                        <div>
+                            <span class="font-semibold text-blue-900 block">Plusieurs options de devis</span>
+                            <p class="text-sm text-blue-700 mt-1">Recevoir des alternatives avec différents niveaux de qualité/prix</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-8 border-t border-gray-200">
+                <div class="flex items-center text-sm text-gray-600 bg-green-50 px-4 py-2 rounded-lg">
+                    <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                    Devis 100% gratuit et sans engagement
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'orcamentos:cliente_projeto_detail' projeto.uuid %}"
+                       class="px-8 py-3 border-2 border-gray-300 hover:border-green-500 text-gray-700 hover:text-green-600 rounded-xl font-semibold transition-all duration-300 hover:bg-green-50 text-center">
+                        Annuler
+                    </a>
+
+                    <button type="submit" class="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer la demande de devis
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Informations sur le processus -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+        <h3 class="font-bold text-gray-900 mb-8 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clock text-white"></i>
+            </div>
+            Que se passe-t-il ensuite ?
+        </h3>
+
+        <div class="space-y-6">
+            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span class="text-white font-bold text-sm">1</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Réception immédiate</h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">Votre demande est reçue instantanément et un numéro de suivi vous est attribué</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span class="text-white font-bold text-sm">2</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Analyse technique (2-4h)</h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">Notre équipe analyse votre projet et prépare les questions techniques</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span class="text-white font-bold text-sm">3</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Contact personnalisé (4-24h)</h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">Un expert vous contacte pour affiner les détails et programmer une visite si nécessaire</p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-300">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span class="text-white font-bold text-sm">4</span>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Devis personnalisé (24-72h)</h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">Vous recevez votre devis détaillé avec prix, délais et conditions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact d'urgence -->
+    <div class="text-center p-8 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl border border-gray-200">
+        <p class="text-gray-600 mb-4 font-medium">Besoin d'une réponse immédiate ?</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="tel:+33123456789"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                <i class="fas fa-phone"></i>
+                +33 7 69 27 37 76
+            </a>
+            <span class="text-gray-400 hidden sm:block">ou</span>
+            <a href="mailto:contact@lopes-peinture.fr"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                <i class="fas fa-envelope"></i>
+                contact@lopes-peinture.fr
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('devis-form');
+    const textarea = form.querySelector('textarea');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // Auto-resize textarea
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    }
+
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Envoi en cours...';
+
+        // Re-enable after 3 seconds in case of issues
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Envoyer la demande de devis';
+        }, 3000);
+    });
+
+    // Track form interactions for analytics
+    form.addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox') {
+            console.log('Option selected:', e.target.name, e.target.checked);
+        }
+    });
+
+    // Character counter for textarea
+    if (textarea) {
+        const maxLength = 1000;
+        const counter = document.createElement('div');
+        counter.className = 'text-sm text-gray-500 text-right mt-1';
+        textarea.parentNode.appendChild(counter);
+
+        function updateCounter() {
+            const remaining = maxLength - textarea.value.length;
+            counter.textContent = `${remaining} caractères restants`;
+            if (remaining < 50) {
+                counter.className = 'text-sm text-red-500 text-right mt-1';
+            } else {
+                counter.className = 'text-sm text-gray-500 text-right mt-1';
+            }
+        }
+
+        textarea.addEventListener('input', updateCounter);
+        updateCounter(); // Initial count
+    }
+});
+</script>
+{% endblock %}

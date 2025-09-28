@@ -1,0 +1,495 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    {% if user.account_type == 'CLIENT' %}Mon Espace Client
+    {% elif user.account_type == 'COLLABORATOR' %}Tableau de Travail
+    {% else %}Dashboard Administration{% endif %} - LOPES PEINTURE
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header dinâmico baseado no tipo de conta -->
+    <div class="text-center lg:text-left">
+        {% if user.account_type == 'CLIENT' %}
+            <h1 class="text-4xl font-bold text-blue-900 mb-4 flex items-center justify-center lg:justify-start gap-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-user text-white text-2xl"></i>
+                </div>
+                Mon Espace Client
+            </h1>
+            <p class="text-xl text-gray-600">Bienvenue {{ user.first_name|default:"" }}! Gérez vos projets de peinture et suivez vos devis.</p>
+
+        {% elif user.account_type == 'COLLABORATOR' %}
+            <h1 class="text-4xl font-bold text-green-900 mb-4 flex items-center justify-center lg:justify-start gap-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-tools text-white text-2xl"></i>
+                </div>
+                Tableau de Travail
+            </h1>
+            <p class="text-xl text-gray-600">Bonjour {{ user.first_name|default:"" }}! Voici vos tâches et projets du jour.</p>
+
+        {% else %}
+            <h1 class="text-4xl font-bold text-red-900 mb-4 flex items-center justify-center lg:justify-start gap-4">
+                <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-chart-line text-white text-2xl"></i>
+                </div>
+                Dashboard Administration
+            </h1>
+            <p class="text-xl text-gray-600">Tableau de bord administrateur - Vue d'ensemble de l'activité.</p>
+        {% endif %}
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% if user.account_type == 'CLIENT' %}
+            <!-- Stats para Cliente -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mes Projets</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ client_projects|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Projets créés</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-paint-brush text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-green-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mes Devis</p>
+                        <p class="text-3xl font-bold text-green-600">{{ client_quotes|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Demandes envoyées</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Investissement</p>
+                        <p class="text-3xl font-bold text-purple-600">€{{ client_investment|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Total des projets</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-euro-sign text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Statut</p>
+                        <p class="text-lg font-bold text-orange-600">Actif</p>
+                        <p class="text-sm text-gray-500 mt-1">Compte vérifié</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-check-circle text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+        {% elif user.account_type == 'COLLABORATOR' %}
+            <!-- Stats para Colaborador -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-green-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mes Projets</p>
+                        <p class="text-3xl font-bold text-green-600">{{ collab_projects|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Projets assignés</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tâches</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ collab_tasks|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">En cours</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-tasks text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Devis Créés</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ collab_quotes|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Ce mois</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-file-invoice text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Clients</p>
+                        <p class="text-3xl font-bold text-orange-600">{{ collab_clients|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Assignés</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-users text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Stats para Administrador -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Total Projets</p>
+                        <p class="text-3xl font-bold text-blue-600">{{ total_projects|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Tous les projets</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-green-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Clients</p>
+                        <p class="text-3xl font-bold text-green-600">{{ total_clients|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Clients actifs</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-users text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Revenus</p>
+                        <p class="text-3xl font-bold text-purple-600">€{{ monthly_revenue|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Ce mois</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-euro-sign text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-600"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-600 uppercase tracking-wider">En Attente</p>
+                        <p class="text-3xl font-bold text-red-600">{{ pending_requests|default:0 }}</p>
+                        <p class="text-sm text-gray-500 mt-1">Demandes pendantes</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clock text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Conteúdo específico por tipo de conta -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {% if user.account_type == 'CLIENT' %}
+            <!-- Projetos Recentes - Cliente -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-paint-brush text-white"></i>
+                    </div>
+                    Mes Projets Récents
+                </h2>
+
+                {% if recent_projects %}
+                    <div class="space-y-4">
+                        {% for projeto in recent_projects %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all duration-300">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">{{ projeto.titulo }}</h3>
+                                    <p class="text-sm text-gray-600">{{ projeto.get_tipo_servico_display }}</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                    {% if projeto.status == 'planejando' %}bg-yellow-100 text-yellow-800
+                                    {% elif projeto.status == 'em_andamento' %}bg-blue-100 text-blue-800
+                                    {% elif projeto.status == 'concluido' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ projeto.get_status_display }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-6">
+                        <a href="{% url 'orcamentos:cliente_projetos' %}"
+                           class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-eye"></i>
+                            Voir tous mes projets
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-paint-brush text-blue-600 text-xl"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Aucun projet créé</p>
+                        <a href="{% url 'orcamentos:cliente_criar_projeto' %}"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-plus"></i>
+                            Créer mon premier projet
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Devis Récents - Cliente -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-white"></i>
+                    </div>
+                    Mes Devis Récents
+                </h2>
+
+                {% if recent_quotes %}
+                    <div class="space-y-4">
+                        {% for quote in recent_quotes %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-green-50 transition-all duration-300">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">#{{ quote.numero }}</h3>
+                                    <p class="text-sm text-gray-600">{{ quote.get_tipo_servico_display }}</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                    {% if quote.status == 'pendente' %}bg-yellow-100 text-yellow-800
+                                    {% elif quote.status == 'enviado' %}bg-green-100 text-green-800
+                                    {% elif quote.status == 'aceito' %}bg-emerald-100 text-emerald-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ quote.get_status_display }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-6">
+                        <a href="{% url 'orcamentos:cliente_orcamentos' %}"
+                           class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-eye"></i>
+                            Voir tous mes devis
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-file-invoice-dollar text-green-600 text-xl"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">Aucune demande de devis</p>
+                        <a href="{% url 'orcamentos:solicitar_publico' %}"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-plus"></i>
+                            Demander un devis
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+        {% elif user.account_type == 'COLLABORATOR' %}
+            <!-- Conteúdo para Colaborador -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-day text-white"></i>
+                    </div>
+                    Tâches du Jour
+                </h2>
+
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <p class="text-gray-600">Toutes les tâches sont à jour</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-project-diagram text-white"></i>
+                    </div>
+                    Projets Assignés
+                </h2>
+
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-briefcase text-blue-600 text-xl"></i>
+                    </div>
+                    <p class="text-gray-600">Aucun projet assigné</p>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Conteúdo para Administrador -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white"></i>
+                    </div>
+                    Analytics & Relatórios
+                </h2>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-red-50 rounded-xl">
+                        <span class="font-medium text-red-900">Crescimento mensal</span>
+                        <span class="text-red-600 font-bold">+12%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-xl">
+                        <span class="font-medium text-green-900">Taxa de conversão</span>
+                        <span class="text-green-600 font-bold">78%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
+                        <span class="font-medium text-blue-900">Satisfação</span>
+                        <span class="text-blue-600 font-bold">4.8/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                    Alertas do Sistema
+                </h2>
+
+                <div class="space-y-3">
+                    {% if pending_requests > 0 %}
+                        <div class="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <i class="fas fa-bell text-yellow-600"></i>
+                            <span class="text-yellow-800 font-medium">{{ pending_requests }} nouvelle{{ pending_requests|pluralize }} demande{{ pending_requests|pluralize }} de devis</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                        <span class="text-green-800 font-medium">Système opérationnel</span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions Rápidas -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 hover:shadow-xl transition-all duration-300">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <i class="fas fa-bolt text-white"></i>
+            </div>
+            Actions Rapides
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% if user.account_type == 'CLIENT' %}
+                <a href="{% url 'orcamentos:cliente_criar_projeto' %}"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 hover:from-blue-100 hover:to-indigo-100 rounded-xl font-semibold text-blue-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-plus text-white"></i>
+                    </div>
+                    <span>Nouveau Projet</span>
+                </a>
+
+                <a href="{% url 'orcamentos:solicitar_publico' %}"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 hover:from-green-100 hover:to-emerald-100 rounded-xl font-semibold text-green-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-white"></i>
+                    </div>
+                    <span>Demander Devis</span>
+                </a>
+
+            {% elif user.account_type == 'COLLABORATOR' %}
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 hover:from-green-100 hover:to-emerald-100 rounded-xl font-semibold text-green-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-plus text-white"></i>
+                    </div>
+                    <span>Nouveau Projet</span>
+                </a>
+
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 hover:from-blue-100 hover:to-cyan-100 rounded-xl font-semibold text-blue-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-file-invoice text-white"></i>
+                    </div>
+                    <span>Créer Devis</span>
+                </a>
+
+            {% else %}
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 hover:from-red-100 hover:to-rose-100 rounded-xl font-semibold text-red-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-plus text-white"></i>
+                    </div>
+                    <span>Nouveau Projet</span>
+                </a>
+
+                <a href="#"
+                   class="flex items-center gap-4 p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 hover:from-purple-100 hover:to-pink-100 rounded-xl font-semibold text-purple-700 transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user-plus text-white"></i>
+                    </div>
+                    <span>Nouvel Utilisateur</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add dashboard-specific JavaScript here
+    console.log('Dashboard loaded for user type:', '{{ user.account_type }}');
+
+    // Animate stats cards on load
+    const statsCards = document.querySelectorAll('.grid > div');
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

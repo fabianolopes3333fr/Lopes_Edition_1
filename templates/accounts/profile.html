@@ -1,0 +1,624 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Mon Profil - Lopes Peinture{% endblock %} 
+{% block extra_css %}
+<!-- <link rel="stylesheet" href="{% static 'css/profile.css' %}" /> -->
+<link rel="stylesheet" href="{% static 'css/projects.css' %}" />
+
+<style>
+  .profile-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.profile-avatar img {
+  transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover img {
+  transform: scale(1.1);
+}
+
+/* Animação de loading para upload */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+/* Melhorias para o modal */
+.modal-content {
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.stat-card:hover::before {
+  left: 100%;
+}
+
+/* Melhorias para upload area */
+.upload-area {
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-area::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover::after {
+  width: 200px;
+  height: 200px;
+}
+/* Badge de status online */
+.status-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.status-badge::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button {
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background-color: #4299e1;
+  color: white;
+  border-color: #4299e1;
+}
+
+.activity-item {
+  border-left: 3px solid #e2e8f0;
+  transition: border-color 0.3s ease;
+}
+
+.activity-item:hover {
+  border-left-color: #4299e1;
+}
+
+.stat-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.tab-button {
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background-color: #4299e1;
+  color: white;
+  border-color: #4299e1;
+}
+
+.activity-item {
+  border-left: 3px solid #e2e8f0;
+  transition: border-color 0.3s ease;
+}
+
+.activity-item:hover {
+  border-left-color: #4299e1;
+}
+
+/* Animação para tabs */
+.tab-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: #3b82f6;
+  transition: width 0.3s ease;
+}
+
+.tab-button.active::before,
+.tab-button:hover::before {
+  width: 100%;
+}
+
+/* Melhorias para formulários */
+ 
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .modal-content {
+    margin: 10% auto;
+    width: 95%;
+  }
+
+  .stat-card {
+    text-align: center;
+  }
+}
+
+/* Tema escuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  .modal-content {
+    background-color: #1f2937;
+    color: white;
+  }
+
+  .upload-area {
+    border-color: #4b5563;
+    background-color: #374151;
+  }
+
+  .upload-area:hover {
+    border-color: #6366f1;
+    background-color: #4b5563;
+  }
+}
+
+/* outra parte do css */
+.profile-nav {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-nav-item {
+  position: relative;
+  padding: 1rem 1.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.profile-nav-item:hover {
+  color: #3b82f6;
+  background-color: #f9fafb;
+}
+
+.profile-nav-item.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.modal {
+  backdrop-filter: blur(4px);
+}
+
+.modal.hidden {
+  display: none !important;
+}
+
+.form-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .profile-nav {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .profile-nav-item {
+    display: inline-block;
+    min-width: 120px;
+    text-align: center;
+  }
+}
+
+</style>
+
+{% endblock %} {% block content %}
+<div class="min-h-screen bg-gray-50">
+  <div class="profile-header text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div
+        class="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6"
+      >
+        <div class="relative group">
+          {% if user.profile.avatar %}
+          <img
+            src="{{ user.profile.avatar.url }}"
+            alt="Avatar de {{ user.get_full_name|default:user.username }}"
+            class="profile-avatar object-cover"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div
+            class="profile-avatar bg-gradient-to-br from-blue-500 to-purple-600 hidden items-center justify-center"
+          >
+            <span class="text-white text-3xl font-bold">
+              {{ user.first_name|first|default:user.username|first|upper }}{{
+              user.last_name|first|upper|default:'' }}
+            </span>
+          </div>
+          {% else %}
+          <div class="profile-avatar bg-white flex items-center justify-center">
+            <i class="fas fa-user text-gray-400 text-4xl"></i>
+          </div>
+          <div
+            class="profile-avatar bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"
+          >
+            <span class="text-white text-3xl font-bold">
+              {{ user.first_name|first|default:user.username|first|upper }}{{
+              user.last_name|first|upper|default:'' }}
+            </span>
+          </div>
+          {% endif %}
+          <!-- Overlay para upload -->
+          <div
+            class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+            onclick="openAvatarModal()"
+          >
+            <div class="text-center text-white">
+              <i class="fas fa-camera text-2xl mb-1"></i>
+
+              <p class="text-xs">Changer</p>
+            </div>
+          </div>
+          <!-- Badge de status -->
+          <div
+            class="absolute bottom-2 right-2 w-6 h-6 bg-green-500 border-4 border-white rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-check text-white text-xs"></i>
+          </div>
+        </div>
+
+        <div class="text-center md:text-left flex-1">
+          <h1 class="text-3xl font-bold">{{ user.get_full_name|default:user.username }}</h1>
+          <p class="text-blue-100 mt-1">{{ user.email }}</p>
+          <p class="text-blue-200 text-sm mt-2">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+
+          <div class="flex flex-wrap gap-2 mt-4">
+            {% if user.profile.is_verified %}
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            >
+              <i class="fas fa-check-circle mr-1"></i>
+              Compte vérifié
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <button
+            onclick="openTab('edit')"
+            class="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+          >
+            <i class="fas fa-edit mr-2"></i>
+            Modifier
+          </button>
+
+          <button
+            onclick="openPasswordModal()"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            <i class="fas fa-cog mr-2"></i>
+            Paramètres
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-file-invoice text-blue-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Devis demandés</p>
+            <p class="text-2xl font-bold text-gray-900">{{ user.orcamentos.count }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Projets terminés</p>
+            <p class="text-2xl font-bold text-gray-900">{{ completed_projects }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-clock text-yellow-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Projets en cours</p>
+            <p class="text-2xl font-bold text-gray-900">{{ active_projects }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-euro-sign text-purple-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Budget total estimé</p>
+            <p class="text-2xl font-bold text-gray-900">{{ total_invested|floatformat:2 }} €</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="bg-white rounded-lg shadow-lg">
+      <div class="border-b border-gray-200">
+        <nav class="flex space-x-8 px-6" id="profile-nav">
+          <button
+            class="nav-btn py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+            data-section="mes-projets"
+          >
+            <i class="fas fa-project-diagram mr-2"></i>
+            Mes Projets
+          </button>
+          <button
+            class="nav-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700"
+            data-section="mes-devis"
+          >
+            <i class="fas fa-file-invoice mr-2"></i>
+            Mes Devis
+          </button>
+          <button
+            class="nav-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700"
+            data-section="modifier-profil"
+          >
+            <i class="fas fa-user-edit mr-2"></i>
+            Modifier Profil
+          </button>
+          <button
+            class="nav-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700"
+            data-section="parametres"
+          >
+            <i class="fas fa-cog mr-2"></i>
+            Paramètres
+          </button>
+        </nav>
+      </div>
+
+      <div class="p-6">
+        <div id="profile-content">
+          <!-- Conteúdo das seções será carregado aqui -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Conteúdo dinâmico -->
+</div>
+
+<!-- Modais -->
+{% include 'accounts/modals/projet_modal.html' %} {% include 'accounts/modals/devis_modal.html' %}
+{% include 'accounts/modals/profile_modal.html' %} {% include
+'accounts/modals/settings_modal.html'%}
+
+<!-- <script>
+  // Inicializar quando a página carregar
+  document.addEventListener('DOMContentLoaded', function () {
+    // Carregar seção inicial
+    loadSectionContent('mes-projets');
+
+    // Event listeners para navegação
+    document.querySelectorAll('[data-section]').forEach((link) => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const section = this.getAttribute('data-section');
+        loadSectionContent(section);
+
+        // Atualizar navegação ativa
+        document.querySelectorAll('[data-section]').forEach((l) => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  });
+</script> -->
+
+<!-- Adicione antes do fechamento do </body> -->
+<script>
+  console.log('=== CARREGAMENTO DE SCRIPTS ===');
+  console.log('jQuery carregado:', typeof $ !== 'undefined');
+  console.log('project-modal.js carregado:', typeof createProject !== 'undefined');
+  console.log('===============================');
+</script>
+
+<!-- Adicione este script antes do fechamento do </body>, após todos os outros scripts -->
+<script>
+  // Definir funções globalmente para garantir que estejam disponíveis
+  window.createProject = function () {
+    console.log('createProject() chamada');
+
+    const modal = document.getElementById('projectModal');
+    if (!modal) {
+      console.error('Modal não encontrado!');
+      return;
+    }
+
+    // Configurar modal para criação
+    const modalTitle = document.getElementById('modal-title');
+    const submitText = document.getElementById('submit-text');
+    const projectIdInput = document.getElementById('project-id');
+
+    if (modalTitle) modalTitle.textContent = 'Nouveau Projet';
+    if (submitText) submitText.textContent = 'Créer le projet';
+    if (projectIdInput) projectIdInput.value = '';
+
+    // Resetar formulário
+    const form = document.getElementById('projectForm');
+    if (form) form.reset();
+
+    // Mostrar modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    console.log('Modal aberto com sucesso!');
+  };
+
+  window.closeProjectModal = function () {
+    const modal = document.getElementById('projectModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+  };
+
+  window.testeModal = function () {
+    console.log('Testando modal...');
+    window.createProject();
+  };
+
+  // Verificar se as funções foram definidas
+  console.log('Funções definidas globalmente:');
+  console.log('createProject:', typeof window.createProject);
+  console.log('closeProjectModal:', typeof window.closeProjectModal);
+  console.log('testeModal:', typeof window.testeModal);
+</script>
+{% endblock %} {% block extra_js %}
+<script src="{% static 'js/notifications.js' %}"></script>
+<script src="{% static 'js/projects-crud.js' %}"></script>
+<script src="{% static 'js/profile-navigation.js' %}"></script>
+<script src="{% static 'js/profile-modals.js' %}"></script>
+<script src="{% static 'js/project-filters.js' %}"></script>
+<script src="{% static 'js/project-sorting.js' %}"></script>
+<script src="{% static 'js/project-export.js' %}"></script>
+<script src="{% static 'js/loading-states.js' %}"></script>
+<script src="{% static 'js/projects-init.js' %}"></script>
+
+{% endblock %}
+<!-- Certifique-se de que o script está sendo carregado -->

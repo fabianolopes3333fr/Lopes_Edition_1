@@ -1,0 +1,116 @@
+<div class="bg-white rounded-lg shadow-md">
+    <div class="p-6 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold">Mes Projets</h3>
+            <button id="create-projet-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Nouveau Projet
+            </button>
+        </div>
+    </div>
+
+    <div class="p-6">
+        {% if page_obj %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for projet in page_obj %}
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-medium">{{ projet.title }}</h4>
+                        <div class="flex space-x-1">
+                            <button class="view-projet-btn text-blue-600 hover:text-blue-800" 
+                                    data-projet-id="{{ projet.id }}" title="Visualizar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </button>
+                            <button class="edit-projet-btn text-green-600 hover:text-green-800" 
+                                    data-projet-id="{{ projet.id }}" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button class="delete-projet-btn text-red-600 hover:text-red-800" 
+                                    data-projet-id="{{ projet.id }}" title="Supprimer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-3">{{ projet.description|truncatechars:100 }}</p>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Localisation:</span>
+                            <span>{{ projet.ville }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                                                       <span class="text-gray-500">Budget:</span>
+                            <span>{{ projet.budget_estime|default:"Non défini" }}€</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Statut:</span>
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if projet.statut == 'en_cours' %}bg-green-100 text-green-800
+                                {% elif projet.statut == 'en_attente' %}bg-yellow-100 text-yellow-800
+                                {% elif projet.statut == 'termine' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ projet.get_statut_display }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Créé le:</span>
+                            <span>{{ projet.date_creation|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação -->
+            {% if page_obj.has_other_pages %}
+            <div class="mt-6 flex justify-center">
+                <nav class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" 
+                           class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                            Précédent
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+                        {% else %}
+                            <a href="?page={{ num }}" 
+                               class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" 
+                           class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                            Suivant
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun projet</h3>
+                <p class="mt-1 text-sm text-gray-500">Commencez par créer votre premier projet.</p>
+                <div class="mt-6">
+                    <button id="create-projet-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Nouveau Projet
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>

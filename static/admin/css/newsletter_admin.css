@@ -1,0 +1,316 @@
+
+/* Estilos personalizados para Newsletter Admin */
+
+/* Estatísticas no topo da página */
+.newsletter-stats {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 120px;
+    margin: 5px;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007cba;
+    display: block;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+/* Melhorar visualização dos status */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-confirmed {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-unconfirmed {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Melhorar badges de interesses */
+.interest-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
+
+.list-badge {
+    display: inline-block;
+    background: #f3e5f5;
+    color: #7b1fa2;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
+
+/* Melhorar tabela de assinantes */
+.newsletter-subscriber-table {
+    font-size: 13px;
+}
+
+.newsletter-subscriber-table .field-email {
+    font-weight: bold;
+}
+
+.newsletter-subscriber-table .field-prenom_display em {
+    font-style: italic;
+    color: #666;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .newsletter-stats {
+        flex-direction: column;
+    }
+
+    .stat-item {
+        margin: 10px 0;
+    }
+
+    .interest-badge,
+    .list-badge {
+        display: block;
+        margin: 2px 0;
+    }
+}
+
+/* Melhorar formulário de edição */
+.newsletter-form .form-row {
+    margin-bottom: 15px;
+}
+
+.newsletter-form .help {
+    font-size: 11px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Destacar campos importantes */
+.field-email input {
+    font-weight: bold;
+    border: 2px solid #007cba;
+}
+
+.field-active input[type="checkbox"]:checked {
+    accent-color: #28a745;
+}
+
+.field-confirmed input[type="checkbox"]:checked {
+    accent-color: #007bff;
+}
+
+.field-rgpd_consent input[type="checkbox"]:checked {
+    accent-color: #17a2b8;
+}
+
+/* Melhorar actions */
+.actions select {
+    min-width: 200px;
+}
+
+.actions .button {
+    margin-left: 10px;
+}
+
+/* Indicadores visuais para diferentes tipos de dados */
+.readonly-field {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+/* Melhorar filtros laterais */
+#changelist-filter h3 {
+    background: #007cba;
+    color: white;
+    padding: 8px 10px;
+    margin: 0;
+    font-size: 13px;
+}
+
+#changelist-filter ul {
+    margin: 0;
+    padding: 0;
+}
+
+#changelist-filter li {
+    border-bottom: 1px solid #eee;
+}
+
+#changelist-filter li a {
+    display: block;
+    padding: 8px 10px;
+    text-decoration: none;
+    color: #333;
+}
+
+#changelist-filter li a:hover {
+    background-color: #f8f9fa;
+}
+
+#changelist-filter li.selected a {
+    background-color: #007cba;
+    color: white;
+}
+
+/* Melhorar paginação */
+.paginator {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.paginator a,
+.paginator .this-page {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 2px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #007cba;
+}
+
+.paginator .this-page {
+    background-color: #007cba;
+    color: white;
+    font-weight: bold;
+}
+
+.paginator a:hover {
+    background-color: #f8f9fa;
+}
+
+/* Melhorar mensagens de sucesso/erro */
+.messagelist .success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.messagelist .warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.messagelist .error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Animações suaves */
+.interest-badge,
+.list-badge,
+.status-badge {
+    transition: all 0.2s ease;
+}
+
+.interest-badge:hover,
+.list-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Loading spinner para actions */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 5px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Melhorar tooltips */
+[title] {
+    position: relative;
+    cursor: help;
+}
+
+/* Destacar campos obrigatórios */
+.required label:after {
+    content: " *";
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Melhorar inline forms */
+.inline-group {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.inline-group h2 {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Estilos para dark mode (se necessário) */
+@media (prefers-color-scheme: dark) {
+    .newsletter-stats {
+        background: #2b2b2b;
+        border-color: #444;
+        color: #fff;
+    }
+
+    .stat-number {
+        color: #4dabf7;
+    }
+
+    .stat-label {
+        color: #aaa;
+    }
+}

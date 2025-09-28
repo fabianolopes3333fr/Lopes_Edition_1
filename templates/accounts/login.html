@@ -1,0 +1,313 @@
+{% extends 'accounts/base_auth.html' %}
+{% load static %}
+{% block title %}
+Connexion - {{block.super }}
+{% endblock %}
+{% block meta_description %}
+  Connectez-vous à votre espace client Lopes Peinture pour
+  gérer vos projets de peinture et suivre vos devis personnalisés.
+{% endblock %}
+{% block content %}
+<div class="w-full max-w-md space-y-8">
+  <!-- Header -->
+  <div class="text-center">
+    <div class="mx-auto h-20 w-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-6 shadow-lg animate-pulse-slow">
+      <i class="fas fa-sign-in-alt text-white text-2xl"></i>
+    </div>
+    <h2 class="text-3xl font-bold text-gray-900 mb-2 animate-slide-up">Connexion</h2>
+    <p class="text-gray-600 animate-fade-in">Accédez à votre espace personnel</p>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+    <div
+      class="rounded-xl p-4 animate-slide-up {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-800{% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %}"
+    >
+      <div class="flex items-center">
+        <i
+          class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %} mr-3 text-lg"
+        ></i>
+        {{ message }}
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Formulário -->
+  <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 animate-slide-up">
+    <form method="post" class="space-y-6" novalidate action="{% url 'accounts:login' %}">
+      {% csrf_token %}
+
+      <!-- Email Field -->
+      <div class="space-y-2">
+        <label
+          for="{{ form.username.id_for_label }}"
+          class="block text-sm font-semibold text-gray-700"
+        >
+          <i class="fas fa-envelope mr-2 text-brand-primary"></i>
+          Adresse email <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <input
+            type="email"
+            id="{{ form.username.id_for_label }}"
+            name="{{ form.username.html_name }}"
+            value="{{ form.username.value|default:'' }}"
+            placeholder="votre.email@exemple.com"
+            autocomplete="email"
+            required
+            class="w-full pl-12 pr-4 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-xl shadow-sm placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-brand-primary transition-all duration-200 hover:border-gray-400 {% if form.username.errors %}border-red-500{% endif %}"
+          />
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="fas fa-envelope text-gray-400"></i>
+          </div>
+        </div>
+        {% if form.username.errors %}
+        <div class="mt-2 text-sm text-red-600">
+          {% for error in form.username.errors %}
+          <p class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i>{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Password Field -->
+      <div class="space-y-2">
+        <label
+          for="{{ form.password.id_for_label }}"
+          class="block text-sm font-semibold text-gray-700"
+        >
+          <i class="fas fa-lock mr-2 text-brand-primary"></i>
+          Mot de passe <span class="text-red-500 ml-1">*</span>
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            id="{{ form.password.id_for_label }}"
+            name="{{ form.password.html_name }}"
+            placeholder="Votre mot de passe"
+            autocomplete="current-password"
+            required
+            class="w-full pl-12 pr-12 py-3 text-gray-900 bg-white border-2 border-gray-300 rounded-xl shadow-sm placeholder-gray-500 focus:outline-none focus:ring-0 focus:border-brand-primary transition-all duration-200 hover:border-gray-400 {% if form.password.errors %}border-red-500{% endif %}"
+          />
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="fas fa-lock text-gray-400"></i>
+          </div>
+          <button
+            type="button"
+            onclick="togglePassword('{{ form.password.id_for_label }}', this)"
+            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+          >
+            <i class="fas fa-eye"></i>
+            <span class="sr-only">Afficher le mot de passe</span>
+          </button>
+        </div>
+        {% if form.password.errors %}
+        <div class="mt-2 text-sm text-red-600">
+          {% for error in form.password.errors %}
+          <p class="flex items-center"><i class="fas fa-exclamation-circle mr-2"></i>{{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Form General Errors -->
+      {% if form.non_field_errors %}
+      <div class="rounded-xl p-4 bg-red-50 border border-red-200 animate-slide-up">
+        {% for error in form.non_field_errors %}
+        <p class="text-red-800 text-sm flex items-center">
+          <i class="fas fa-exclamation-circle mr-3"></i>{{ error }}
+        </p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Remember Me and Forgot Password -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+        <div class="flex items-center">
+          <input
+            id="remember_me"
+            name="remember_me"
+            type="checkbox"
+            class="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded transition-colors duration-200"
+          />
+          <label for="remember_me" class="ml-3 block text-sm text-gray-700 cursor-pointer">
+            Se souvenir de moi
+          </label>
+        </div>
+
+        <div class="text-sm">
+          <a href="{% url 'accounts:password_reset' %}" class="font-medium text-brand-primary hover:text-brand-secondary transition-colors duration-200 underline-offset-4 hover:underline">
+            Mot de passe oublié ?
+          </a>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="space-y-4">
+        <button
+          type="submit"
+          class="group relative w-full flex justify-center items-center py-4 px-6 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-brand-primary focus:ring-opacity-50 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 btn-primary transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <i class="fas fa-sign-in-alt mr-3 text-white/90 group-hover:text-white transition-colors duration-200"></i>
+          Se connecter
+        </button>
+      </div>
+    </form>
+
+    <!-- Social Login Separator -->
+    <div class="mt-8">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-4 bg-white text-gray-500 font-medium">Ou continuez avec</span>
+        </div>
+      </div>
+
+      <!-- Social Login Buttons -->
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a
+          href="/accounts/google/login/"
+          class="w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-300 rounded-xl shadow-sm bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label="Connexion avec Google"
+        >
+          <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            />
+          </svg>
+          Google
+        </a>
+
+        <a
+          href="/accounts/microsoft/login/"
+          class="w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-300 rounded-xl shadow-sm bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          aria-label="Connexion avec Microsoft"
+        >
+          <i class="fab fa-microsoft text-blue-600 text-lg mr-3" aria-hidden="true"></i>
+          Microsoft
+        </a>
+      </div>
+
+      <p class="mt-4 text-xs text-gray-500 text-center">
+        <i class="fas fa-shield-alt mr-2" aria-hidden="true"></i>
+        Connexion sécurisée avec vos comptes
+      </p>
+    </div>
+
+    <!-- Register Link -->
+    <div class="text-center mt-8 pt-6 border-t border-gray-200">
+      <p class="text-sm text-gray-600">
+        Vous n'avez pas encore de compte ?
+        <a
+          href="{% url 'accounts:register' %}"
+          class="font-medium text-brand-primary hover:text-brand-secondary transition-colors duration-200 underline-offset-4 hover:underline ml-1"
+        >
+          Créer un compte
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block navigation_links %}
+<div class="text-center space-y-6">
+  <div class="p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl shadow-sm">
+    <p class="text-blue-800 font-medium mb-3">
+      <i class="fas fa-user-plus mr-2 text-blue-600" aria-hidden="true"></i>
+      Nouveau client ?
+    </p>
+    <p class="text-gray-600 text-sm mb-4 leading-relaxed">
+      Créez votre compte pour demander des devis personnalisés et suivre vos projets de peinture.
+    </p>
+    <a
+      href="{% url 'accounts:register' %}"
+      class="inline-flex items-center justify-center px-6 py-3 border-2 border-brand-primary text-brand-primary font-semibold rounded-xl hover:bg-brand-primary hover:text-white focus:outline-none focus:ring-4 focus:ring-brand-primary focus:ring-opacity-50 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md"
+    >
+      <i class="fas fa-arrow-right mr-2" aria-hidden="true"></i>
+      Créer un compte gratuit
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+  // Toggle password visibility
+  function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+
+  // Animações nos labels flutuantes
+  document.addEventListener('DOMContentLoaded', function () {
+    const inputs = document.querySelectorAll('.form-input');
+
+    inputs.forEach((input) => {
+      // Verificar se input já tem valor
+      if (input.value) {
+        const label = input.parentElement.parentElement.querySelector('.form-floating-label');
+        if (label) {
+          label.style.transform = 'translateY(-1.5rem) scale(0.875)';
+          label.style.color = '#3b82f6';
+        }
+      }
+
+      input.addEventListener('focus', function () {
+        const label = this.parentElement.parentElement.querySelector('.form-floating-label');
+        if (label) {
+          label.style.transform = 'translateY(-1.5rem) scale(0.875)';
+          label.style.color = '#3b82f6';
+        }
+      });
+
+      input.addEventListener('blur', function () {
+        if (!this.value) {
+          const label = this.parentElement.parentElement.querySelector('.form-floating-label');
+          if (label) {
+            label.style.transform = 'translateY(0) scale(1)';
+            label.style.color = '#6b7280';
+          }
+        }
+      });
+    });
+
+  });
+
+  // Auto-focus no primeiro input
+  document.addEventListener('DOMContentLoaded', function () {
+    const firstInput = document.querySelector('input[type="email"]');
+    if (firstInput) {
+      firstInput.focus();
+    }
+  });
+</script>
+{% endblock %}

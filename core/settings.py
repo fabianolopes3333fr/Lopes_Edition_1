@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import sys
 from pathlib import Path
+import os
+import tempfile
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,17 +23,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p+!h5_)05zwgk!=y1w7blv*mv@fo4*qc-*fwfq$g-fiw1(_zlm'
+SECRET_KEY = config(
+    "SECRET_KEY",
+)
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"], cast=lambda v: [s.strip() for s in v.split(",")])
 
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,29 +46,126 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
 ]
 
+THIRD_APPS = [
+    "rest_framework",
+    "corsheaders",
+    "django_filters",
+    "widget_tweaks",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.microsoft",
+]
+
+PROJECT_APPS = [
+    #"projetos",
+    #"profiles",
+    "blog",
+    "contato",
+    #"orcamentos",
+    #"home",
+    #"accounts",
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + PROJECT_APPS
+
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Adicionar esta linha
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = 'core.urls'
 
+# Configurar o modelo de usuário customizado
+AUTH_USER_MODEL = "accounts.User"
+
+# URLs de redirecionamento após login/logout
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "accounts/dashboard/"
+LOGOUT_REDIRECT_URL = "/"
+
+# Configurações do allauth
+SITE_ID = 2
+
+AUTHENTICATION_BACKENDS = [
+    "accounts.backends.EmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# Configurações do allauth (versão atualizada)
+ACCOUNT_ADAPTER = "accounts.adapters.CustomAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.CustomSocialAccountAdapter"
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "first_name*",
+    "last_name*",
+    "password1*",
+    "password2*",
+]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Configurações dos provedores sociais
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "OAUTH_PKCE_ENABLED": True,
+        "VERIFIED_EMAIL": True,
+    },
+    "microsoft": {
+        "tenant": "common",  # Use 'common' para contas pessoais e corporativas
+        "SCOPE": [
+            "openid",
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "response_type": "code",
+        },
+        "VERIFIED_EMAIL": True,
+    }
+}
+
+# URLs de redirecionamento social
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+
+# Variáveis de ambiente (adicionar no .env)
+GOOGLE_OAUTH2_CLIENT_ID = config("GOOGLE_OAUTH2_CLIENT_ID", default="")
+GOOGLE_OAUTH2_CLIENT_SECRET = config("GOOGLE_OAUTH2_CLIENT_SECRET", default="")
+
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            os.path.join(BASE_DIR, "templates"),
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -80,6 +183,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 # Password validation
@@ -104,21 +208,313 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# Internationalization
+LANGUAGE_CODE = "fr-fr"
+TIME_ZONE = "Europe/Paris"
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+# Configurações para desenvolvimento
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
+
+# Criar diretório de logs se não existir
+log_dir = BASE_DIR / "logs"
+if not log_dir.exists():
+    log_dir.mkdir(exist_ok=True)
+
+# Configuração do Django REST Framework
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 12,
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL", default="contact@lopespeinture.fr"
+)
+SERVER_EMAIL = config("SERVER_EMAIL", default="contact@lopespeinture.fr")
+
+
+# Configurações de upload de arquivos
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'accounts.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'accounts': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
+
+# ✅ Configurações específicas para testes
+if "test" in sys.argv:
+    # Usar base de dados em memória para testes
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+    }
+
+    # Desabilitar migrações para acelerar testes
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
+
+    MIGRATION_MODULES = DisableMigrations()
+
+    # Usar diretório temporário para media nos testes
+    MEDIA_ROOT = tempfile.mkdtemp()
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if config("DJANGO_ENV") == "production":
+    ALLOWED_HOSTS = config(
+        "ALLOWED_HOSTS", default="lopespeinture.fr,www.lopespeinture.fr"
+    ).split(",")
+    # Database
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": config("DB_PORT", default="5432"),
+        }
+    }
+    SITE_URL = "https://lopespeinture.fr"
+
+    # Criar diretório de logs
+    LOGS_DIR = BASE_DIR / "logs"
+    LOGS_DIR.mkdir(exist_ok=True)
+
+    INTERNAL_IPS = ["127.0.0.1"]
+
+    MAX_FAILED_LOGIN_ATTEMPTS = 5
+    SIREN_LENGTH = 9
+    VAT_NUMBER_LENGTH = 14
+    APE_CODE_LENGTH = 5
+    # Default country
+    DEFAULT_COUNTRY = "France"
+
+    # Enhanced security settings
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+    # CSRF and Session settings
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = "Strict"
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Strict"
+
+    # Frame options
+    X_FRAME_OPTIONS = "DENY"
+
+    # Admin configuration
+    ADMINS = [
+        (
+            config("SUPER_USER", default="Admin"),
+            config("ADMIN_EMAIL", default="admin@lopespeinture.fr"),
+        ),
+    ]
+    MANAGERS = ADMINS
+    SEND_WELCOME_EMAIL = True
+
+    # Proteção contra ataques de força bruta
+    AXES_ENABLED = True
+    AXES_FAILURE_LIMIT = 5
+    AXES_LOCK_OUT_AT_FAILURE = True
+    AXES_COOLOFF_TIME = 1  # horas
+
+    # Static files storage
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    # Email settings for production
+    #EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+    #EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+    #EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+    #EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = config(
+        "DEFAULT_FROM_EMAIL", default="contact@lopespeinture.fr"
+    )
+    SERVER_EMAIL = config("SERVER_EMAIL", default="server@lopespeinture.fr")
+
+    # Logging Configuration
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+                "style": "{",
+            },
+            "simple": {
+                "format": "[{asctime}] {levelname} {message}",
+                "style": "{",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            },
+        },
+        "filters": {
+            "require_debug_true": {
+                "()": "django.utils.log.RequireDebugTrue",
+            },
+            "require_debug_false": {
+                "()": "django.utils.log.RequireDebugFalse",
+            },
+        },
+        "handlers": {
+            "console": {
+                "level": "INFO",
+                "filters": ["require_debug_true"],
+                "class": "logging.StreamHandler",
+                "formatter": "simple",
+            },
+            "file_debug": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": BASE_DIR / "logs" / "debug.log",
+                "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+            "file_error": {
+                "level": "ERROR",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": BASE_DIR / "logs" / "error.log",
+                "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+            "mail_admins": {
+                "level": "ERROR",
+                "filters": ["require_debug_false"],
+                "class": "django.utils.log.AdminEmailHandler",
+                "formatter": "verbose",
+            },
+            "security": {
+                "level": "INFO",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": BASE_DIR / "logs" / "security.log",
+                "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["console", "file_debug"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "django.request": {
+                "handlers": ["file_error", "mail_admins"],
+                "level": "ERROR",
+                "propagate": False,
+            },
+            "django.security": {
+                "handlers": ["security", "mail_admins"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "accounts": {  # Para sua app de contas
+                "handlers": ["console", "file_debug", "file_error"],
+                "level": "INFO",
+                "propagate": True,
+            },
+        },
+    }
+
+    # Configurações de cache
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": config("REDIS_URL", default="redis://localhost:6379/0"),
+        }
+    }
+
+    # Configuração de sessão
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+
+    # Configurações de template para produção
+    TEMPLATES[0]["OPTIONS"]["loaders"] = [
+        (
+            "django.template.loaders.cached.Loader",
+            [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
+        ),
+    ]
+    TEMPLATES[0]["OPTIONS"]["debug"] = False

@@ -1,0 +1,174 @@
+@page {
+  size: A4;
+  margin: 2cm;
+}
+
+body {
+  font-family: 'Helvetica', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #2c5aa0;
+  padding-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  color: #2c5aa0;
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.header .devis-number {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.company-client-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.company-info,
+.client-info {
+  flex: 1;
+}
+
+.company-info h3,
+.client-info h3 {
+  color: #2c5aa0;
+  font-size: 14px;
+  margin: 0 0 10px 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.project-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border-left: 4px solid #2c5aa0;
+}
+
+.project-info h3 {
+  color: #2c5aa0;
+  margin: 0 0 15px 0;
+  font-size: 16px;
+}
+
+.project-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.table-container {
+  margin: 30px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th {
+  background-color: #2c5aa0;
+  color: white;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+td {
+  padding: 10px 8px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 10px;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+.service-description {
+  font-weight: bold;
+  color: #2c5aa0;
+}
+
+.service-details {
+  font-size: 9px;
+  color: #666;
+  font-style: italic;
+  margin-top: 5px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tfoot td {
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+.total-row td {
+  background-color: #2c5aa0 !important;
+  color: white !important;
+  font-size: 12px;
+}
+
+.conditions {
+  margin-top: 40px;
+}
+
+.conditions h3 {
+  color: #2c5aa0;
+  font-size: 14px;
+  margin: 20px 0 10px 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.conditions ul {
+  padding-left: 20px;
+}
+
+.conditions li {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+
+.footer {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 10px;
+  color: #666;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+.thank-you {
+  font-style: italic;
+  color: #2c5aa0;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+@media print {
+  .page-break {
+    page-break-before: always;
+  }
+}

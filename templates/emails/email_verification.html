@@ -1,0 +1,43 @@
+{% extends 'emails/base_email.html' %} {% block title %}Vérifiez votre compte - Lopes Peinture{%
+endblock %} {% block header_title %}Vérification de compte{% endblock %} {% block header_subtitle
+%}Confirmez votre adresse email{% endblock %} {% block content %}
+<h2>Bonjour {{ user.get_full_name|default:user.username }} !</h2>
+
+<p>
+  Merci de vous être inscrit sur Lopes Peinture. Pour activer votre compte et accéder à tous nos
+  services, veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous.
+</p>
+
+<div class="btn-container">
+  <a href="{{ verification_url }}" class="btn">Vérifier mon compte</a>
+</div>
+
+<div class="info-box">
+  <p>
+    <strong>Pourquoi vérifier votre email ?</strong><br />
+    La vérification nous permet de sécuriser votre compte et de vous envoyer des informations
+    importantes concernant vos projets et devis.
+  </p>
+</div>
+
+<p>Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>
+<p style="word-break: break-all; color: #4299e1">{{ verification_url }}</p>
+
+<div class="warning-box">
+  <p>
+    <strong>Important :</strong> Ce lien expire dans 24 heures pour des raisons de sécurité. Si le
+    lien a expiré, vous pouvez demander un nouveau lien de vérification sur notre site.
+  </p>
+</div>
+
+<div class="divider"></div>
+
+<p>
+  Si vous n'avez pas créé de compte sur notre site, vous pouvez ignorer cet email en toute sécurité.
+</p>
+
+<p>
+  Cordialement,<br />
+  <strong>L'équipe Lopes Peinture</strong>
+</p>
+{% endblock %}

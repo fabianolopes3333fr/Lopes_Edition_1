@@ -1,0 +1,93 @@
+{% extends 'accounts/../accounts/base_auth.html' %} {% load static %} {% block title %}Confirmation Email -
+Lopes Peinture{% endblock %} {% block content %}
+<div class="text-center">
+  {% if validlink %}
+  <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+    <i class="fas fa-check text-green-600 text-2xl"></i>
+  </div>
+
+  <h2 class="text-3xl font-bold text-gray-900 mb-4">Email vérifié avec succès !</h2>
+
+  <div class="max-w-md mx-auto">
+    <p class="text-gray-600 mb-6">
+      Votre adresse email a été vérifiée avec succès. Votre compte est maintenant activé.
+    </p>
+
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-check-circle text-green-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-green-700">
+            Vous pouvez maintenant vous connecter et profiter de tous nos services.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <a
+        href="{% url 'accounts:login' %}"
+        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="fas fa-sign-in-alt mr-2"></i>
+        Se connecter
+      </a>
+
+      <a
+        href="{% url 'home:home' %}"
+        class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="fas fa-home mr-2"></i>
+        Retour à l'accueil
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+    <i class="fas fa-times text-red-600 text-2xl"></i>
+  </div>
+
+  <h2 class="text-3xl font-bold text-gray-900 mb-4">Lien de vérification invalide</h2>
+
+  <div class="max-w-md mx-auto">
+    <p class="text-gray-600 mb-6">
+      Ce lien de vérification est invalide ou a expiré. Veuillez demander un nouveau lien de
+      vérification.
+    </p>
+
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-triangle text-red-400"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">
+            Les liens de vérification expirent après 24 heures pour des raisons de sécurité.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <a
+        href="{% url 'accounts:resend_verification_page' %}"
+        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="fas fa-paper-plane mr-2"></i>
+        Demander un nouveau lien
+      </a>
+
+      <a
+        href="{% url 'accounts:login' %}"
+        class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        <i class="fas fa-sign-in-alt mr-2"></i>
+        Se connecter
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

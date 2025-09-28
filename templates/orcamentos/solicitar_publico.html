@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demander un devis gratuit - LOPES PEINTURE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Demander un devis gratuit
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Décrivez votre projet et recevez une estimation personnalisée sous 24h.
+                Aucun engagement, devis 100% gratuit.
+            </p>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Section: Informations personnelles -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Vos coordonnées</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Nom complet <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.nome_solicitante }}
+                        {% if form.nome_solicitante.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.nome_solicitante.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.email_solicitante }}
+                        {% if form.email_solicitante.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.email_solicitante.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Téléphone <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.telefone_solicitante }}
+                        {% if form.telefone_solicitante.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.telefone_solicitante.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Localisation du projet -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Localisation du projet</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="col-span-1 lg:col-span-2 space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Adresse complète <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.endereco }}
+                        {% if form.endereco.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.endereco.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Ville <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.cidade }}
+                        {% if form.cidade.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.cidade.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Code postal <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.cep }}
+                        {% if form.cep.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.cep.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Détails du projet -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-600"></div>
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-paint-brush text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Détails du projet</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Type de service <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.tipo_servico }}
+                        {% if form.tipo_servico.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.tipo_servico.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Surface approximative (m²)
+                        </label>
+                        {{ form.area_aproximada }}
+                        {% if form.area_aproximada.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.area_aproximada.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Description détaillée <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.descricao_servico }}
+                        {% if form.descricao_servico.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.descricao_servico.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Préférences -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-600"></div>
+
+                <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-cog text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Vos préférences</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Urgence du projet
+                        </label>
+                        {{ form.urgencia }}
+                        {% if form.urgencia.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.urgencia.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Date de début souhaitée
+                        </label>
+                        {{ form.data_inicio_desejada }}
+                        {% if form.data_inicio_desejada.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.data_inicio_desejada.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Budget maximum (€)
+                        </label>
+                        {{ form.orcamento_maximo }}
+                        {% if form.orcamento_maximo.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.orcamento_maximo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Informations complémentaires
+                        </label>
+                        {{ form.observacoes }}
+                        {% if form.observacoes.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de ação -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-8">
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                    Vos données sont sécurisées et ne seront pas partagées
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'home:home' %}"
+                       class="px-8 py-3 border-2 border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl font-semibold transition-all duration-300 hover:bg-blue-50 text-center">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                            class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3">
+                        <i class="fas fa-paper-plane"></i>
+                        Envoyer ma demande
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Section d'avantages -->
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-clock text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Réponse rapide</h3>
+                <p class="text-gray-600">Nous vous recontactons sous 24h</p>
+            </div>
+
+            <div class="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-gift text-green-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">100% gratuit</h3>
+                <p class="text-gray-600">Devis sans engagement</p>
+            </div>
+
+            <div class="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-award text-purple-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-3">Qualité garantie</h3>
+                <p class="text-gray-600">Professionnels certifiés</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation en temps réel avec animation
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+
+        // Animation on focus
+        input.addEventListener('focus', function() {
+            this.classList.add('scale-105', 'shadow-xl');
+        });
+
+        input.addEventListener('blur', function() {
+            this.classList.remove('scale-105', 'shadow-xl');
+        });
+    });
+
+    function validateField(field) {
+        const value = field.value.trim();
+        const isRequired = field.hasAttribute('required') || field.closest('.space-y-2').querySelector('.text-red-500');
+
+        // Remove error styling
+        field.classList.remove('border-red-500', 'ring-red-200');
+        field.classList.add('border-gray-200');
+
+        if (isRequired && !value) {
+            field.classList.remove('border-gray-200');
+            field.classList.add('border-red-500', 'ring-4', 'ring-red-200');
+            return false;
+        }
+
+        // Email validation
+        if (field.type === 'email' && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                field.classList.remove('border-gray-200');
+                field.classList.add('border-red-500', 'ring-4', 'ring-red-200');
+                return false;
+            }
+        }
+
+        // Success styling
+        field.classList.add('border-green-300', 'ring-2', 'ring-green-100');
+        return true;
+    }
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez corriger les erreurs avant de soumettre le formulaire.');
+        }
+    });
+});
+</script>
+{% endblock %}

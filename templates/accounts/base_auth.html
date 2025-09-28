@@ -1,0 +1,340 @@
+{% load static  %}
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>{% block title %}Authentification - Lopes Peinture{% endblock %}</title>
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="{% block meta_description %}Connectez-vous à votre espace client Lopes Peinture pour gérer vos projets de peinture et décoration.{% endblock %}"
+    />
+    <meta name="keywords" content="peinture, décoration, rénovation, devis, authentification" />
+    <meta name="author" content="Lopes Peinture" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="{% static 'base/css/base_auth.css' %}">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'Open Sans', 'system-ui', 'sans-serif'],
+                        'nunito': ['Nunito', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        'brand': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            'primary': '#2563eb',
+                            'secondary': '#1d4ed8'
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                        'slide-in': 'slideIn 0.4s ease-out',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out infinite 2s',
+                        'float-slow': 'float 8s ease-in-out infinite 1s',
+                        'slide-right': 'slideRight 0.6s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.6s ease-out'
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideIn: {
+                            '0%': { opacity: '0', transform: 'translateX(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        slideRight: {
+                            '0%': { opacity: '0', transform: 'translateX(-30px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body class="h-full font-sans antialiased bg-gray-50 overflow-hidden">
+    <!-- Main Container -->
+    <div class="h-screen flex">
+      <!-- Left Side - Brand Section (Hidden on mobile and tablet) -->
+      <div class="hidden xl:flex xl:w-1/2 hero-gradient relative overflow-hidden">
+        <!-- Floating Background Shapes -->
+        <div class="absolute inset-0">
+          <div class="absolute top-20 left-20 w-32 h-32 bg-white bg-opacity-10 rounded-full animate-float"></div>
+          <div class="absolute top-40 right-32 w-24 h-24 bg-white bg-opacity-15 rounded-full animate-float-delayed"></div>
+          <div class="absolute bottom-32 left-32 w-40 h-40 bg-white bg-opacity-5 rounded-full animate-float-slow"></div>
+          <div class="absolute bottom-20 right-20 w-16 h-16 bg-white bg-opacity-20 rounded-full animate-bounce"></div>
+        </div>
+
+        <!-- Hero Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40"></div>
+
+        <!-- Content - Centralized vertically -->
+        <div class="relative z-10 flex flex-col justify-center items-center text-center text-white px-12 py-8 w-full h-full">
+          <!-- Logo Container -->
+          <div class="mb-8 animate-fade-in">
+            <div class="relative">
+              <!-- Main Logo Circle -->
+              <div class="flex items-center justify-center">
+                <img
+                  src="{% static 'img/logo-220x80-preto.svg' %}"
+                  alt="Lopes Peinture Logo"
+                  class="h-20 w-auto filter drop-shadow-lg"
+                  loading="lazy"
+                >
+              </div>
+
+              <!-- Floating Accent Dots -->
+              <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full animate-pulse shadow-lg"></div>
+              <div class="absolute -bottom-1 -left-3 w-4 h-4 bg-white opacity-80 rounded-full animate-ping"></div>
+            </div>
+          </div>
+
+          <!-- Brand Information -->
+          <div class="space-y-8 max-w-lg">
+            <!-- Tagline -->
+            <p class="text-2xl font-light opacity-95 animate-slide-right leading-relaxed">
+              Votre Expert en Peinture & Décoration
+            </p>
+
+            <!-- Services Grid -->
+            <div class="grid grid-cols-3 gap-6 my-12 animate-fade-in">
+              <div class="text-center group cursor-default transform hover:scale-105 transition-transform duration-300">
+                <div class="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30 transition-all duration-300 shadow-lg">
+                  <i class="fas fa-home text-2xl" aria-hidden="true"></i>
+                </div>
+                <p class="text-sm font-medium">Peinture Intérieure</p>
+              </div>
+
+              <div class="text-center group cursor-default transform hover:scale-105 transition-transform duration-300">
+                <div class="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30 transition-all duration-300 shadow-lg">
+                  <i class="fas fa-building text-2xl" aria-hidden="true"></i>
+                </div>
+                <p class="text-sm font-medium">Peinture Extérieure</p>
+              </div>
+
+              <div class="text-center group cursor-default transform hover:scale-105 transition-transform duration-300">
+                <div class="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30 transition-all duration-300 shadow-lg">
+                  <i class="fas fa-palette text-2xl" aria-hidden="true"></i>
+                </div>
+                <p class="text-sm font-medium">Décoration</p>
+              </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="grid grid-cols-3 gap-6 py-8 border-t border-white border-opacity-20 animate-fade-in">
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-2 text-yellow-300">500+</div>
+                <div class="text-sm opacity-90">Projets Réalisés</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-2 text-yellow-300">10</div>
+                <div class="text-sm opacity-90">Ans d'Expérience</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold mb-2 text-yellow-300">98%</div>
+                <div class="text-sm opacity-90">Clients Satisfaits</div>
+              </div>
+            </div>
+
+            <!-- Testimonial -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-6 animate-fade-in shadow-lg border border-white border-opacity-20">
+              <blockquote class="text-lg italic mb-4 leading-relaxed">
+                "Un travail impeccable et des conseils précieux pour notre rénovation complète."
+              </blockquote>
+              <div class="flex items-center justify-center space-x-1 mb-3">
+                {% for i in "12345" %}
+                <i class="fas fa-star text-yellow-300 text-lg" aria-hidden="true"></i>
+                {% endfor %}
+              </div>
+              <p class="text-sm opacity-90">- Marie & Pierre Dubois, Toulouse</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side - Form Section (Scrollable only) -->
+      <div class="flex-1 xl:w-1/2 bg-white h-screen overflow-y-auto">
+        <div class="flex flex-col justify-center px-6 py-12 sm:px-8 lg:px-12 xl:px-16 min-h-full">
+          <!-- Mobile Logo -->
+         <!-- <div class="xl:hidden text-center mb-8 animate-fade-in flex-shrink-0">
+            <div class="mx-auto flex items-center justify-center w-20 h-20 mb-6">
+              <img
+                src=""
+                alt="Lopes Peinture Logo"
+                class="h-16 w-auto"
+                loading="lazy"
+              >
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Lopes Peinture</h1>
+            <p class="text-gray-600">Votre Expert en Peinture & Décoration</p>
+          </div>-->
+
+          <!-- Form Container -->
+          <div class="w-full max-w-md mx-auto animate-slide-up flex-1 flex flex-col justify-center">
+            {% block content %}{% endblock %}
+
+            <!-- Navigation Links -->
+            <div class="mt-8 text-center space-y-4 animate-fade-in">
+              {% block navigation_links %}{% endblock %}
+            </div>
+
+            <!-- Help & Support -->
+            <div class="mt-12 text-center animate-fade-in flex-shrink-0">
+              <p class="text-sm text-gray-600 mb-4">
+                <i class="fas fa-question-circle mr-2" aria-hidden="true"></i>
+                Besoin d'aide ? Notre équipe est là pour vous
+              </p>
+              <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-sm">
+                <a
+                  href="tel:+33769273776"
+                  class="inline-flex items-center justify-center text-brand-primary hover:text-brand-secondary transition duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-opacity-50 rounded-md px-3 py-2"
+                  aria-label="Appeler Lopes Peinture"
+                >
+                  <i class="fas fa-phone mr-2" aria-hidden="true"></i>
+                  +33 7 69 27 37 76
+                </a>
+                <a
+                  href="mailto:contact@lopespeinture.fr"
+                  class="inline-flex items-center justify-center text-brand-primary hover:text-brand-secondary transition duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-opacity-50 rounded-md px-3 py-2"
+                  aria-label="Envoyer un email à Lopes Peinture"
+                >
+                  <i class="fas fa-envelope mr-2" aria-hidden="true"></i>
+                  Contact
+                </a>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-12 text-center text-xs text-gray-500 animate-fade-in flex-shrink-0">
+              <p class="mb-3">&copy; {% now "Y" %} Lopes Peinture. Tous droits réservés.</p>
+              <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6">
+                <a
+                  href="#"
+                  class="hover:text-gray-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 rounded px-1"
+                >
+                  Mentions légales
+                </a>
+                <a
+                  href="#"
+                  class="hover:text-gray-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 rounded px-1"
+                >
+                  Politique de confidentialité
+                </a>
+                <a
+                  href="#"
+                  class="hover:text-gray-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 rounded px-1"
+                >
+                  CGU
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div
+      id="toast-container"
+      class="fixed top-4 right-4 z-50 flex flex-col-reverse space-y-2 space-y-reverse"
+      role="alert"
+      aria-live="polite"
+    ></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+      <div class="bg-white rounded-lg p-6 flex items-center space-x-3 mx-4">
+        <i class="fas fa-spinner fa-spin text-brand-primary text-xl" aria-hidden="true"></i>
+        <span class="text-gray-700 font-medium">Chargement...</span>
+      </div>
+    </div>
+
+     <!-- WhatsApp Float Button -->
+    <div class="fixed bottom-6 right-6 z-40">
+      <a
+        href="https://wa.me/33634623320?text=Bonjour,%20je%20souhaite%20obtenir%20un%20devis%20pour%20des%20travaux%20de%20peinture."
+        target="_blank"
+        class="bg-green-500 hover:bg-green-600 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse"
+        aria-label="Contacter via WhatsApp"
+      >
+        <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
+      </a>
+    </div>
+
+    <!-- JavaScript Functions -->
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
+

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmer l'action - Devis {{ orcamento.numero }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .icon.success { color: #27ae60; }
+        .icon.danger { color: #e74c3c; }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .devis-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border-left: 5px solid {% if action == 'aceitar' %}#27ae60{% else %}#e74c3c{% endif %};;
+        }
+
+        .message{
+            margin-top: 20px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        .footer {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .footer .company-info {
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .next-steps {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #bbdefb;
+        }
+
+        .next-steps h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .next-steps ul {
+            text-align: left;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .next-steps li {
+            margin: 8px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon {{ action_color }}">
+            {% if action == 'aceitar' %}
+                ✅
+            {% else %}
+                ❌
+            {% endif %}
+        </div>
+        
+        <h1>
+            {% if action == 'aceitar' %}
+                Accepter le Devis
+            {% else %}
+                Refuser le Devis
+            {% endif %}
+        </h1>
+        
+        <div class="devis-info">
+            <h3>Devis N° {{ orcamento.numero }}</h3>
+            <p><strong>Client:</strong> {{ orcamento.cliente.nom_complet }}</p>
+            <p><strong>Projet:</strong> {{ orcamento.titre }}</p>
+            <p><strong>Total:</strong> {{ orcamento.total }}€ TTC</p>
+        </div>
+        
+        <!-- <p>
+            {% if action == 'aceitar' %}
+                Êtes-vous sûr de vouloir accepter ce devis ?
+            {% else %}
+                Êtes-vous sûr de vouloir refuser ce devis ?
+            {% endif %}
+        </p> -->
+        
+        <div class="actions">
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-{{ action_color }}">
+                    {% if action == 'aceitar' %}
+                        ✅ Oui, Accepter
+                    {% else %}
+                        ❌ Oui, Refuser
+                    {% endif %}
+                </button>
+            </form>
+            
+            <a href="/orcamentos/visualizar/{{ orcamento.uuid }}/" class="btn btn-secondary">
+                ↩️ Revoir le Devis
+            </a>
+        </div>
+        <div class="message">
+            {% if action == 'aceitar' %}
+                <p>🎉 <strong>Félicitations !</strong> Votre devis est presque finalisé, cliquez sur le bouton accepter.</p>
+                <p>Nous vous contacterons très prochainement pour planifier le début des travaux.</p>
+            {% else %}
+                <p>📝 Votre devis a été marqué comme refusé.</p>
+                <p>N'hésitez pas à nous contacter si vous souhaitez discuter d'une modification ou d'un nouveau projet.</p>
+            {% endif %}
+        </div>
+        {% if action == 'aceitar' %}
+            <div class="next-steps">
+                <h4>🚀 Prochaines Étapes</h4>
+                <ul>
+                    <li>Nous vous contacterons dans les 24-48h pour confirmer les détails</li>
+                    <li>Planification de la date de début des travaux</li>
+                    <li>Préparation du matériel et de l'équipe</li>
+                    <li>Début des travaux selon le planning convenu</li>
+                </ul>
+            </div>
+        {% endif %}
+        
+        <div class="footer">
+            <div class="company-info">
+                <strong>LOPES PEINTURE</strong><br>
+                275 chemin de la castellane, 31790 St Sauveur<br>
+                📞 +33 07 69 27 37 76 | 📧 admlopespeinture@gmail.com
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<form method="post" enctype="multipart/form-data" class="space-y-6" id="profileForm">
+  {% csrf_token %} {% if form.non_field_errors %}
+  <div class="mb-4 p-4 rounded-lg bg-red-100 border border-red-400 text-red-700">
+    {% for error in form.non_field_errors %}
+    <p>{{ error }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Informações Pessoais -->
+    <div class="space-y-4">
+      <h4 class="text-lg font-medium text-gray-900">Informations personnelles</h4>
+
+      <div>
+        <label
+          for="{{ form.first_name.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Prénom</label
+        >
+        {{ form.first_name }} {% if form.first_name.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.last_name.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Nom</label
+        >
+        {{ form.last_name }} {% if form.last_name.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700"
+          >Email</label
+        >
+        {{ form.email }} {% if form.email.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.telefone.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Téléphone</label
+        >
+        {{ form.telefone }} {% if form.telefone.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.telefone.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.date_naissance.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Date de naissance</label
+        >
+        <input
+          type="date"
+          name="date_naissance"
+          id="date_naissance"
+          value="{{ user.profile.date_naissance|date:'Y-m-d'|default:'' }}"
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {% if form.date_naissance.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.date_naissance.errors.0 }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Informações do Cliente -->
+    <div class="space-y-4">
+      <h4 class="text-lg font-medium text-gray-900">Informations du client</h4>
+
+      <div>
+        <label
+          for="{{ form.type_client.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Type de client</label
+        >
+        {{ form.type_client }} {% if form.type_client.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.type_client.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.nom_entreprise.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Nom de l'entreprise</label
+        >
+        {{ form.nom_entreprise }} {% if form.nom_entreprise.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.nom_entreprise.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.siret.id_for_label }}" class="block text-sm font-medium text-gray-700"
+          >Numéro SIRET</label
+        >
+        {{ form.siret }} {% if form.siret.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.siret.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.tva_intracommunautaire.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >TVA intracommunautaire</label
+        >
+        {{ form.tva_intracommunautaire }} {% if form.tva_intracommunautaire.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.tva_intracommunautaire.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.secteur_activite.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Secteur d'activité</label
+        >
+        {{ form.secteur_activite }} {% if form.secteur_activite.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.secteur_activite.errors.0 }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Endereço -->
+  <div class="space-y-4">
+    <h4 class="text-lg font-medium text-gray-900">Adresse</h4>
+
+    <div>
+      <label for="{{ form.adresse.id_for_label }}" class="block text-sm font-medium text-gray-700"
+        >Adresse</label
+      >
+      {{ form.adresse }} {% if form.adresse.errors %}
+      <p class="mt-1 text-sm text-red-600">{{ form.adresse.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="{{ form.ville.id_for_label }}" class="block text-sm font-medium text-gray-700"
+          >Ville</label
+        >
+        {{ form.ville }} {% if form.ville.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.ville.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label
+          for="{{ form.code_postal.id_for_label }}"
+          class="block text-sm font-medium text-gray-700"
+          >Code postal</label
+        >
+        {{ form.code_postal }} {% if form.code_postal.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.code_postal.errors.0 }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <label for="{{ form.pays.id_for_label }}" class="block text-sm font-medium text-gray-700"
+        >Pays</label
+      >
+      {{ form.pays }} {% if form.pays.errors %}
+      <p class="mt-1 text-sm text-red-600">{{ form.pays.errors.0 }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Photo de Perfil -->
+  <!-- <div>
+    <h4 class="text-lg font-medium text-gray-900 mb-4">Photo de profil</h4>
+    <div class="flex items-center space-x-6">
+      <div class="shrink-0">
+        {% if user.profile.avatar %}
+        <img
+          class="h-16 w-16 object-cover rounded-full"
+          src="{{ user.profile.avatar.url }}"
+          alt="Photo de profil"
+        />
+        {% else %}
+        <div class="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-gray-500 text-xl"></i>
+        </div>
+        {% endif %}
+      </div>
+      <label class="block">
+        <span class="sr-only">Choisir une photo de profil</span>
+        {{ form.avatar }} {% if form.avatar.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.avatar.errors.0 }}</p>
+        {% endif %}
+      </label>
+    </div>
+  </div> -->
+
+  <!-- Préférences -->
+  <div>
+    <h4 class="text-lg font-medium text-gray-900 mb-4">Préférences</h4>
+    <div class="space-y-4">
+      <div class="flex items-center">
+        {{ form.notifications_email }}
+        <label
+          for="{{ form.notifications_email.id_for_label }}"
+          class="ml-2 block text-sm text-gray-900"
+        >
+          Recevoir les notifications par email
+        </label>
+        {% if form.notifications_email.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.notifications_email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center">
+        {{ form.notifications_sms }}
+        <label
+          for="{{ form.notifications_sms.id_for_label }}"
+          class="ml-2 block text-sm text-gray-900"
+        >
+          Recevoir les notifications par SMS
+        </label>
+        {% if form.notifications_sms.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.notifications_sms.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center">
+        {{ form.newsletter }}
+        <label for="{{ form.newsletter.id_for_label }}" class="ml-2 block text-sm text-gray-900">
+          Recevoir les offres promotionnelles
+        </label>
+        {% if form.newsletter.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.newsletter.errors.0 }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Botões de Ação -->
+  <div class="flex justify-end pt-6 border-t border-gray-200">
+    <button
+      type="button"
+      onclick="window.location.reload()"
+      class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+    >
+      Annuler
+    </button>
+    <button
+      type="submit"
+      class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
+      <i class="fas fa-save mr-2"></i>
+      Enregistrer
+    </button>
+  </div>
+</form>

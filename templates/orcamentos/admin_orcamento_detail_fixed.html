@@ -1,0 +1,455 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pendente { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .status-em_elaboracao { background-color: #dbeafe; color: #1e40af; border: 1px solid #60a5fa; }
+    .status-enviado { background-color: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+    .status-aceito { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    .status-recusado { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .status-expirado { background-color: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 1rem;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .items-table th,
+    .items-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .items-table th {
+        background-color: #f9fafb;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .items-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .total-section {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+
+    .timeline-item {
+        display: flex;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+
+    .timeline-dot {
+        width: 12px;
+        height: 12px;
+        background: #3b82f6;
+        border-radius: 50%;
+        margin-right: 1rem;
+        margin-top: 4px;
+        flex-shrink: 0;
+    }
+
+    .value-highlight {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #059669;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}"
+                   class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour aux demandes
+                </a>
+            </div>
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ page_title }}</h1>
+                    <p class="mt-2 text-gray-600">Details complets du devis</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="status-badge status-{{ orcamento.status }}">
+                        {{ orcamento.get_status_display }}
+                    </span>
+                    <div class="text-right">
+                        {% if orcamento.tem_itens %}
+                            <div class="value-highlight">{{ orcamento.total_ttc|floatformat:2 }}€</div>
+                            <div class="text-sm text-gray-500">Total TTC</div>
+                        {% else %}
+                            <div class="text-lg font-semibold text-gray-400">0,00€</div>
+                            <div class="text-sm text-gray-400">Total TTC (sans elements)</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Contenu principal -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Informations du devis -->
+                <div class="detail-card">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-file-invoice text-blue-600 mr-3"></i>
+                            Informations du devis
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Titre</dt>
+                                <dd class="text-base text-gray-900 font-medium">{{ orcamento.titulo }}</dd>
+                            </div>
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Numero</dt>
+                                <dd class="text-base text-gray-900 font-mono">{{ orcamento.numero }}</dd>
+                            </div>
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Elabore par</dt>
+                                <dd class="text-base text-gray-900">{{ orcamento.elaborado_por.get_full_name|default:orcamento.elaborado_por.email }}</dd>
+                            </div>
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Date elaboration</dt>
+                                <dd class="text-base text-gray-900">{{ orcamento.data_elaboracao|date:"d F Y à H:i" }}</dd>
+                            </div>
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Delai execution</dt>
+                                <dd class="text-base text-gray-900">{{ orcamento.prazo_execucao }} jours</dd>
+                            </div>
+                            <div class="info-item">
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Validite</dt>
+                                <dd class="text-base text-gray-900">{{ orcamento.validade_orcamento|date:"d F Y" }}</dd>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Description des travaux</dt>
+                            <dd class="text-base text-gray-900 bg-gray-50 p-4 rounded-lg">
+                                {{ orcamento.descricao|linebreaks }}
+                            </dd>
+                        </div>
+
+                        <div class="mt-6">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Conditions de paiement</dt>
+                            <dd class="text-base text-gray-900 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                                {{ orcamento.condicoes_pagamento|linebreaks }}
+                            </dd>
+                        </div>
+
+                        {% if orcamento.observacoes %}
+                        <div class="mt-6">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Observations particulieres</dt>
+                            <dd class="text-base text-gray-900 bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                                {{ orcamento.observacoes|linebreaks }}
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Elements du devis -->
+                <div class="detail-card">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-list text-blue-600 mr-3"></i>
+                                Elements du devis
+                            </h2>
+                            {% if orcamento.status == 'em_elaboracao' %}
+                            <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                               class="btn-action btn-secondary">
+                                <i class="fas fa-edit mr-2"></i>
+                                Modifier elements
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="p-0">
+                        {% if orcamento.itens.all %}
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Quantite</th>
+                                    <th>Unite</th>
+                                    <th>Prix unitaire</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in orcamento.itens.all %}
+                                <tr>
+                                    <td class="font-medium">{{ item.descricao }}</td>
+                                    <td>{{ item.quantidade }}</td>
+                                    <td>{{ item.unidade }}</td>
+                                    <td>{{ item.preco_unitario|floatformat:2 }}€</td>
+                                    <td class="font-semibold">{{ item.total_item|floatformat:2 }}€</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="total-section">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700">Sous-total HT:</span>
+                                    <span class="font-semibold">{{ orcamento.subtotal|floatformat:2 }}€</span>
+                                </div>
+                                {% if orcamento.desconto > 0 %}
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700">Remise ({{ orcamento.desconto }}%):</span>
+                                    <span class="font-semibold text-red-600">-{{ orcamento.valor_desconto|floatformat:2 }}€</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700">Total HT apres remise:</span>
+                                    <span class="font-semibold">{{ orcamento.total|floatformat:2 }}€</span>
+                                </div>
+                                {% endif %}
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700">TVA (20%):</span>
+                                    <span class="font-semibold">{{ orcamento.valor_tva|floatformat:2 }}€</span>
+                                </div>
+                                <hr class="border-blue-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-lg font-bold text-gray-900">TOTAL TTC:</span>
+                                    <span class="text-2xl font-bold text-green-600">{{ orcamento.total_ttc|floatformat:2 }}€</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="p-6 text-center">
+                            <i class="fas fa-inbox text-gray-400 text-3xl mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun element ajoute</h3>
+                            <p class="text-gray-500 mb-4">Ce devis ne contient pas encore d'elements detailles.</p>
+                            {% if orcamento.status == 'em_elaboracao' %}
+                            <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                               class="btn-action btn-primary">
+                                <i class="fas fa-plus mr-2"></i>
+                                Ajouter des elements
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Actions rapides -->
+                <div class="detail-card">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Actions</h3>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        {% if orcamento.status == 'em_elaboracao' %}
+                        <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                           class="btn-action btn-primary w-full justify-center">
+                            <i class="fas fa-edit mr-2"></i>
+                            Modifier le devis
+                        </a>
+
+                        <button onclick="enviarDevis('{{ orcamento.numero }}')"
+                                class="btn-action btn-success w-full justify-center">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Envoyer au client
+                        </button>
+                        {% endif %}
+
+                        <a href="#" onclick="gerarPDF('{{ orcamento.numero }}')"
+                           class="btn-action btn-warning w-full justify-center">
+                            <i class="fas fa-file-pdf mr-2"></i>
+                            Generer PDF
+                        </a>
+
+                        <button onclick="window.print()"
+                                class="btn-action btn-secondary w-full justify-center">
+                            <i class="fas fa-print mr-2"></i>
+                            Imprimer
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="detail-card">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Historique</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div>
+                                    <div class="font-medium text-gray-900">Devis cree</div>
+                                    <div class="text-sm text-gray-500">{{ orcamento.data_elaboracao|date:"d/m/Y" }}</div>
+                                    <div class="text-sm text-gray-600">Par {{ orcamento.elaborado_por.get_full_name|default:orcamento.elaborado_por.email }}</div>
+                                </div>
+                            </div>
+
+                            {% if orcamento.data_envio %}
+                            <div class="timeline-item">
+                                <div class="timeline-dot bg-green-500"></div>
+                                <div>
+                                    <div class="font-medium text-gray-900">Envoye au client</div>
+                                    <div class="text-sm text-gray-500">{{ orcamento.data_envio|date:"d/m/Y" }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if orcamento.data_resposta_cliente %}
+                            <div class="timeline-item">
+                                <div class="timeline-dot bg-blue-500"></div>
+                                <div>
+                                    <div class="font-medium text-gray-900">Reponse du client</div>
+                                    <div class="text-sm text-gray-500">{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</div>
+                                    <div class="text-sm text-gray-600">Statut: {{ orcamento.get_status_display }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    window.enviarDevis = function(numero) {
+        if (confirm('Etes-vous sur de vouloir envoyer ce devis au client?')) {
+            fetch(`/orcamentos/admin/orcamento/${numero}/enviar/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de l\'envoi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erreur de connexion');
+                console.error('Error:', error);
+            });
+        }
+    };
+
+    window.gerarPDF = function(numero) {
+        window.open(`/orcamentos/admin/orcamento/${numero}/pdf/`, '_blank');
+    };
+});
+</script>
+{% endblock %}

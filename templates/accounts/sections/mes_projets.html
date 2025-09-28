@@ -1,0 +1,886 @@
+{% load static %}
+
+<!-- Seção Mes Projets -->
+<div class="mes-projets-section">
+  <!-- Header da seção -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Mes Projets</h2>
+      <p class="text-gray-600 mt-1">Gérez vos projets de peinture</p>
+    </div>
+    <button
+      onclick="createProject()"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+    >
+      <i class="fas fa-plus"></i>
+      Nouveau Projet
+    </button>
+  </div>
+
+  <!-- Filtros e busca -->
+  <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+    <div class="flex flex-col lg:flex-row gap-4">
+      <!-- Busca -->
+      <div class="flex-1">
+        <div class="relative">
+          <input
+            type="text"
+            id="searchProjects"
+            placeholder="Rechercher un projet..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <i
+            class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          ></i>
+        </div>
+      </div>
+
+      <!-- Filtro por status -->
+      <div class="lg:w-48">
+        <select
+          id="statusFilter"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="">Tous les statuts</option>
+          <option value="en_attente">En attente</option>
+          <option value="devis_demande">Devis demandé</option>
+          <option value="devis_recu">Devis reçu</option>
+          <option value="accepte">Accepté</option>
+          <option value="en_cours">En cours</option>
+          <option value="termine">Terminé</option>
+          <option value="annule">Annulé</option>
+        </select>
+      </div>
+
+      <!-- Ordenação -->
+      <div class="lg:w-48">
+        <select
+          id="sortProjects"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="-date_creation">Plus récent</option>
+          <option value="date_creation">Plus ancien</option>
+          <option value="titre">Nom A-Z</option>
+          <option value="-titre">Nom Z-A</option>
+          <option value="statut">Statut</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de projetos -->
+  <div id="projectsList" class="space-y-4">
+    {% for projet in projets %}
+    <div
+      class="project-card bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+      data-status="{{ projet.statut }}"
+    >
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ projet.titre }}</h3>
+            <p class="text-gray-600 text-sm mb-3">{{ projet.description|truncatewords:20 }}</p>
+
+            <!-- Status badge -->
+            <span
+              class="status-badge status-{{ projet.statut }} px-3 py-1 rounded-full text-xs font-medium"
+            >
+              {% if projet.statut == 'en_attente' %}En attente {% elif projet.statut ==
+              'devis_demande' %}Devis demandé {% elif projet.statut == 'devis_recu' %}Devis reçu {%
+              elif projet.statut == 'accepte' %}Accepté {% elif projet.statut == 'en_cours' %}En
+              cours {% elif projet.statut == 'termine' %}Terminé {% elif projet.statut == 'annule'
+              %}Annulé {% endif %}
+            </span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-2 ml-4">
+            <button
+              onclick="viewProject('{{ projet.id }}')"
+              class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+              title="Voir détails"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+            <button
+              onclick="editProject('{{ projet.id }}')"
+              class="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              title="Modifier"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              onclick="deleteProject('{{ projet.id }}')"
+              class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+              title="Supprimer"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Informações adicionais -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-calendar text-gray-400"></i>
+            <span>Créé le {{ projet.date_creation|date:"d/m/Y" }}</span>
+          </div>
+          {% if projet.type_projet %}
+          <div class="flex items-center gap-2">
+            <i class="fas fa-tag text-gray-400"></i>
+            <span>{{ projet.get_type_projet_display }}</span>
+          </div>
+          {% endif %} {% if projet.budget_estime %}
+          <div class="flex items-center gap-2">
+            <i class="fas fa-euro-sign text-gray-400"></i>
+            <span>Budget: {{ projet.budget_estime }}€</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Barra de progresso (se aplicável) -->
+        {% if projet.statut == 'en_cours' %}
+        <div class="mt-4">
+          <div class="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Progresso</span>
+            <span>75%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <i class="fas fa-folder-open text-6xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun projet</h3>
+      <p class="text-gray-600 mb-4">Vous n'avez pas encore créé de projet.</p>
+      <button
+        onclick="createProject()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+      >
+        Créer mon premier projet
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Paginação -->
+  {% if projets.has_other_pages %}
+  <div class="flex justify-center mt-8">
+    <nav class="flex items-center gap-2">
+      {% if projets.has_previous %}
+      <a
+        href="?page={{ projets.previous_page_number }}"
+        class="px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </a>
+      {% endif %} {% for num in projets.paginator.page_range %} {% if projets.number == num %}
+      <span class="px-3 py-2 bg-blue-600 text-white rounded">{{ num }}</span>
+      {% else %}
+      <a
+        href="?page={{ num }}"
+        class="px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
+        >{{ num }}</a
+      >
+      {% endif %} {% endfor %} {% if projets.has_next %}
+      <a
+        href="?page={{ projets.next_page_number }}"
+        class="px-3 py-2 text-gray-600 hover:text-blue-600 transition-colors"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </a>
+      {% endif %}
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal para criar/editar projeto -->
+<div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 id="modal-title" class="text-xl font-semibold text-gray-900">Nouveau Projet</h3>
+          <button onclick="closeProjectModal()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <form id="projectForm" onsubmit="submitProject(event)">
+          {% csrf_token %}
+          <input type="hidden" id="project-id" name="project_id" value="" />
+
+          <div class="space-y-4">
+            <!-- Título -->
+            <div>
+              <label for="titre" class="block text-sm font-medium text-gray-700 mb-1">
+                Titre du projet *
+              </label>
+              <input
+                type="text"
+                id="titre"
+                name="titre"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Peinture salon et cuisine"
+              />
+            </div>
+
+            <!-- Descrição -->
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Décrivez votre projet en détail..."
+              ></textarea>
+            </div>
+
+            <!-- Tipo de projeto -->
+            <div>
+              <label for="type_projet" class="block text-sm font-medium text-gray-700 mb-1">
+                Type de projet
+              </label>
+              <select
+                id="type_projet"
+                name="type_projet"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Sélectionner un type</option>
+                <option value="interieur">Peinture Intérieure</option>
+                <option value="exterieur">Peinture Extérieure</option>
+                <option value="decoration">Décoration</option>
+                <option value="renovation">Rénovation</option>
+              </select>
+            </div>
+
+            <!-- Endereço -->
+            <div>
+              <label for="adresse" class="block text-sm font-medium text-gray-700 mb-1">
+                Adresse du projet
+              </label>
+              <input
+                type="text"
+                id="adresse"
+                name="adresse"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Adresse complète"
+              />
+            </div>
+
+            <!-- Budget estimado -->
+            <div>
+              <label for="budget_estime" class="block text-sm font-medium text-gray-700 mb-1">
+                Budget estimé (€)
+              </label>
+              <input
+                type="number"
+                id="budget_estime"
+                name="budget_estime"
+                min="0"
+                step="0.01"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0.00"
+              />
+            </div>
+
+            <!-- Data desejada -->
+            <div>
+              <label for="date_souhaitee" class="block text-sm font-medium text-gray-700 mb-1">
+                Date souhaitée
+              </label>
+              <input
+                type="date"
+                id="date_souhaitee"
+                name="date_souhaitee"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <!-- Urgência -->
+            <div>
+              <label for="urgence" class="block text-sm font-medium text-gray-700 mb-1">
+                Niveau d'urgence
+              </label>
+              <select
+                id="urgence"
+                name="urgence"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="normale">Normale</option>
+                <option value="elevee">Élevée</option>
+                <option value="urgente">Urgente</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Botões -->
+          <div class="flex justify-end gap-3 mt-6 pt-6 border-t">
+            <button
+              type="button"
+              onclick="closeProjectModal()"
+              class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              <span id="submit-text">Créer le projet</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de visualização de projeto -->
+<div id="viewProjectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">Détails du Projet</h3>
+          <button onclick="closeViewProjectModal()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div id="projectDetails">
+          <!-- Conteúdo será carregado dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <script>
+  // Função para criar novo projeto (abrir modal)
+  function createProject() {
+    console.log('createProject() chamada');
+
+    // Resetar o formulário
+    resetProjectForm();
+
+    // Configurar modal para criação
+    const modalTitle = document.getElementById('modal-title');
+    const submitText = document.getElementById('submit-text');
+    const projectIdInput = document.getElementById('project-id');
+
+    if (modalTitle) {
+      modalTitle.textContent = 'Nouveau Projet';
+    }
+
+    if (submitText) {
+      submitText.textContent = 'Créer le projet';
+    }
+
+    if (projectIdInput) {
+      projectIdInput.value = '';
+    }
+
+    // Abrir modal
+    const modal = document.getElementById('projectModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  // Função para fechar modal de projeto
+  function closeProjectModal() {
+    const modal = document.getElementById('projectModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+    resetProjectForm();
+  }
+
+  // Função para fechar modal de visualização
+  function closeViewProjectModal() {
+    const modal = document.getElementById('viewProjectModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  // Função para resetar formulário
+  function resetProjectForm() {
+    const form = document.getElementById('projectForm');
+    if (form) {
+      form.reset();
+    }
+
+    const projectId = document.getElementById('project-id');
+    if (projectId) {
+      projectId.value = '';
+    }
+  }
+
+  // Função para editar projeto
+  function editProject(projectId) {
+    console.log('Editando projeto:', projectId);
+
+    // Buscar dados do projeto
+    fetch(`/accounts/api/project/${projectId}/`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          // Preencher formulário
+          fillProjectForm(data.project);
+
+          // Configurar modal para edição
+          const modalTitle = document.getElementById('modal-title');
+          const submitText = document.getElementById('submit-text');
+          const projectIdInput = document.getElementById('project-id');
+
+          if (modalTitle) {
+            modalTitle.textContent = 'Modifier le Projet';
+          }
+
+          if (submitText) {
+            submitText.textContent = 'Mettre à jour';
+          }
+
+          if (projectIdInput) {
+            projectIdInput.value = projectId;
+          }
+
+          // Abrir modal
+          const modal = document.getElementById('projectModal');
+          if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+          }
+        } else {
+          alert('Erreur lors du chargement du projet');
+        }
+      })
+      .catch((error) => {
+        console.error('Erro:', error);
+        alert('Erreur lors du chargement du projet');
+      });
+  }
+
+  // Função para preencher formulário
+  function fillProjectForm(project) {
+    const fields = [
+      'titre',
+      'description',
+      'type_projet',
+      'adresse',
+      'budget_estime',
+      'date_souhaitee',
+      'urgence',
+    ];
+
+    fields.forEach((field) => {
+      const element = document.getElementById(field);
+      if (element && project[field]) {
+        element.value = project[field];
+      }
+    });
+  }
+
+  // Função para visualizar projeto
+  function viewProject(projectId) {
+    console.log('Visualizando projeto:', projectId);
+
+    fetch(`/accounts/api/project/${projectId}/view/`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const detailsContainer = document.getElementById('projectDetails');
+          if (detailsContainer) {
+            detailsContainer.innerHTML = data.html;
+          }
+
+          const modal = document.getElementById('viewProjectModal');
+          if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+          }
+        } else {
+          alert('Erreur lors du chargement du projet');
+        }
+      })
+      .catch((error) => {
+        console.error('Erro:', error);
+        alert('Erreur lors du chargement du projet');
+      });
+  }
+
+  // Função para deletar projeto
+  function deleteProject(projectId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+      fetch(`/accounts/api/project/${projectId}/`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Remover elemento da lista
+            const projectCard = document.querySelector(`[data-project-id="${projectId}"]`);
+            if (projectCard) {
+              projectCard.remove();
+            }
+
+            // Recarregar página se necessário
+            location.reload();
+          } else {
+            alert('Erreur lors de la suppression du projet');
+          }
+        })
+        .catch((error) => {
+          console.error('Erro:', error);
+          alert('Erreur lors de la suppression du projet');
+        });
+    }
+  }
+
+  // Função para submeter formulário
+  function submitProject(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('projectForm');
+    const formData = new FormData(form);
+    const projectId = document.getElementById('project-id').value;
+
+    const url = projectId ? `/accounts/api/project/${projectId}/` : '/accounts/api/project/create/';
+
+    const method = projectId ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method: method,
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          closeProjectModal();
+          // Recarregar a página para mostrar as mudanças
+          location.reload();
+        } else {
+          // Mostrar erros do formulário
+          if (data.errors) {
+            let errorMessage = 'Erreurs:\n';
+            for (const [field, errors] of Object.entries(data.errors)) {
+              errorMessage += `${field}: ${errors.join(', ')}\n`;
+            }
+            alert(errorMessage);
+          } else {
+            alert(data.message || 'Erreur lors de la sauvegarde');
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Erro:', error);
+        alert('Erreur lors de la sauvegarde du projet');
+      });
+  }
+
+  // Função para filtrar projetos
+  function filterProjects() {
+    const searchTerm = document.getElementById('searchProjects').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const projectCards = document.querySelectorAll('.project-card');
+
+    projectCards.forEach((card) => {
+      const title = card.querySelector('h3').textContent.toLowerCase();
+      const description = card.querySelector('p').textContent.toLowerCase();
+      const status = card.dataset.status;
+
+      const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+      const matchesStatus = !statusFilter || status === statusFilter;
+
+      if (matchesSearch && matchesStatus) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // Função para ordenar projetos
+  function sortProjects() {
+    const sortBy = document.getElementById('sortProjects').value;
+    const container = document.getElementById('projectsList');
+    const cards = Array.from(container.querySelectorAll('.project-card'));
+
+    cards.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortBy) {
+        case 'titre':
+          aValue = a.querySelector('h3').textContent;
+          bValue = b.querySelector('h3').textContent;
+          return aValue.localeCompare(bValue);
+
+        case '-titre':
+          aValue = a.querySelector('h3').textContent;
+          bValue = b.querySelector('h3').textContent;
+          return bValue.localeCompare(aValue);
+
+        case 'statut':
+          aValue = a.dataset.status;
+          bValue = b.dataset.status;
+          return aValue.localeCompare(bValue);
+
+        case 'date_creation':
+        case '-date_creation':
+        default:
+          // Para ordenação por data, seria necessário ter o timestamp nos dados
+          return 0;
+      }
+    });
+
+    // Reordenar elementos no DOM
+    cards.forEach((card) => container.appendChild(card));
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', function () {
+    // Filtro de busca
+    const searchInput = document.getElementById('searchProjects');
+    if (searchInput) {
+      searchInput.addEventListener('input', filterProjects);
+    }
+
+    // Filtro de status
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+      statusFilter.addEventListener('change', filterProjects);
+    }
+
+    // Ordenação
+    const sortSelect = document.getElementById('sortProjects');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', sortProjects);
+    }
+
+    // Fechar modal ao clicar fora
+    const projectModal = document.getElementById('projectModal');
+    if (projectModal) {
+      projectModal.addEventListener('click', function (e) {
+        if (e.target === projectModal) {
+          closeProjectModal();
+        }
+      });
+    }
+
+    const viewProjectModal = document.getElementById('viewProjectModal');
+    if (viewProjectModal) {
+      viewProjectModal.addEventListener('click', function (e) {
+        if (e.target === viewProjectModal) {
+          closeViewProjectModal();
+        }
+      });
+    }
+
+    // Tecla ESC para fechar modais
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        closeProjectModal();
+        closeViewProjectModal();
+      }
+    });
+  });
+
+  // Função para exportar projetos (opcional)
+  function exportProjects() {
+    window.location.href = '/accounts/export-projects/';
+  }
+
+  // Função para atualizar status do projeto
+  function updateProjectStatus(projectId, newStatus) {
+    fetch(`/accounts/api/project/${projectId}/status/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: JSON.stringify({
+        status: newStatus,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert('Erreur lors de la mise à jour du statut');
+        }
+      })
+      .catch((error) => {
+        console.error('Erro:', error);
+        alert('Erreur lors de la mise à jour du statut');
+      });
+  }
+</script> -->
+
+<!-- <style>
+  /* Estilos específicos para a seção de projetos */
+  .mes-projets-section {
+    min-height: 400px;
+  }
+
+  .project-card {
+    transition: all 0.3s ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-en_attente {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-devis_demande {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-devis_recu {
+    background-color: #e0e7ff;
+    color: #3730a3;
+  }
+
+  .status-accepte {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-en_cours {
+    background-color: #bfdbfe;
+    color: #1e3a8a;
+  }
+
+  .status-termine {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .status-annule {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Animações para os modais */
+  .modal-overlay {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .modal-content {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .project-card .flex {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .project-card .flex .ml-4 {
+      margin-left: 0;
+      margin-top: 1rem;
+    }
+
+    .grid.grid-cols-1.md\\:grid-cols-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Loading states */
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Estados de hover para botões */
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  /* Melhorias visuais para formulários */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Estilo para campos obrigatórios */
+  input[required]:invalid {
+    border-color: #ef4444;
+  }
+
+  input[required]:valid {
+    border-color: #10b981;
+  }
+</style> -->

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard administratif - LOPES PEINTURE - Gestion des projets de peinture et services">
+    <meta name="keywords" content="dashboard, peinture, administration, projets, LOPES PEINTURE">
+    <meta name="author" content="LOPES PEINTURE">
+    <title>{% block title %}Dashboard - LOPES PEINTURE{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Open Sans', 'system-ui', 'sans-serif'],
+                        'nunito': ['Nunito', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+    <style>
+        :root {
+            --header-height: 70px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --footer-height: 60px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            z-index: 1000;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-sidebar {
+            position: fixed;
+            left: 0;
+            top: var(--header-height);
+            bottom: var(--footer-height);
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            box-shadow: 2px 0 4px 0 rgba(0, 0, 0, 0.1);
+            z-index: 900;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-collapsed {
+            width: var(--sidebar-collapsed-width) !important;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .sidebar-content::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .sidebar-collapsed .sidebar-text {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .sidebar-collapsed .sidebar-header-text {
+            display: none !important;
+        }
+
+        .sidebar-collapsed .sidebar-header-icon {
+            display: block !important;
+        }
+
+        .sidebar-collapsed .sidebar-tooltip {
+            display: block;
+        }
+
+        .sidebar-tooltip {
+            display: none;
+            position: absolute;
+            left: calc(100% + 15px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            z-index: 9999;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }
+
+        .sidebar-tooltip::before {
+            content: '';
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: #1f2937;
+        }
+
+        /* Garantir que todos os textos e spans sejam ocultados quando collapsed */
+        .sidebar-collapsed span:not(.sidebar-tooltip) {
+            display: none !important;
+        }
+
+        .sidebar-collapsed h2,
+        .sidebar-collapsed h3 {
+            display: none !important;
+        }
+
+        /* Ocultar qualquer texto nos itens da sidebar quando collapsed */
+        .sidebar-collapsed .sidebar-item span.sidebar-text {
+            display: none !important;
+            width: 0 !important;
+            opacity: 0 !important;
+        }
+
+        /* Ocultar divs com texto */
+        .sidebar-collapsed .sidebar-item div:not(.sidebar-tooltip) {
+            display: none !important;
+        }
+
+        /* Ocultar seções de header */
+        .sidebar-collapsed div.pt-4 {
+            display: none !important;
+        }
+
+        /* Garantir que apenas os ícones sejam visíveis */
+        .sidebar-collapsed .sidebar-item {
+            justify-content: center !important;
+            padding: 12px 8px !important;
+            width: calc(var(--sidebar-collapsed-width) - 16px) !important;
+            margin: 4px 8px !important;
+            position: relative;
+        }
+
+        /* Centralizar os ícones perfeitamente */
+        .sidebar-collapsed .sidebar-icon {
+            margin-right: 0 !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Mostrar tooltip ao hover */
+        .sidebar-collapsed .sidebar-item:hover .sidebar-tooltip {
+            display: block !important;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            margin-bottom: var(--footer-height);
+            height: calc(100vh - var(--header-height) - var(--footer-height));
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f9fafb;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100%;
+        }
+
+        .dashboard-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--footer-height);
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 1024px) {
+            .dashboard-sidebar {
+                transform: translateX(-100%);
+                z-index: 1100;
+            }
+
+            .dashboard-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1050;
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        /* Sidebar Items */
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 4px 8px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar-collapsed .sidebar-item {
+            justify-content: center;
+            padding: 12px 8px;
+        }
+
+        .sidebar-item:hover {
+            background: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .sidebar-collapsed .sidebar-item:hover {
+            transform: translateX(0);
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .sidebar-item.active:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-collapsed .sidebar-icon {
+            margin-right: 0;
+        }
+
+        /* Hide section headers when collapsed */
+        .sidebar-collapsed .sidebar-section-header {
+            display: none !important;
+        }
+
+        .sidebar-section-header {
+            display: block;
+        }
+
+        /* Header adjustments */
+        .header-content {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+        }
+
+        .sidebar-toggle {
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+
+        /* REGRAS ESPECÍFICAS PARA SIDEBAR COLLAPSED - MÁXIMA PRIORIDADE */
+        .sidebar-collapsed * {
+            overflow: hidden !important;
+        }
+
+        /* Ocultar TODOS os textos quando collapsed */
+        .sidebar-collapsed .sidebar-text,
+        .sidebar-collapsed span:not(.sidebar-tooltip),
+        .sidebar-collapsed h2,
+        .sidebar-collapsed h3,
+        .sidebar-collapsed .sidebar-header-text,
+        .sidebar-collapsed .sidebar-header-text *,
+        .sidebar-collapsed nav > div.pt-4,
+        .sidebar-collapsed .sidebar-content div.pt-4,
+        .sidebar-collapsed .sidebar-footer span {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Mostrar apenas o ícone no header quando collapsed */
+        .sidebar-collapsed .sidebar-header-icon {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            padding: 1rem 0 !important;
+        }
+
+        /* Ocultar completamente o footer quando collapsed */
+        .sidebar-collapsed .dashboard-sidebar > div:last-child {
+            display: none !important;
+        }
+
+        /* Garantir que apenas os ícones sejam visíveis nos itens - CENTRALIZAÇÃO PERFEITA */
+        .sidebar-collapsed .sidebar-item {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 12px 0 !important;
+            width: 100% !important;
+            margin: 4px 0 !important;
+            position: relative !important;
+            text-align: center !important;
+        }
+
+        /* Centralizar perfeitamente os ícones - REGRA ABSOLUTA */
+        .sidebar-collapsed .sidebar-icon {
+            margin: 0 auto !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        /* Centralizar os ícones Font Awesome especificamente */
+        .sidebar-collapsed .sidebar-icon i {
+            display: block !important;
+            width: 100% !important;
+            text-align: center !important;
+            margin: 0 !important;
+        }
+
+        /* Tooltip só aparece no hover quando collapsed */
+        .sidebar-collapsed .sidebar-tooltip {
+            display: none !important;
+        }
+
+        .sidebar-collapsed .sidebar-item:hover .sidebar-tooltip {
+            display: block !important;
+            position: absolute !important;
+            left: calc(100% + 15px) !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 9999 !important;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="dashboard-container">
+    {% include 'components/logout.html' %}
+
+    <!-- Header Fixo -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <!-- Logo e Toggle Sidebar -->
+            <div class="flex items-center space-x-4">
+                <!-- Toggle Sidebar Button -->
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+
+                <!-- Logo -->
+                <a href="{% url 'home:home' %}" class="flex items-center space-x-3">
+                    <img src="{% static 'img/logo-220x80-preto.svg' %}" class="h-10 w-auto" alt="LOPES PEINTURE" loading="lazy">
+
+
+                </a>
+            </div>
+
+            <!-- User Menu -->
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <button class="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                </button>
+
+                <!-- User Info -->
+                <div class="hidden md:flex items-center space-x-3 text-gray-700">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600 text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium">{{ user.first_name|default:"Utilisateur" }} {{ user.last_name }}</span>
+                </div>
+
+                <!-- Logout Button -->
+                <button onclick="openLogoutModal()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span class="hidden sm:inline">Déconnexion</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="dashboard-sidebar">
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+            <div class="sidebar-header-text">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-th-large text-blue-600"></i>
+                    Menu Principal
+                </h2>
+            </div>
+            <div class="sidebar-header-icon hidden text-center">
+                <i class="fas fa-th-large text-blue-600 text-2xl"></i>
+            </div>
+        </div>
+
+        <!-- Sidebar Content with scroll -->
+        <div class="sidebar-content">
+            <nav class="p-4 space-y-2">
+                <!-- Retour au Site -->
+                <a href="{% url 'home:home' %}" class="sidebar-item text-amber-700 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 hover:from-amber-100 hover:to-orange-100">
+                    <i class="sidebar-icon fas fa-arrow-left text-amber-600"></i>
+                    <span class="sidebar-text">Retour au Site</span>
+                    <div class="sidebar-tooltip">Retour au Site</div>
+                </a>
+
+                <!-- Dashboard Principal -->
+                <a href="{% url 'accounts:dashboard' %}" class="sidebar-item text-blue-700 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 hover:from-blue-100 hover:to-indigo-100">
+                    <i class="sidebar-icon fas fa-tachometer-alt text-blue-600"></i>
+                    <span class="sidebar-text">
+                        {% if user.account_type == 'CLIENT' %}Mon Espace
+                        {% elif user.account_type == 'COLLABORATOR' %}Tableau de Travail
+                        {% else %}Dashboard Admin{% endif %}
+                    </span>
+                    <div class="sidebar-tooltip">
+                        {% if user.account_type == 'CLIENT' %}Mon Espace Client
+                        {% elif user.account_type == 'COLLABORATOR' %}Tableau de Travail
+                        {% else %}Dashboard Administration{% endif %}
+                    </div>
+                </a>
+
+                <!-- SEÇÃO CLIENTE -->
+                {% if user.account_type == 'CLIENT' %}
+                <div class="pt-4 mt-4">
+                    <div class="sidebar-header-text">
+                        <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Mon Espace</h3>
+                    </div>
+                </div>
+
+                <a href="{% url 'orcamentos:cliente_projetos' %}" class="sidebar-item text-gray-700 hover:text-blue-700 hover:bg-blue-50">
+                    <i class="sidebar-icon fas fa-paint-brush text-gray-500"></i>
+                    <span class="sidebar-text">Mes Projets</span>
+                    <div class="sidebar-tooltip">Mes Projets</div>
+                </a>
+
+                <a href="{% url 'orcamentos:cliente_orcamentos' %}" class="sidebar-item text-gray-700 hover:text-blue-700 hover:bg-blue-50">
+                    <i class="sidebar-icon fas fa-file-invoice-dollar text-gray-500"></i>
+                    <span class="sidebar-text">Mes Devis</span>
+                    <div class="sidebar-tooltip">Mes Devis</div>
+                </a>
+
+                <a href="{% url 'orcamentos:solicitar_publico' %}" class="sidebar-item text-gray-700 hover:text-green-700 hover:bg-green-50">
+                    <i class="sidebar-icon fas fa-plus-circle text-gray-500"></i>
+                    <span class="sidebar-text">Demander un Devis</span>
+                    <div class="sidebar-tooltip">Nouveau Devis</div>
+                </a>
+                {% endif %}
+
+                <!-- SEÇÃO COLABORATOR/ADMIN -->
+                {% if user.account_type == 'COLLABORATOR' or user.account_type == 'ADMINISTRATOR' %}
+                <div class="pt-4 mt-4">
+                    <div class="sidebar-header-text">
+                        <h3 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                            {% if user.account_type == 'COLLABORATOR' %}Travail{% else %}Gestion{% endif %}
+                        </h3>
+                    </div>
+                </div>
+
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}" class="sidebar-item text-gray-700 hover:text-blue-700 hover:bg-blue-50">
+                    <i class="sidebar-icon fas fa-paint-brush text-gray-500"></i>
+                    <span class="sidebar-text">
+                        {% if user.account_type == 'COLLABORATOR' %}Mes Projets{% else %}Demandes de Devis{% endif %}
+                    </span>
+                    <div class="sidebar-tooltip">
+                        {% if user.account_type == 'COLLABORATOR' %}Mes Projets{% else %}Gestion des Demandes{% endif %}
+                    </div>
+                </a>
+
+                <a href="{% url 'orcamentos:admin_solicitacoes' %}" class="sidebar-item text-gray-700 hover:text-green-700 hover:bg-green-50">
+                    <i class="sidebar-icon fas fa-file-invoice-dollar text-gray-500"></i>
+                    <span class="sidebar-text">
+                        {% if user.account_type == 'COLLABORATOR' %}Mes Devis{% else %}Gestion Devis{% endif %}
+                    </span>
+                    <div class="sidebar-tooltip">Gestion des Devis</div>
+                </a>
+
+                <a href="#" class="sidebar-item text-gray-700 hover:text-purple-700 hover:bg-purple-50">
+                    <i class="sidebar-icon fas fa-users text-gray-500"></i>
+                    <span class="sidebar-text">Clients</span>
+                    <div class="sidebar-tooltip">Gestion des Clients</div>
+                </a>
+                {% endif %}
+
+                <!-- SEÇÃO ADMINISTRAÇÃO -->
+                {% if user.account_type == 'ADMINISTRATOR' %}
+                <div class="pt-4 mt-4">
+                    <div class="sidebar-header-text">
+                        <h3 class="px-4 text-xs font-semibold text-red-500 uppercase tracking-wider mb-3">Administration</h3>
+                    </div>
+                </div>
+
+                <a href="{% url 'accounts:dashboard' %}" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                    <i class="sidebar-icon fas fa-chart-line text-gray-500"></i>
+                    <span class="sidebar-text">Analytics</span>
+                    <div class="sidebar-tooltip">Analytics</div>
+                </a>
+
+                <a href="#" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                    <i class="sidebar-icon fas fa-user-shield text-gray-500"></i>
+                    <span class="sidebar-text">Utilisateurs</span>
+                    <div class="sidebar-tooltip">Utilisateurs</div>
+                </a>
+
+                <a href="#" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                    <i class="sidebar-icon fas fa-box text-gray-500"></i>
+                    <span class="sidebar-text">Produits</span>
+                    <div class="sidebar-tooltip">Produits</div>
+                </a>
+
+                <a href="#" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                    <i class="sidebar-icon fas fa-cogs text-gray-500"></i>
+                    <span class="sidebar-text">Configuration</span>
+                    <div class="sidebar-tooltip">Configuration</div>
+                </a>
+                {% endif %}
+
+                <!-- Perfil -->
+                <div class="pt-4 mt-4"></div>
+                <a href="{% url 'profiles:detail' %}" class="sidebar-item text-gray-700 hover:text-blue-700 hover:bg-blue-50">
+                    <i class="sidebar-icon fas fa-user text-gray-500"></i>
+                    <span class="sidebar-text">Mon Profil</span>
+                    <div class="sidebar-tooltip">Mon Profil</div>
+                </a>
+
+                <!-- Paramètres -->
+                <a href="{% url 'accounts:parametros' %}" class="sidebar-item text-gray-700 hover:text-indigo-700 hover:bg-indigo-50">
+                    <i class="sidebar-icon fas fa-cog text-gray-500"></i>
+                    <span class="sidebar-text">Paramètres</span>
+                    <div class="sidebar-tooltip">Paramètres du compte</div>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-green-50">
+            <div class="flex items-center space-x-3 text-sm text-gray-600">
+                <div class="w-8 h-8 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-circle text-green-500 text-xs"></i>
+                </div>
+                <span class="sidebar-text font-medium">Système en ligne</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay para mobile -->
+    <div id="sidebarOverlay" class="sidebar-overlay hidden"></div>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="main-content">
+        <div class="content-wrapper">
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                <div class="bg-{{ message.tags }}-50 border-l-4 border-{{ message.tags }}-400 p-4 mb-4 rounded-r-lg shadow-sm" role="alert">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle text-{{ message.tags }}-400 text-lg"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle text-{{ message.tags }}-400 text-lg"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="fas fa-exclamation-triangle text-{{ message.tags }}-400 text-lg"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-{{ message.tags }}-400 text-lg"></i>
+                            {% endif %}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-{{ message.tags }}-800 font-medium">{{ message }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Page Content -->
+            {% block content %}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">Dashboard</h1>
+                <p class="text-gray-600">Bienvenue dans votre espace personnel.</p>
+            </div>
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer Fixo -->
+    <footer class="dashboard-footer">
+        <div class="flex items-center space-x-4 text-sm text-gray-600">
+            <span>&copy; 2025 LOPES PEINTURE</span>
+            <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+            <span>Tous droits réservés</span>
+            <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+            <span class="flex items-center gap-1">
+                <i class="fas fa-heart text-red-500 text-xs"></i>
+                Fait avec passion
+            </span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            let sidebarCollapsed = false;
+
+            sidebarToggle.addEventListener('click', function() {
+                if (window.innerWidth >= 1024) {
+                    // Desktop behavior - collapse/expand
+                    sidebarCollapsed = !sidebarCollapsed;
+
+                    if (sidebarCollapsed) {
+                        sidebar.classList.add('sidebar-collapsed');
+                        mainContent.classList.add('collapsed');
+                    } else {
+                        sidebar.classList.remove('sidebar-collapsed');
+                        mainContent.classList.remove('collapsed');
+                    }
+                } else {
+                    // Mobile behavior - show/hide
+                    sidebar.classList.toggle('mobile-open');
+                    sidebarOverlay.classList.toggle('hidden');
+                }
+            });
+
+            // Close sidebar on overlay click (mobile)
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.add('hidden');
+                });
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    sidebar.classList.remove('mobile-open');
+                    if (sidebarOverlay) {
+                        sidebarOverlay.classList.add('hidden');
+                    }
+                } else {
+                    sidebar.classList.remove('sidebar-collapsed');
+                    mainContent.classList.remove('collapsed');
+                    sidebarCollapsed = false;
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

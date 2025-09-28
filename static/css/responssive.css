@@ -1,0 +1,421 @@
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .mobile-sidebar {
+    width: 280px;
+  }
+
+  .hero-gradient-text {
+    font-size: 2rem;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .hero-stat-item {
+    padding: 0.5rem;
+  }
+
+  .hero-stat-number {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-grid {
+    gap: 2rem;
+  }
+
+  .about-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .grid.grid-cols-1.sm\\:grid-cols-2 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .trust-indicators {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* CTA */
+
+  .flex-col.sm\\:flex-row {
+    flex-direction: column;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+
+  .benefit-item .p-6 {
+    padding: 1rem;
+  }
+
+  .w-16.h-16 {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+
+  /* SERVICE */
+
+  .services-section .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .services-section .inline-flex.flex-col.sm\\:flex-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .services-section .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #colorsGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-main {
+    padding: 3rem 0;
+  }
+
+  .footer .grid {
+    gap: 2rem;
+  }
+
+  .footer-certifications .flex {
+    gap: 1rem;
+  }
+
+  .certification-item .w-16 {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* MAP */
+
+  .contact-map {
+    height: 300px;
+  }
+
+  .contact-links {
+    gap: 0.5rem;
+  }
+
+  .contact-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .info-card {
+    padding: 1rem;
+  }
+
+  /* ABOUT */
+  .about-preview {
+    padding: 4rem 0;
+  }
+
+  .about-content h2 {
+    font-size: 2rem;
+  }
+
+  .about-content p {
+    font-size: 1rem;
+  }
+
+  .feature-item {
+    padding: 1rem;
+  }
+
+  .feature-item h4 {
+    font-size: 0.9rem;
+  }
+
+  .feature-item p {
+    font-size: 0.8rem;
+  }
+
+  .about-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Hide floating stats on mobile */
+  .about-image .absolute.-bottom-6 {
+    display: none;
+  }
+
+  /* CTA */
+
+  .cta-section {
+    padding: 3rem 0;
+  }
+
+  .text-4xl {
+    font-size: 2.5rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+  }
+
+  .min-w-[280px] {
+    min-width: 100%;
+  }
+
+  .gap-6 {
+    gap: 1rem;
+  }
+
+  .px-8 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .py-4 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .grid.md\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .absolute.top-20,
+  .absolute.top-32,
+  .absolute.bottom-32,
+  .absolute.bottom-20 {
+    display: none;
+  }
+
+  /* FAQ */
+
+  .faq-question span {
+    font-size: 1rem;
+  }
+
+  .faq-item {
+    margin-bottom: 1rem;
+  }
+
+  /* FEATURE */
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .feature-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .feature-icon-bg {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .stat-number {
+    font-size: 2.5rem !important;
+  }
+
+  /* NEWLASTER */
+
+  .newsletter-section .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter-section .md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .newsletter-section .text-4xl {
+    font-size: 2.5rem;
+  }
+
+  .newsletter-section .lg\:text-5xl {
+    font-size: 3rem;
+  }
+
+  /* PROJECTS */
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .stats-section {
+    padding: 2rem 1rem;
+  }
+
+  .stat-item .text-4xl {
+    font-size: 2rem;
+  }
+
+  /* SERVICE */
+
+  .services-section .service-card {
+    margin-bottom: 1rem;
+  }
+
+  .services-section .grid.md\\:grid-cols-2.lg\\:grid-cols-4 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .services-section .grid.grid-cols-2.lg\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .ticker-content {
+    animation-duration: 20s;
+  }
+
+  .ticker-item {
+    margin-right: 2rem;
+  }
+
+  .hero-gradient-text {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .hero-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .hero-stat-item {
+    padding: 0.75rem;
+  }
+
+  .hero-stat-number {
+    font-size: 1.5rem;
+  }
+
+  .hero-stat-label {
+    font-size: 0.75rem;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .floating-element {
+    display: none;
+  }
+
+  .modal-content {
+    margin: 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .filter-dropdown-btn {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .dropdown-menu-content {
+    left: 0;
+    right: 0;
+    min-width: auto;
+  }
+
+  #colorsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .hero-gradient-text {
+    font-size: 2.5rem;
+  }
+
+  .floating-element {
+    display: none;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .about-grid {
+    gap: 3rem;
+  }
+
+  .about-image {
+    order: -1;
+  }
+
+  .about-content h2 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .services-section .process-step .absolute {
+    display: none;
+  }
+}
+
+/* Tablet */
+@media (min-width: 640px) {
+  .logo-image {
+    height: 40px;
+    max-width: 150px;
+  }
+}
+
+@media (min-width: 768px) {
+  .contact-links {
+    flex-direction: row;
+  }
+
+  #colorsGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .logo-image {
+    height: 48px;
+    max-width: 180px;
+  }
+
+  #colorsGrid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  #colorsGrid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+@media (min-width: 1536px) {
+  #colorsGrid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bienvenue chez Lopes Peinture</title>
+  </head>
+  <body>
+    <h1>Bienvenue chez Lopes Peinture, {{ user.first_name }}!</h1>
+
+    <p>Nous sommes ravis de vous accueillir dans notre communauté.</p>
+
+    <p>Votre compte a été créé avec succès :</p>
+    <ul>
+      <li><strong>Email:</strong> {{ user.email }}</li>
+      <li><strong>Nom:</strong> {{ user.get_full_name }}</li>
+      <li><strong>Type de compte:</strong> {{ user.get_account_type_display }}</li>
+    </ul>
+
+    <p>Vous pouvez maintenant vous connecter et explorer nos services.</p>
+
+    <p>
+      <a
+        href="{{ site_url }}/accounts/login/"
+        style="
+          background-color: #007bff;
+          color: white;
+          padding: 10px 20px;
+          text-decoration: none;
+          border-radius: 5px;
+        "
+      >
+        Se connecter
+      </a>
+    </p>
+
+    <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+
+    <p>Cordialement,<br />L'équipe Lopes Peinture</p>
+  </body>
+</html>

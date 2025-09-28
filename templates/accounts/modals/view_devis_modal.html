@@ -1,0 +1,64 @@
+<div id="view-devis-modal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="modal-overlay flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Détails du Devis</h3>
+                    <button class="modal-close text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Numéro</label>
+                            <p id="view-devis-numero" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Statut</label>
+                            <p id="view-devis-status" class="font-medium"></p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Titre</label>
+                        <p id="view-devis-titre" class="text-lg font-medium"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Total</label>
+                            <p id="view-devis-total" class="text-xl font-bold text-green-600"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Date d'expiration</label>
+                            <p id="view-devis-expiration" class="text-gray-700"></p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Date de création</label>
+                        <p id="view-devis-created" class="text-gray-700"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Lien public</label>
+                        <a id="view-devis-link" href="#" target="_blank" 
+                           class="text-blue-600 hover:text-blue-800 underline">
+                            Voir le devis complet
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-6">
+                    <button class="modal-close px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

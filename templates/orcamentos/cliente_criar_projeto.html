@@ -1,0 +1,307 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Nouveau Projet - LOPES PEINTURE{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'orcamentos:cliente_projetos' %}"
+           class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+            <i class="fas fa-arrow-left text-lg"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Nouveau Projet</h1>
+            <p class="text-gray-600 mt-1">Créez un projet détaillé pour vos travaux de peinture</p>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Section: Informations générales -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+
+            <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-info-circle text-white text-xl"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Informations générales</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="col-span-1 lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Titre du projet <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Type de service <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.tipo_servico }}
+                    {% if form.tipo_servico.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.tipo_servico.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Urgence du projet
+                    </label>
+                    {{ form.urgencia }}
+                    {% if form.urgencia.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.urgencia.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-span-1 lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Description détaillée <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Localisation -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
+
+            <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-map-marker-alt text-white text-xl"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Localisation du projet</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="col-span-1 lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Adresse du projet <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.endereco_projeto }}
+                    {% if form.endereco_projeto.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.endereco_projeto.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Ville <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.cidade_projeto }}
+                    {% if form.cidade_projeto.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.cidade_projeto.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Code postal <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.cep_projeto }}
+                    {% if form.cep_projeto.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.cep_projeto.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Détails techniques -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-600"></div>
+
+            <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-ruler-combined text-white text-xl"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Détails techniques</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Surface approximative (m²)
+                    </label>
+                    {{ form.area_aproximada }}
+                    {% if form.area_aproximada.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.area_aproximada.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Nombre de pièces
+                    </label>
+                    {{ form.numero_comodos }}
+                    {% if form.numero_comodos.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.numero_comodos.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Hauteur du plafond (m)
+                    </label>
+                    {{ form.altura_teto }}
+                    {% if form.altura_teto.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.altura_teto.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Budget estimé (€)
+                    </label>
+                    {{ form.orcamento_estimado }}
+                    {% if form.orcamento_estimado.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.orcamento_estimado.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Planning -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-600"></div>
+
+            <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <i class="fas fa-calendar text-white text-xl"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Planning</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Date de début souhaitée
+                    </label>
+                    {{ form.data_inicio_desejada }}
+                    {% if form.data_inicio_desejada.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.data_inicio_desejada.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-span-1 lg:col-span-2 space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">
+                        Observations particulières
+                    </label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-6 pt-8 border-t border-gray-200">
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                Vous pourrez ajouter des photos après la création du projet
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="{% url 'orcamentos:cliente_projetos' %}"
+                   class="px-8 py-3 border-2 border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl font-semibold transition-all duration-300 hover:bg-blue-50 text-center">
+                    Annuler
+                </a>
+
+                <button type="submit"
+                        class="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-3">
+                    <i class="fas fa-save"></i>
+                    Créer le projet
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+    });
+
+    function validateField(e) {
+        const field = e.target;
+        const value = field.value.trim();
+        const isRequired = field.closest('.form-group').querySelector('.required');
+
+        // Remove previous error styling
+        field.classList.remove('border-red-500');
+
+        // Check required fields
+        if (isRequired && !value) {
+            field.classList.add('border-red-500');
+            return false;
+        }
+
+        // Validate numeric fields
+        if (field.type === 'number' && value) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue < 0) {
+                field.classList.add('border-red-500');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required], .form-group:has(.required) input, .form-group:has(.required) select, .form-group:has(.required) textarea');
+
+        requiredFields.forEach(field => {
+            if (!validateField({ target: field })) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez corriger les erreurs avant de soumettre le formulaire.');
+            // Scroll to first error
+            const firstError = form.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+
+    // Auto-save functionality (opcional)
+    let autoSaveTimeout;
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Could implement auto-save functionality here
+                console.log('Auto-save triggered');
+            }, 2000);
+        });
+    });
+});
+</script>
+{% endblock %}

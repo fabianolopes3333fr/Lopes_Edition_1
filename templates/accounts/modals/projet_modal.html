@@ -1,0 +1,125 @@
+<!-- Modal para Criar/Editar Projeto -->
+<div id="projectModal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeProjectModal()"></div>
+  <div class="modal-content max-w-2xl">
+    <div class="modal-header">
+      <h3 id="modal-title" class="text-lg font-semibold text-gray-900">Nouveau Projet</h3>
+      <button onclick="closeProjectModal()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+    </div>
+
+    <form id="projectForm" class="modal-body">
+      {% csrf_token %}
+      <input type="hidden" id="project-id" name="project_id" />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group md:col-span-2">
+          <label for="titre" class="form-label">Titre du projet *</label>
+          <input type="text" id="titre" name="titre" class="form-input" required />
+        </div>
+
+        <div class="form-group">
+          <label for="type_service" class="form-label">Type de service *</label>
+          <select id="type_service" name="type_service" class="form-select" required>
+            <option value="">Sélectionner...</option>
+            <option value="interieur">Peinture Intérieure</option>
+            <option value="exterieur">Peinture Extérieure</option>
+            <option value="decoration">Décoration</option>
+            <option value="renovation">Rénovation</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="statut" class="form-label">Statut</label>
+          <select id="statut" name="statut" class="form-select">
+            <option value="en_attente">En attente</option>
+            <option value="en_cours">En cours</option>
+            <option value="termine">Terminé</option>
+            <option value="annule">Annulé</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="budget_estime" class="form-label">Budget estimé (€)</label>
+          <input
+            type="number"
+            id="budget_estime"
+            name="budget_estime"
+            class="form-input"
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="date_souhaite" class="form-label">Date souhaitée</label>
+          <input type="date" id="date_souhaite" name="date_souhaite" class="form-input" />
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="adresse" class="form-label">Adresse du projet</label>
+          <input
+            type="text"
+            id="adresse"
+            name="adresse"
+            class="form-input"
+            placeholder="Adresse complète..."
+          />
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            class="form-textarea"
+            rows="4"
+            placeholder="Décrivez votre projet en détail..."
+          ></textarea>
+        </div>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" onclick="closeProjectModal()" class="btn-secondary">Annuler</button>
+      <button type="submit" form="projectForm" class="btn-primary">
+        <i class="fas fa-save mr-2"></i>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Visualizar Projeto -->
+<div id="viewProjectModal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeViewProjectModal()"></div>
+  <div class="modal-content max-w-4xl">
+    <div class="modal-header">
+      <h3 id="view-project-title" class="text-lg font-semibold text-gray-900">Détails du Projet</h3>
+      <div class="flex items-center gap-2">
+        <button onclick="editProjectFromView()" class="btn-icon btn-icon-green" title="Modifier">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button onclick="closeViewProjectModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div id="project-details">
+        <!-- Conteúdo será preenchido via JavaScript -->
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button onclick="editProjectFromView()" class="btn-primary">
+        <i class="fas fa-edit mr-2"></i>
+        Modifier le projet
+      </button>
+      <button onclick="closeViewProjectModal()" class="btn-secondary">Fermer</button>
+    </div>
+  </div>
+</div>

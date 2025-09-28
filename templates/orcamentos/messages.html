@@ -1,0 +1,128 @@
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert-content">
+            {% if message.tags == 'success' %}
+                <span class="alert-icon">✅</span>
+            {% elif message.tags == 'error' %}
+                <span class="alert-icon">❌</span>
+            {% elif message.tags == 'warning' %}
+                <span class="alert-icon">⚠️</span>
+            {% else %}
+                <span class="alert-icon">ℹ️</span>
+            {% endif %}
+            <span class="alert-text">{{ message }}</span>
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+            <span>&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.alert {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert-success {
+    border-left: 5px solid #28a745;
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+}
+
+.alert-error {
+    border-left: 5px solid #dc3545;
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+}
+
+.alert-warning {
+    border-left: 5px solid #ffc107;
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+}
+
+.alert-info {
+    border-left: 5px solid #17a2b8;
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.alert-icon {
+    font-size: 1.2em;
+}
+
+.alert-text {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    margin-left: 15px;
+    transition: color 0.2s;
+}
+
+.alert-close:hover {
+    color: #333;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Auto-hide after 5 seconds */
+.alert {
+    animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 4.7s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+</style>
+
+<script>
+// Auto-remove messages after 5 seconds
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.remove();
+    });
+}, 5000);
+</script>
+{% endif %}

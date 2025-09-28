@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Devis {{ orcamento.numero }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm 1.5cm;
+            @top-center {
+                content: "LOPES PEINTURE - Devis {{ orcamento.numero }}";
+                font-family: Arial, sans-serif;
+                font-size: 10pt;
+                color: #666;
+            }
+            @bottom-right {
+                content: "Page " counter(page) " sur " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: #666;
+            }
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-name {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        .company-details {
+            font-size: 10pt;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .devis-info {
+            text-align: right;
+            flex: 1;
+        }
+
+        .devis-title {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .devis-number {
+            font-size: 16pt;
+            color: #2563eb;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .devis-date {
+            font-size: 10pt;
+            color: #666;
+        }
+
+        .client-section {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .client-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .client-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .client-details {
+            flex: 1;
+        }
+
+        .project-info {
+            flex: 1;
+            margin-left: 40px;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .description-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 5px;
+        }
+
+        .description-text {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: white;
+        }
+
+        .items-table thead {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border: 1px solid #d1d5db;
+        }
+
+        .items-table th {
+            font-weight: bold;
+            font-size: 10pt;
+            text-transform: uppercase;
+        }
+
+        .items-table tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .items-table tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        .qty-col { width: 80px; text-align: center; }
+        .unit-col { width: 60px; text-align: center; }
+        .price-col { width: 100px; text-align: right; }
+        .total-col { width: 120px; text-align: right; }
+
+        .totals-section {
+            margin-top: 30px;
+            float: right;
+            width: 300px;
+        }
+
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #e5e7eb;
+        }
+
+        .totals-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .totals-table .label-col {
+            font-weight: bold;
+            background-color: #f8fafc;
+            width: 60%;
+        }
+
+        .totals-table .value-col {
+            text-align: right;
+            width: 40%;
+        }
+
+        .total-final {
+            background-color: #2563eb;
+            color: white;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        .conditions-section {
+            clear: both;
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+
+        .conditions-content {
+            background-color: #fffbeb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #f59e0b;
+        }
+
+        .validity-info {
+            background-color: #fef2f2;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #f87171;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #991b1b;
+        }
+
+        .footer-info {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 9pt;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .break-before {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête -->
+    <div class="header">
+        <div class="company-info">
+            <div class="company-name">{{ company_name }}</div>
+            <div class="company-details">
+                {{ company_address }}<br>
+                Tél: {{ company_phone }}<br>
+                Email: {{ company_email }}
+            </div>
+        </div>
+        <div class="devis-info">
+            <div class="devis-title">DEVIS</div>
+            <div class="devis-number">N° {{ orcamento.numero }}</div>
+            <div class="devis-date">{{ date_generation|date:"d F Y" }}</div>
+        </div>
+    </div>
+
+    <!-- Informations client -->
+    <div class="client-section">
+        <div class="client-title">INFORMATIONS CLIENT</div>
+        <div class="client-info">
+            <div class="client-details">
+                <div class="info-row">
+                    <span class="label">Nom:</span> {{ orcamento.solicitacao.nome_solicitante }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Email:</span> {{ orcamento.solicitacao.email_solicitante }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Téléphone:</span> {{ orcamento.solicitacao.telefone_solicitante|default:"Non renseigné" }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Adresse:</span> {{ orcamento.solicitacao.endereco }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Ville:</span> {{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}
+                </div>
+            </div>
+            <div class="project-info">
+                <div class="info-row">
+                    <span class="label">Service:</span> {{ orcamento.solicitacao.get_tipo_servico_display }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Demande N°:</span> {{ orcamento.solicitacao.numero }}
+                </div>
+                {% if orcamento.solicitacao.area_aproximada %}
+                <div class="info-row">
+                    <span class="label">Surface:</span> {{ orcamento.solicitacao.area_aproximada }} m²
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="label">Urgence:</span> {{ orcamento.solicitacao.get_urgencia_display }}
+                </div>
+                <div class="info-row">
+                    <span class="label">Délai souhaité:</span> {{ orcamento.prazo_execucao }} jours
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description des travaux -->
+    <div class="description-section">
+        <div class="section-title">DESCRIPTION DES TRAVAUX</div>
+        <div class="description-text">
+            {{ orcamento.descricao|linebreaks }}
+        </div>
+    </div>
+
+    <!-- Détail des prestations -->
+    <div class="items-section">
+        <div class="section-title">DÉTAIL DES PRESTATIONS</div>
+
+        {% if orcamento.itens.all %}
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="qty-col">Qté</th>
+                    <th class="unit-col">Unité</th>
+                    <th class="price-col">Prix unitaire</th>
+                    <th class="total-col">Total HT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in orcamento.itens.all %}
+                <tr>
+                    <td>{{ item.descricao }}</td>
+                    <td class="qty-col text-center">{{ item.quantidade }}</td>
+                    <td class="unit-col text-center">{{ item.unidade }}</td>
+                    <td class="price-col text-right">{{ item.preco_unitario|floatformat:2 }}€</td>
+                    <td class="total-col text-right font-bold">{{ item.total_item|floatformat:2 }}€</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totaux -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="label-col">Sous-total HT</td>
+                    <td class="value-col">{{ orcamento.subtotal|floatformat:2 }}€</td>
+                </tr>
+                <tr>
+                    <td class="label-col">TVA (20%)</td>
+                    <td class="value-col">{{ orcamento.subtotal|floatformat:2|add:"0"|mul:0.2|floatformat:2 }}€</td>
+                </tr>
+                {% if orcamento.desconto > 0 %}
+                <tr>
+                    <td class="label-col">Remise ({{ orcamento.desconto }}%)</td>
+                    <td class="value-col">-{{ orcamento.valor_desconto|floatformat:2 }}€</td>
+                </tr>
+                {% endif %}
+                <tr class="total-final">
+                    <td class="label-col">TOTAL TTC</td>
+                    <td class="value-col">{{ orcamento.total|floatformat:2 }}€</td>
+                </tr>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-items">
+            <p>Aucun détail de prestation n'a été ajouté à ce devis.</p>
+            <p>Le montant sera précisé lors de la finalisation du devis.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Conditions -->
+    <div class="conditions-section">
+        <div class="section-title">CONDITIONS GÉNÉRALES</div>
+        <div class="conditions-content">
+            <div style="margin-bottom: 15px;">
+                <strong>Conditions de paiement:</strong><br>
+                {{ orcamento.condicoes_pagamento|linebreaks }}
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao }} jours à compter de la signature du devis
+            </div>
+
+            {% if orcamento.observacoes %}
+            <div style="margin-bottom: 15px;">
+                <strong>Observations particulières:</strong><br>
+                {{ orcamento.observacoes|linebreaks }}
+            </div>
+            {% endif %}
+
+            <div style="font-size: 9pt; color: #666; margin-top: 15px;">
+                • Ce devis est établi pour les prestations décrites ci-dessus<br>
+                • Les travaux supplémentaires feront l'objet d'un avenant<br>
+                • Matériel et fournitures de première qualité<br>
+                • Garantie décennale selon la législation en vigueur
+            </div>
+        </div>
+
+        <div class="validity-info">
+            <strong>Ce devis est valable jusqu'au {{ orcamento.validade_orcamento|date:"d F Y" }}</strong>
+        </div>
+    </div>
+
+    <!-- Signatures -->
+    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+        <div style="width: 45%; text-align: center; border-top: 1px solid #ccc; padding-top: 10px;">
+            <strong>{{ company_name }}</strong><br>
+            <div style="height: 60px;"></div>
+            Signature et cachet
+        </div>
+        <div style="width: 45%; text-align: center; border-top: 1px solid #ccc; padding-top: 10px;">
+            <strong>Client</strong><br>
+            <div style="height: 60px;"></div>
+            Bon pour accord, signature
+        </div>
+    </div>
+
+    <!-- Pied de page -->
+    <div class="footer-info">
+        Document généré le {{ date_generation|date:"d F Y à H:i" }}<br>
+        {{ company_name }} - {{ company_address }}<br>
+        SIRET: 12345678901234 - APE: 4334Z - TVA: FR12345678901
+    </div>
+</body>
+</html>

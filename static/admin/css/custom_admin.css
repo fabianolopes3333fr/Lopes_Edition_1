@@ -1,0 +1,9 @@
+.field-total input {
+  background-color: #f8f9fa !important;
+  color: #6c757d;
+}
+
+.total-formatted {
+  font-weight: bold;
+  color: #28a745;
+}

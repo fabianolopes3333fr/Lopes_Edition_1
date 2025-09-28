@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Supprimer le compte - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-8">
+    <h1 class="text-2xl font-bold mb-6 text-red-600">Supprimer le compte</h1>
+
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <h2 class="text-lg font-semibold text-red-700 mb-4">Attention!</h2>
+        <p class="text-red-600 mb-4">
+            Cette action est irréversible. Toutes vos données seront supprimées définitivement.
+        </p>
+        <ul class="list-disc list-inside text-red-600 mb-4">
+            <li>Vos informations personnelles</li>
+            <li>Vos projets</li>
+            <li>Votre historique</li>
+        </ul>
+    </div>
+
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="flex items-center justify-between">
+            <a href="{% url 'accounts:profile' %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Annuler
+            </a>
+            
+            <button type="submit" 
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ?');">
+                Supprimer définitivement
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

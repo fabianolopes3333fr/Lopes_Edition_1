@@ -1,0 +1,107 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Historique des connexions - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+  <!-- Header -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Historique des connexions</h1>
+        <p class="text-gray-600 mt-1">Consultez l'historique de vos connexions récentes</p>
+      </div>
+      <a 
+        href="{% url 'accounts:settings' %}"
+        class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200"
+      >
+        <i class="fas fa-arrow-left mr-2"></i>
+        Retour aux paramètres
+      </a>
+    </div>
+  </div>
+
+  <!-- Sessions actives -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-shield-alt text-green-600 mr-3"></i>
+        Sessions actives
+      </h2>
+    </div>
+    
+    <div class="p-6">
+      {% for session in login_sessions %}
+      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4 last:mb-0">
+        <div class="flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            {% if session.is_current %}
+              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+            {% else %}
+              <div class="w-3 h-3 bg-gray-300 rounded-full"></div>
+            {% endif %}
+          </div>
+          
+          <div class="flex-1">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-desktop text-gray-600"></i>
+              <span class="text-sm font-medium text-gray-900">
+                {% if session.is_current %}Session actuelle{% else %}Session terminée{% endif %}
+              </span>
+              {% if session.is_current %}
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  En cours
+                </span>
+              {% endif %}
+            </div>
+            
+            <div class="mt-1 space-y-1">
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-map-marker-alt mr-1"></i>
+                IP: {{ session.ip_address }}
+              </p>
+              <p class="text-sm text-gray-600">
+                <i class="fas fa-clock mr-1"></i>
+                Connexion: {{ session.login_time|date:"d/m/Y à H:i" }}
+              </p>
+              <p class="text-sm text-gray-600 truncate">
+                <i class="fas fa-browser mr-1"></i>
+                {{ session.user_agent|truncatechars:60 }}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {% if not session.is_current %}
+        <button class="text-red-600 hover:text-red-800 text-sm">
+          <i class="fas fa-times"></i>
+        </button>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="text-center py-8">
+        <i class="fas fa-history text-gray-400 text-3xl mb-4"></i>
+        <p class="text-gray-500">Aucun historique de connexion disponible</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Informations de sécurité -->
+  <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+    <div class="flex items-start">
+      <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+      <div>
+        <h3 class="text-sm font-medium text-blue-900 mb-2">Conseils de sécurité</h3>
+        <ul class="text-sm text-blue-800 space-y-1">
+          <li>• Vérifiez régulièrement vos connexions récentes</li>
+          <li>• Déconnectez-vous des sessions que vous ne reconnaissez pas</li>
+          <li>• Utilisez un mot de passe fort et unique</li>
+          <li>• Activez l'authentification à deux facteurs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

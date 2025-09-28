@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.contrib.auth import get_user_model
 from .models import User
-from profiles.models import Profile
+#from profiles.models import Profile
 
 # Unregister the default Group admin
 admin.site.unregister(Group)

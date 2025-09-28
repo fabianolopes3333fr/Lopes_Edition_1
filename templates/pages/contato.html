@@ -1,0 +1,712 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Contact - LOPES PEINTURE{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+  <!-- Background Video/Image -->
+    <div class="absolute inset-0 z-0 animate-fade-in">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/80 to-purple-900/90 z-10"></div>
+      <div class="w-full h-full bg-cover bg-center bg-fixed"
+        style="background-image: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(55, 48, 163, 0.9) 50%, rgba(88, 28, 135, 0.9) 100%)"></div>
+    </div>
+
+    <!-- Floating Elements -->
+    <div class="absolute inset-0 z-5">
+      <div class="floating-element absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-float animate-fade-in-scale" style="animation-delay: 1s">
+      </div>
+      <div class="floating-element absolute top-40 right-20 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl animate-float-delayed animate-fade-in-scale" style="animation-delay: 1.5s">
+      </div>
+      <div class="floating-element absolute bottom-32 left-1/4 w-16 h-16 bg-purple-400/20 rounded-full blur-xl animate-float-slow animate-fade-in-scale" style="animation-delay: 2s">
+      </div>
+    </div>
+
+  <!-- Hero Content -->
+  <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="animate-fade-in-up">
+      <h1 class="text-4xl md:text-6xl lg:text-8xl font-bold text-white mb-6 leading-tight">
+          <div class=" resp flex flex-col md:flex-row justify-center items-center gap-4">
+            <span class="animate-fade-in-up" style="animation-delay: 0.3s">Contactez</span>
+            <span class="hero-gradient-text animate-fade-in-up" style="animation-delay: 0.6s">
+            -nous
+            </span>
+          </div>
+        </h1>
+
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up"
+          style="animation-delay: 0.9s">
+          Une question ? Nous sommes là pour vous accompagner
+          <span class="block mt-2">dans tous vos projets de peinture et décoration.</span>
+        </p>
+      
+
+      <!-- Quick Contact Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+        <a href="tel:+33769273776"
+          class="group relative px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25">
+          <span class="relative z-10 flex items-center">
+            <i class="fas fa-phone mr-2"></i>
+            Appeler maintenant
+          </span>
+        </a>
+
+        <a href="https://wa.me/33634623320?text=Bonjour,%20j'ai%20une%20question%20concernant%20vos%20services."
+          target="_blank"
+          class="group px-8 py-4 border-2 border-white/30 text-white font-bold rounded-full text-lg backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+          <span class="flex items-center gap-2">
+            <i class="fab fa-whatsapp"></i>
+            WhatsApp
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Contact Section -->
+<section class="py-16 lg:py-24 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid lg:grid-cols-2 gap-12 xl:gap-16">
+      <!-- Contact Form -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 lg:p-10 animate-slide-in-left">
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Envoyez-nous un message</h2>
+          <p class="text-gray-600 text-lg">Nous vous répondrons dans les plus brefs délais</p>
+        </div>
+
+        <form id="contact-form" method="post" class="space-y-6">
+          {% csrf_token %}
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="form-group">
+              <label for="prenom" class="block text-sm font-semibold text-gray-700 mb-2">Prénom *</label>
+              <input type="text" id="prenom" name="prenom" required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Votre prénom" />
+            </div>
+            <div class="form-group">
+              <label for="nom" class="block text-sm font-semibold text-gray-700 mb-2">Nom *</label>
+              <input type="text" id="nom" name="nom" required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Votre nom" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">E-mail *</label>
+            <input type="email" id="email" name="email" required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder="votre@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="telephone" class="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
+            <input type="tel" id="telephone" name="telephone"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder="+33 7 69 27 37 76" />
+          </div>
+
+          <div class="form-group">
+            <label for="sujet" class="block text-sm font-semibold text-gray-700 mb-2">Sujet *</label>
+            <select id="sujet" name="sujet" required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+              <option value="">Sélectionnez un sujet</option>
+              <option value="information">Demande d'information</option>
+              <option value="devis">Demande de devis</option>
+              <option value="urgence">Urgence</option>
+              <option value="reclamation">Réclamation</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message" class="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
+            <textarea id="message" name="message" rows="5" required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+              placeholder="Décrivez votre demande..."></textarea>
+          </div>
+
+          <div class="flex items-start">
+            <input type="checkbox" id="rgpd" name="rgpd" required
+              class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+            <label for="rgpd" class="ml-3 text-sm text-gray-600">
+              J'accepte que mes données personnelles soient utilisées pour me recontacter concernant
+              ma demande. *
+            </label>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+            <i class="fas fa-paper-plane mr-2"></i>
+            Envoyer le message
+          </button>
+        </form>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="space-y-8 animate-slide-in-right">
+        <!-- Main Contact Info -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Nos coordonnées</h3>
+          <div class="space-y-6">
+            <div class="flex items-start group">
+              <div
+                class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                <i class="fas fa-phone text-white"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Téléphone</p>
+                <a href="tel:+33769273776" class="text-blue-600 hover:text-blue-700 font-medium text-lg">
+                  +33 7 69 27 37 76
+                </a>
+                <p class="text-sm text-gray-500">Lun-Ven: 8h-18h</p>
+              </div>
+            </div>
+
+            <div class="flex items-start group">
+              <div
+                class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                <i class="fas fa-envelope text-white"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">E-mail</p>
+                <a href="mailto:contact@lopespeinture.fr" class="text-blue-600 hover:text-blue-700 font-medium text-lg">
+                  contact@lopespeinture.fr
+                </a>
+                <p class="text-sm text-gray-500">Réponse sous 48h</p>
+              </div>
+            </div>
+            <div class="flex items-start group">
+              <div
+                class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                <i class="fas fa-map-marker-alt text-white"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Zone d'intervention</p>
+                <p class="text-gray-700 text-lg">ST SAUVEUR 31790 - France</p>
+                <p class="text-sm text-gray-500">Déplacement gratuit pour devis</p>
+              </div>
+            </div>
+
+            <div class="flex items-start group">
+              <div
+                class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+                <i class="fas fa-clock text-white"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Horaires</p>
+                <p class="text-gray-700">Lundi à Vendredi: 8h - 18h</p>
+                <p class="text-sm text-gray-500">Dimanche: Fermé</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Contact -->
+        <div
+          class="bg-gradient-to-r from-green-500 to-green-600 text-white p-8 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="fab fa-whatsapp text-3xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">WhatsApp</h3>
+              <p class="text-green-100">Réponse immédiate</p>
+            </div>
+          </div>
+          <p class="mb-6 text-green-50 text-lg">
+            Contactez-nous directement sur WhatsApp pour une réponse rapide !
+          </p>
+          <a href="https://wa.me/33634623320?text=Bonjour,%20j'ai%20une%20question%20concernant%20vos%20services."
+            target="_blank"
+            class="bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-green-50 transition duration-300 inline-flex items-center shadow-lg hover:shadow-xl transform hover:scale-105">
+            <i class="fab fa-whatsapp mr-2"></i>
+            Discuter maintenant
+          </a>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div
+          class="bg-gradient-to-r from-red-500 to-red-600 text-white p-8 rounded-2xl shadow-xl transform hover:scale-105 transition-all duration-300">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-exclamation-triangle text-3xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">Urgences</h3>
+              <p class="text-red-100">Service d'urgence</p>
+            </div>
+          </div>
+          <p class="mb-6 text-red-50 text-lg">
+            Pour les urgences (dégâts des eaux, infiltrations, etc.)
+          </p>
+          <a href="tel:+33123456789"
+            class="bg-white text-red-600 px-6 py-3 rounded-xl font-semibold hover:bg-red-50 transition duration-300 inline-flex items-center shadow-lg hover:shadow-xl transform hover:scale-105">
+            <i class="fas fa-phone mr-2"></i>
+            Appeler maintenant
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ... existing code ... -->
+
+<!-- Seção do Mapa -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Où nous trouver</h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Nous intervenons dans toute la région de Toulouse et ses environs. 
+        Contactez-nous pour un devis gratuit et sans engagement.
+      </p>
+    </div>
+    
+    {% include 'components/contact_map.html' %}
+  </div>
+</section>
+
+<!-- ... rest of the page ... -->
+
+
+
+<style>
+
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+    display: inline-block;
+    position: relative;
+  }
+  /* Fallback for browsers that don't support background-clip: text */
+  @supports not (-webkit-background-clip: text) {
+    .hero-gradient-text {
+      color: #a855f7;
+      background: none;
+      -webkit-text-fill-color: initial;
+    }
+  }
+  
+  /* Custom Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes floatDelayed {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-30px);
+    }
+  }
+
+  @keyframes floatSlow {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.8s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.8s ease-out;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: floatDelayed 8s ease-in-out infinite;
+    animation-delay: -2s;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 10s ease-in-out infinite;
+    animation-delay: -4s;
+  }
+
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 50%, #c7d2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Form Styles */
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* FAQ Styles */
+  .faq-question.active i {
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .faq-answer.show {
+    max-height: 500px;
+    transition: max-height 0.3s ease-in;
+  }
+
+  
+
+  /* Loading states */
+  .form-loading {
+    position: relative;
+    pointer-events: none;
+  }
+
+  .form-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+  }
+
+  /* Success message */
+  .success-message {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .success-message.show {
+    display: block;
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+   @media (max-width: 768px) {
+    .hero-gradient-text {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .hero-stat-item {
+      padding: 0.75rem;
+    }
+
+    .hero-stat-number {
+      font-size: 1.5rem;
+    }
+
+    .hero-stat-label {
+      font-size: 0.75rem;
+    }
+
+    .hero-btn-primary,
+    .hero-btn-secondary {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    .floating-element {
+      display: none;
+    }
+    .resp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      gap: 0;
+      
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-gradient-text {
+      font-size: 2rem;
+    }
+
+    .hero-stats {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .hero-stat-item {
+      padding: 0.5rem;
+    }
+
+    .hero-stat-number {
+      font-size: 1.25rem;
+    }
+    .resp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      
+    }
+  }
+
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // FAQ Functionality
+    const faqQuestions = document.querySelectorAll('.faq-question');
+
+    faqQuestions.forEach(question => {
+      question.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target');
+        const answer = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+
+        // Close all other FAQs
+        faqQuestions.forEach(otherQuestion => {
+          if (otherQuestion !== this) {
+            const otherTargetId = otherQuestion.getAttribute('data-target');
+            const otherAnswer = document.getElementById(otherTargetId);
+            const otherIcon = otherQuestion.querySelector('i');
+
+            otherAnswer.classList.remove('show');
+            otherAnswer.classList.add('hidden');
+            otherQuestion.classList.remove('active');
+            otherIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+
+        // Toggle current FAQ
+        if (answer.classList.contains('show')) {
+          answer.classList.remove('show');
+          answer.classList.add('hidden');
+          this.classList.remove('active');
+          icon.style.transform = 'rotate(0deg)';
+        } else {
+          answer.classList.remove('hidden');
+          answer.classList.add('show');
+          this.classList.add('active');
+          icon.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+
+    // Form Submission
+    const contactForm = document.getElementById('contact-form');
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Add loading state
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Envoi en cours...';
+        submitButton.disabled = true;
+        this.classList.add('form-loading');
+
+        // Simulate form submission (replace with actual API call)
+        setTimeout(() => {
+          // Remove loading state
+          this.classList.remove('form-loading');
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+
+          // Show success message
+          const successMessage = document.createElement('div');
+          successMessage.className = 'success-message show';
+          successMessage.innerHTML = `
+          <div class="flex items-center">
+            <i class="fas fa-check-circle mr-3 text-xl"></i>
+            <div>
+              <h4 class="font-bold">Message envoyé avec succès !</h4>
+              <p class="text-sm opacity-90">Nous vous répondrons dans les plus brefs délais.</p>
+            </div>
+          </div>
+        `;
+
+          this.insertBefore(successMessage, this.firstChild);
+
+          // Reset form
+          this.reset();
+
+          // Hide success message after 5 seconds
+          setTimeout(() => {
+            successMessage.classList.remove('show');
+            setTimeout(() => {
+              successMessage.remove();
+            }, 500);
+          }, 5000);
+
+        }, 2000);
+      });
+    }
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.querySelectorAll('.animate-slide-in-left, .animate-slide-in-right').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+      observer.observe(el);
+    });
+
+    // Phone number formatting
+    const phoneInput = document.getElementById('telephone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('33')) {
+          value = '+' + value;
+        } else if (value.startsWith('0')) {
+          value = '+33' + value.substring(1);
+        }
+        e.target.value = value;
+      });
+    }
+
+    
+  // Adicionar no mounted() ou created()
+  mounted() {
+    // Verificar se há parâmetros de cor na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.has('couleur_nom')) {
+      const colorInfo = {
+        nom: urlParams.get('couleur_nom'),
+        code: urlParams.get('couleur_code'),
+        rgb: urlParams.get('couleur_rgb'),
+        categorie: urlParams.get('couleur_categorie')
+      };
+      
+      // Pré-preencher o formulário com informações da cor
+      this.form.type_projet = 'decoration'; // ou outro tipo apropriado
+      
+      // Adicionar informações da cor na mensagem
+      const colorMessage = `\n\n--- Couleur sélectionnée ---\nNom: ${colorInfo.nom}\nCode: ${colorInfo.code}\nCatégorie: ${colorInfo.categorie}\nRGB: ${colorInfo.rgb}`;
+      
+      if (this.form.message) {
+        this.form.message += colorMessage;
+      } else {
+        this.form.message = `Bonjour, je suis intéressé(e) par cette couleur pour mon projet de peinture.${colorMessage}`;
+      }
+      
+      // Scroll para o formulário
+      this.$nextTick(() => {
+        const formElement = document.querySelector('.contact-form');
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+  }
+  });
+</script>
+{% endblock %}
