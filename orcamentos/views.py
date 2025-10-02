@@ -8,6 +8,7 @@ from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from decimal import Decimal
 import json
 
 from .models import (
@@ -16,8 +17,9 @@ from .models import (
 )
 from .forms import (
     ProjetoForm, SolicitacaoOrcamentoPublicoForm, SolicitacaoOrcamentoProjetoForm,
-    OrcamentoForm, ItemOrcamentoFormSet, AnexoProjetoForm
+    OrcamentoForm, ItemOrcamentoFormSet, ProdutoForm, FornecedorForm, AnexoProjetoForm
 )
+from .services import NotificationService
 
 # ============ VIEWS PÚBLICAS (SEM LOGIN) ============
 
@@ -27,6 +29,10 @@ def solicitar_orcamento_publico(request):
         form = SolicitacaoOrcamentoPublicoForm(request.POST)
         if form.is_valid():
             solicitacao = form.save()
+
+            # Enviar notificações e emails para admins
+            NotificationService.enviar_email_nova_solicitacao(solicitacao)
+
             messages.success(
                 request,
                 f'Votre demande de devis #{solicitacao.numero} a été envoyée avec succès! '
@@ -93,6 +99,10 @@ def cliente_criar_projeto(request):
             projeto = form.save(commit=False)
             projeto.cliente = request.user
             projeto.save()
+
+            # Notificar admins sobre novo projeto
+            NotificationService.notificar_projeto_criado(projeto)
+
             messages.success(request, 'Projet créé avec succès!')
             return redirect('orcamentos:cliente_projeto_detail', uuid=projeto.uuid)
     else:
@@ -191,6 +201,9 @@ def cliente_solicitar_orcamento_projeto(request, uuid):
 
             solicitacao.save()
 
+            # Enviar notificações para admins
+            NotificationService.enviar_email_nova_solicitacao(solicitacao)
+
             messages.success(
                 request,
                 f'Demande de devis #{solicitacao.numero} envoyée avec succès!'
@@ -273,6 +286,9 @@ def cliente_devis_accepter(request, numero):
         orcamento.solicitacao.status = StatusOrcamento.ACEITO
         orcamento.solicitacao.save()
 
+        # Enviar notificações para admins
+        NotificationService.enviar_email_orcamento_aceito(orcamento)
+
         return JsonResponse({
             'success': True,
             'message': 'Devis accepté avec succès!'
@@ -308,6 +324,9 @@ def cliente_devis_refuser(request, numero):
         orcamento.solicitacao.status = StatusOrcamento.RECUSADO
         orcamento.solicitacao.save()
 
+        # Enviar notificações para admins
+        NotificationService.enviar_email_orcamento_recusado(orcamento)
+
         return JsonResponse({
             'success': True,
             'message': 'Devis refusé'
@@ -341,37 +360,61 @@ def cliente_devis_pdf(request, numero):
     # Calcular totais para o PDF
     subtotal_ht = Decimal('0.00')
     total_taxe = Decimal('0.00')
+    total_ttc = Decimal('0.00')
 
     items_data = []
     for i, item in enumerate(orcamento.itens.all(), 1):
-        pu_ht = item.preco_unitario
-        pu_ttc = pu_ht * Decimal('1.20')  # + 20% TVA
-        total_item_ht = item.quantidade * pu_ht
-        total_item_ttc = total_item_ht * Decimal('1.20')
-        taxe_item = total_item_ht * Decimal('0.20')
+        # Usar a TVA real do item, não fixa
+        taxa_tva_decimal = Decimal(item.taxa_tva) / 100
+
+        pu_ht = item.preco_unitario_ht
+        pu_ttc = pu_ht * (1 + taxa_tva_decimal)
+        total_item_ht = item.total_ht  # Já calculado com remise
+        total_item_ttc = item.total_ttc  # Já calculado com remise e TVA
+        taxe_item = total_item_ttc - total_item_ht
 
         subtotal_ht += total_item_ht
         total_taxe += taxe_item
+        total_ttc += total_item_ttc
 
         items_data.append({
-            'ref': f"REF{i:03d}",
+            'ref': item.referencia or f"REF{i:03d}",
             'designation': item.descricao,
-            'unite': item.unidade,
+            'unite': item.get_unidade_display(),
             'quantite': item.quantidade,
             'pu_ht': pu_ht,
             'pu_ttc': pu_ttc,
-            'remise': Decimal('0.00'),
+            'remise': (item.quantidade * pu_ht * item.remise_percentual / 100) if item.remise_percentual else Decimal('0.00'),
             'total_ht': total_item_ht,
             'total_ttc': total_item_ttc,
-            'taxe': taxe_item
+            'taxe': taxe_item,
+            'taxa_tva': item.taxa_tva  # Adicionar a taxa para usar no template
         })
 
-    # Aplicar desconto global
+    # Aplicar desconto global se houver
     remise_global = orcamento.desconto or Decimal('0.00')
-    valor_remise = subtotal_ht * (remise_global / 100)
-    subtotal_apres_remise_ht = subtotal_ht - valor_remise
-    subtotal_apres_remise_ttc = subtotal_apres_remise_ht * Decimal('1.20')
-    taxe_finale = subtotal_apres_remise_ht * Decimal('0.20')
+    valor_remise_global = (subtotal_ht * remise_global / 100) if remise_global else Decimal('0.00')
+
+    # Calcular taxa média de TVA para exibir no resumo
+    taxa_tva_media = "Variável"
+    if total_ttc > 0 and subtotal_ht > 0:
+        percentual_tva = ((total_taxe / subtotal_ht) * 100)
+        # Se for um valor "redondo", mostrar como percentual fixo
+        if abs(percentual_tva - 20) < 0.01:
+            taxa_tva_media = "20"
+        elif abs(percentual_tva - 10) < 0.01:
+            taxa_tva_media = "10"
+        elif abs(percentual_tva - 5.5) < 0.01:
+            taxa_tva_media = "5.5"
+        elif abs(percentual_tva - 0) < 0.01:
+            taxa_tva_media = "0"
+        else:
+            taxa_tva_media = f"{percentual_tva:.1f}"
+
+    # Totais finais (já com desconto global aplicado via model)
+    subtotal_final_ht = orcamento.total
+    taxe_finale = orcamento.valor_tva
+    subtotal_final_ttc = orcamento.total_ttc
 
     # Context para o template
     context = {
@@ -379,10 +422,11 @@ def cliente_devis_pdf(request, numero):
         'items_data': items_data,
         'subtotal_ht': subtotal_ht,
         'remise_global': remise_global,
-        'valor_remise': valor_remise,
-        'subtotal_apres_remise_ht': subtotal_apres_remise_ht,
+        'valor_remise': valor_remise_global,
+        'subtotal_apres_remise_ht': subtotal_final_ht,
         'taxe_finale': taxe_finale,
-        'subtotal_apres_remise_ttc': subtotal_apres_remise_ttc,
+        'subtotal_apres_remise_ttc': subtotal_final_ttc,
+        'taxa_tva_media': taxa_tva_media,  # Adicionar a taxa média calculada
         'date_generation': datetime.now(),
         'company_info': {
             'name': 'LOPES PEINTURE',
@@ -484,3 +528,430 @@ def get_admin_stats():
         ).count()
     }
     return stats
+
+
+# ============ VIEWS ADMINISTRATIVAS ============
+
+@staff_member_required
+def admin_solicitacoes(request):
+    """Lista todas as solicitações de orçamento para administradores"""
+    solicitacoes = SolicitacaoOrcamento.objects.all().order_by('-created_at')
+
+    # Filtros opcionais
+    status_filter = request.GET.get('status')
+    if status_filter:
+        solicitacoes = solicitacoes.filter(status=status_filter)
+
+    # Paginação
+    paginator = Paginator(solicitacoes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'status_choices': StatusOrcamento.choices,
+        'current_status': status_filter,
+        'page_title': 'Solicitações de Orçamento - Admin',
+    }
+    return render(request, 'orcamentos/admin_solicitacoes.html', context)
+
+
+@staff_member_required
+def admin_solicitacao_detail(request, numero):
+    """Detalhes de uma solicitação específica"""
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, numero=numero)
+
+    context = {
+        'solicitacao': solicitacao,
+        'page_title': f'Solicitação #{numero}',
+    }
+    return render(request, 'orcamentos/admin_solicitacao_detail.html', context)
+
+
+@staff_member_required
+def admin_criar_orcamento(request, numero):
+    """Criar orçamento para uma solicitação"""
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, numero=numero)
+
+    if request.method == 'POST':
+        form = OrcamentoForm(request.POST)
+        formset = ItemOrcamentoFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            orcamento = form.save(commit=False)
+            orcamento.solicitacao = solicitacao
+            orcamento.elaborado_por = request.user  # Adicionar o usuário que está criando
+            orcamento.save()
+
+            # Salvar itens do orçamento
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.orcamento = orcamento
+                instance.save()
+
+            # Recalcular totais
+            orcamento.calcular_totais()
+
+            # Atualizar status da solicitação
+            solicitacao.status = StatusOrcamento.EM_ELABORACAO
+            solicitacao.save()
+
+            messages.success(request, f'Orçamento #{orcamento.numero} criado com sucesso!')
+            return redirect('orcamentos:admin_orcamento_detail', numero=orcamento.numero)
+    else:
+        form = OrcamentoForm()
+        formset = ItemOrcamentoFormSet()
+
+    context = {
+        'form': form,
+        'formset': formset,
+        'solicitacao': solicitacao,
+        'page_title': f'Criar Orçamento - Solicitação #{numero}',
+    }
+    return render(request, 'orcamentos/admin_criar_orcamento.html', context)
+
+@staff_member_required
+def admin_orcamentos(request):
+    """Lista todos os orçamentos para administradores"""
+    orcamentos = Orcamento.objects.all().order_by('-data_elaboracao')
+
+    # Filtros opcionais
+    status_filter = request.GET.get('status')
+    if status_filter:
+        orcamentos = orcamentos.filter(status=status_filter)
+
+    # Paginação
+    paginator = Paginator(orcamentos, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'status_choices': StatusOrcamento.choices,
+        'current_status': status_filter,
+        'page_title': 'Gestion des Devis',
+    }
+    return render(request, 'orcamentos/admin_orcamentos.html', context)
+
+@staff_member_required
+def admin_orcamento_detail(request, numero):
+    """Detalhes de um orçamento específico"""
+    orcamento = get_object_or_404(Orcamento, numero=numero)
+
+    context = {
+        'orcamento': orcamento,
+        'page_title': f'Devis #{numero}',
+    }
+    return render(request, 'orcamentos/admin_orcamento_detail.html', context)
+
+@staff_member_required
+def admin_editar_orcamento(request, numero):
+    """Editar um orçamento existente"""
+    orcamento = get_object_or_404(Orcamento, numero=numero)
+
+    if request.method == 'POST':
+        form = OrcamentoForm(request.POST, instance=orcamento)
+        if form.is_valid():
+            orcamento = form.save()
+
+            # Processar itens atualizados
+            itens_data = request.POST.get('itens_json', '[]')
+            try:
+                # Remover itens existentes
+                orcamento.itens.all().delete()
+
+                # Criar novos itens
+                itens = json.loads(itens_data)
+                for item_data in itens:
+                    if item_data.get('descricao'):
+                        ItemOrcamento.objects.create(
+                            orcamento=orcamento,
+                            produto_id=item_data.get('produto_id') if item_data.get('produto_id') else None,
+                            referencia=item_data.get('referencia', ''),
+                            descricao=item_data.get('descricao'),
+                            unidade=item_data.get('unidade', 'unite'),
+                            atividade=item_data.get('atividade', 'marchandise'),
+                            quantidade=Decimal(str(item_data.get('quantidade', 1))),
+                            preco_unitario_ht=Decimal(str(item_data.get('preco_unitario_ht', 0))),
+                            remise_percentual=Decimal(str(item_data.get('remise_percentual', 0))),
+                            taxa_tva=item_data.get('taxa_tva', '20'),
+                            preco_compra_unitario=Decimal(str(item_data.get('preco_compra_unitario', 0))),
+                        )
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                messages.warning(request, f'Erro ao processar itens: {str(e)}')
+                pass
+
+            # Recalcular totais
+            orcamento.calcular_totais()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                orcamento.status = StatusOrcamento.ENVIADO
+                orcamento.data_envio = timezone.now()
+                orcamento.save()
+
+                orcamento.solicitacao.status = StatusOrcamento.ENVIADO
+                orcamento.solicitacao.save()
+
+                messages.success(request, f'Devis {orcamento.numero} mis à jour et envoyé!')
+            else:
+                messages.success(request, f'Devis {orcamento.numero} mis à jour.')
+
+            return redirect('orcamentos:admin_orcamento_detail', numero=orcamento.numero)
+    else:
+        form = OrcamentoForm(instance=orcamento)
+
+    # Preparar dados dos itens existentes para o JavaScript
+    existing_items = []
+    for item in orcamento.itens.all():
+        existing_items.append({
+            'produto_id': item.produto_id,
+            'referencia': item.referencia,
+            'descricao': item.descricao,
+            'unidade': item.unidade,
+            'atividade': item.atividade,
+            'quantidade': float(item.quantidade),
+            'preco_unitario_ht': float(item.preco_unitario_ht),
+            'remise_percentual': float(item.remise_percentual),
+            'taxa_tva': item.taxa_tva,
+            'preco_compra_unitario': float(item.preco_compra_unitario)
+        })
+
+    context = {
+        'form': form,
+        'orcamento': orcamento,
+        'solicitacao': orcamento.solicitacao,
+        'page_title': f'Éditer Devis - {orcamento.numero}',
+        'existing_items': existing_items
+    }
+
+    return render(request, 'orcamentos/admin_editar_orcamento.html', context)
+
+
+@staff_member_required
+def admin_enviar_orcamento(request, numero):
+    """Enviar orçamento para o cliente"""
+    orcamento = get_object_or_404(Orcamento, numero=numero)
+
+    if request.method == 'POST':
+        # Marcar como enviado
+        orcamento.status = StatusOrcamento.ENVIADO
+        orcamento.data_envio = timezone.now()
+        orcamento.save()
+
+        # Atualizar status da solicitação
+        orcamento.solicitacao.status = StatusOrcamento.ENVIADO
+        orcamento.solicitacao.save()
+
+        # Enviar email e notificações para cliente
+        NotificationService.enviar_email_orcamento_enviado(orcamento)
+
+        messages.success(request, f'Orçamento #{numero} enviado com sucesso!')
+        return redirect('orcamentos:admin_orcamento_detail', numero=numero)
+
+    context = {
+        'orcamento': orcamento,
+        'page_title': f'Enviar Orçamento #{numero}',
+    }
+    return render(request, 'orcamentos/admin_enviar_orcamento.html', context)
+
+
+@staff_member_required
+def admin_orcamento_pdf(request, numero):
+    """Gerar PDF do orçamento para administradores"""
+    orcamento = get_object_or_404(Orcamento, numero=numero)
+
+    # Importar o gerador de PDF aqui para evitar dependências circulares
+    from .pdf_generator import gerar_pdf_orcamento
+
+    try:
+        pdf_buffer = gerar_pdf_orcamento(orcamento)
+        response = HttpResponse(pdf_buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="orcamento_{numero}.pdf"'
+        return response
+    except Exception as e:
+        messages.error(request, f'Erro ao gerar PDF: {str(e)}')
+        return redirect('orcamentos:admin_orcamento_detail', numero=numero)
+
+@login_required
+@staff_member_required
+def admin_elaborar_orcamento(request, numero):
+    """Elaborar orçamento a partir de uma solicitação"""
+    solicitacao = get_object_or_404(SolicitacaoOrcamento, numero=numero)
+
+    # Verificar se já existe orçamento
+    if hasattr(solicitacao, 'orcamento'):
+        messages.info(request, 'Cette demande a déjà un devis associé.')
+        return redirect('orcamentos:admin_editar_orcamento', numero=solicitacao.orcamento.numero)
+
+    if request.method == 'POST':
+        form = OrcamentoForm(request.POST)
+        if form.is_valid():
+            orcamento = form.save(commit=False)
+            orcamento.solicitacao = solicitacao
+            orcamento.elaborado_por = request.user
+            orcamento.save()
+
+            # Processar itens do orçamento enviados via AJAX
+            itens_data = request.POST.get('itens_json', '[]')
+            print(f"DEBUG: itens_data recebido: {itens_data}")  # Debug
+
+            try:
+                itens = json.loads(itens_data)
+                print(f"DEBUG: itens parseados: {itens}")  # Debug
+
+                for item_data in itens:
+                    print(f"DEBUG: processando item: {item_data}")  # Debug
+                    if item_data.get('descricao'):  # Só criar se tiver descrição
+                        item_criado = ItemOrcamento.objects.create(
+                            orcamento=orcamento,
+                            produto_id=item_data.get('produto_id') if item_data.get('produto_id') else None,
+                            referencia=item_data.get('referencia', ''),
+                            descricao=item_data.get('descricao'),
+                            unidade=item_data.get('unidade', 'unite'),
+                            atividade=item_data.get('atividade', 'marchandise'),
+                            quantidade=Decimal(str(item_data.get('quantidade', 1))),
+                            preco_unitario_ht=Decimal(str(item_data.get('preco_unitario_ht', 0))),
+                            remise_percentual=Decimal(str(item_data.get('remise_percentual', 0))),
+                            taxa_tva=item_data.get('taxa_tva', '20'),
+                            preco_compra_unitario=Decimal(str(item_data.get('preco_compra_unitario', 0))),
+                        )
+                        print(f"DEBUG: item criado com ID: {item_criado.id}")  # Debug
+                    else:
+                        print(f"DEBUG: item ignorado - sem descrição")  # Debug
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                print(f"DEBUG: erro ao processar itens: {str(e)}")  # Debug
+                messages.warning(request, f'Erro ao processar itens: {str(e)}')
+                pass
+
+            # Recalcular totais
+            orcamento.calcular_totais()
+
+            # Atualizar status da solicitação
+            solicitacao.status = StatusOrcamento.EM_ELABORACAO
+            solicitacao.save()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                orcamento.status = StatusOrcamento.ENVIADO
+                orcamento.data_envio = timezone.now()
+                orcamento.save()
+
+                solicitacao.status = StatusOrcamento.ENVIADO
+                solicitacao.save()
+
+                messages.success(request, f'Devis {orcamento.numero} créé et envoyé avec succès!')
+            else:
+                messages.success(request, f'Devis {orcamento.numero} sauvegardé en brouillon.')
+
+            return redirect('orcamentos:admin_orcamento_detail', numero=orcamento.numero)
+    else:
+        # Pré-preencher com dados da solicitação
+        initial_data = {
+            'titulo': f"Devis pour {solicitacao.get_tipo_servico_display()}",
+            'descricao': solicitacao.descricao_servico,
+            'prazo_execucao': 30,
+            'validade_orcamento': timezone.now().date() + timezone.timedelta(days=30),
+            'condicoes_pagamento': "30% à la signature, 70% à la fin des travaux",
+            'desconto': 0,
+        }
+        form = OrcamentoForm(initial=initial_data)
+
+    context = {
+        'form': form,
+        'solicitacao': solicitacao,
+        'page_title': f'Elaborer Devis - {solicitacao.numero}',
+    }
+
+    return render(request, 'orcamentos/admin_elaborar_orcamento.html', context)
+
+@staff_member_required
+def admin_criar_orcamento_cliente(request, cliente_id):
+    """Criar orçamento diretamente para um cliente específico"""
+    from clientes.models import Cliente
+
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == 'POST':
+        # Primeiro, criar uma solicitação temporária para o cliente
+        solicitacao = SolicitacaoOrcamento.objects.create(
+            nome_solicitante=cliente.nom_complet,
+            email_solicitante=cliente.email or 'nao-informado@exemplo.com',
+            telefone_solicitante=cliente.telephone or '',
+            endereco=cliente.adresse,
+            cidade=cliente.ville,
+            cep=cliente.code_postal,
+            tipo_servico='outro',
+            descricao_servico=f'Orçamento personalizado para {cliente.nom_complet}',
+            orcamento_maximo=5000.00,
+            data_inicio_desejada=timezone.now().date() + timezone.timedelta(days=30),
+            status=StatusOrcamento.EM_ELABORACAO
+        )
+
+        # Criar o orçamento
+        form = OrcamentoForm(request.POST)
+        if form.is_valid():
+            orcamento = form.save(commit=False)
+            orcamento.solicitacao = solicitacao
+            orcamento.elaborado_por = request.user
+            orcamento.save()
+
+            # Processar itens do orçamento enviados via AJAX
+            itens_data = request.POST.get('itens_json', '[]')
+            try:
+                itens = json.loads(itens_data)
+                for item_data in itens:
+                    if item_data.get('descricao'):
+                        ItemOrcamento.objects.create(
+                            orcamento=orcamento,
+                            produto_id=item_data.get('produto_id') if item_data.get('produto_id') else None,
+                            referencia=item_data.get('referencia', ''),
+                            descricao=item_data.get('descricao'),
+                            unidade=item_data.get('unidade', 'unite'),
+                            atividade=item_data.get('atividade', 'marchandise'),
+                            quantidade=Decimal(str(item_data.get('quantidade', 1))),
+                            preco_unitario_ht=Decimal(str(item_data.get('preco_unitario_ht', 0))),
+                            remise_percentual=Decimal(str(item_data.get('remise_percentual', 0))),
+                            taxa_tva=item_data.get('taxa_tva', '20'),
+                            preco_compra_unitario=Decimal(str(item_data.get('preco_compra_unitario', 0))),
+                        )
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                messages.warning(request, f'Erro ao processar itens: {str(e)}')
+
+            # Recalcular totais
+            orcamento.calcular_totais()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                orcamento.status = StatusOrcamento.ENVIADO
+                orcamento.data_envio = timezone.now()
+                orcamento.save()
+
+                solicitacao.status = StatusOrcamento.ENVIADO
+                solicitacao.save()
+
+                messages.success(request, f'Devis {orcamento.numero} créé et envoyé avec succès pour {cliente.nom_complet}!')
+            else:
+                messages.success(request, f'Devis {orcamento.numero} sauvegardé en brouillon pour {cliente.nom_complet}.')
+
+            return redirect('orcamentos:admin_orcamento_detail', numero=orcamento.numero)
+    else:
+        # Pré-preencher com dados do cliente
+        initial_data = {
+            'titulo': f"Devis pour {cliente.nom_complet}",
+            'descricao': f'Orçamento personalizado elaborado para {cliente.nom_complet}',
+            'prazo_execucao': 30,
+            'validade_orcamento': timezone.now().date() + timezone.timedelta(days=30),
+            'condicoes_pagamento': cliente.get_conditions_paiement_display() if cliente.conditions_paiement else "30% à la signature, 70% à la fin des travaux",
+            'desconto': float(cliente.remise_globale) if cliente.remise_globale else 0,
+        }
+        form = OrcamentoForm(initial=initial_data)
+
+    context = {
+        'form': form,
+        'cliente': cliente,
+        'page_title': f'Criar Devis para {cliente.nom_complet}',
+        'is_cliente_direto': True,  # Flag para identificar que é criação direta
+    }
+
+    return render(request, 'orcamentos/admin_elaborar_orcamento.html', context)

@@ -1,0 +1,595 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}
+    {% if is_cliente_direto %}
+        Criar Devis - {{ cliente.nom_complet }}
+    {% else %}
+        Elaborer Devis - {{ solicitacao.numero }}
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block content %}
+<div class="p-4 sm:p-6 bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+            <div>
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                    <i class="fas fa-file-invoice text-blue-600"></i>
+                    {% if is_cliente_direto %}
+                        Criar Devis - {{ cliente.nom_complet }}
+                    {% else %}
+                        Elaborer Devis - {{ solicitacao.numero }}
+                    {% endif %}
+                </h1>
+                <p class="text-sm sm:text-base text-gray-600">
+                    {% if is_cliente_direto %}
+                        {{ cliente.email|default:"Email não informado" }} - Cliente: {{ cliente.code }}
+                    {% else %}
+                        {{ solicitacao.nome_solicitante }} - {{ solicitacao.email_solicitante }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2 sm:gap-3">
+                <button type="button"
+                        class="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        id="btn-save-draft">
+                    <i class="fas fa-save mr-2"></i>
+                    <span class="hidden sm:inline">Sauvegarder</span>
+                </button>
+                {% if is_cliente_direto %}
+                    <a href="{% url 'clientes:detalhe_cliente' cliente.pk %}"
+                       class="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span class="hidden sm:inline">Retour au Client</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                       class="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <span class="hidden sm:inline">Retour</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="form-orcamento">
+        {% csrf_token %}
+        <input type="hidden" name="itens_json" id="itens-json">
+
+        <!-- Informações do orçamento -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                Informations du Devis
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="field-container">
+                    {{ form.titulo.label_tag }}
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.titulo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="field-container">
+                    {{ form.prazo_execucao.label_tag }}
+                    {{ form.prazo_execucao }}
+                    {% if form.prazo_execucao.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.prazo_execucao.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="field-container">
+                    {{ form.validade_orcamento.label_tag }}
+                    {{ form.validade_orcamento }}
+                    {% if form.validade_orcamento.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.validade_orcamento.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="field-container">
+                    {{ form.desconto.label_tag }}
+                    {{ form.desconto }}
+                    {% if form.desconto.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.desconto.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field-container">
+                    {{ form.descricao.label_tag }}
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.descricao.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="field-container">
+                    {{ form.condicoes_pagamento.label_tag }}
+                    {{ form.condicoes_pagamento }}
+                    {% if form.condicoes_pagamento.errors %}
+                        <div class="text-red-500 text-sm mt-1">{{ form.condicoes_pagamento.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de produtos -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 sm:px-6 py-4 border-b border-gray-200 rounded-t-xl flex justify-between items-center">
+                <h2 class="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-table text-blue-600"></i>
+                    Produits et Services
+                </h2>
+                <button type="button"
+                        class="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-lg transition-all transform hover:scale-105"
+                        id="btn-add-row"
+                        title="Ajouter une ligne">
+                    <i class="fas fa-plus text-sm"></i>
+                </button>
+            </div>
+
+            <div class=" overflow-x-auto">
+                <table class=" w-full" id="products-table" >
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="col-search px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recherche Produit</th>
+                            <th class="col-ref px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                            <th class="col-desc px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Désignation</th>
+                            <th class="col-unite px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unité</th>
+                            <th class="col-qty px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qté</th>
+                            <th class="col-price px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">P.U HT</th>
+                            <th class="col-price px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">P.U TTC</th>
+                            <th class="col-remise px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">% Remise</th>
+                            <th class="col-total px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total HT</th>
+                            <th class="col-total px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total TTC</th>
+                            <th class="col-tva px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">TVA</th>
+                            <th class="col-activity px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activité</th>
+                            <th class="col-actions px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-tbody">
+                        <!-- Linhas adicionadas via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totais -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-6 rounded-b-xl">
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div class="field-container">
+                        <label class="form-label" for="observacoes">Observations</label>
+                        <textarea id="observacoes"
+                                  name="observacoes"
+                                  rows="4"
+                                  placeholder="Ajoutez des observations, notes ou conditions particulières..."
+                                  class="form-input form-textarea">{{ form.observacoes.value|default:'' }}</textarea>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-3 px-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <span class="font-semibold text-gray-700">Total HT:</span>
+                            <span class="font-bold text-lg text-gray-900" id="total-ht">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 px-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <span class="font-semibold text-gray-700">Total TVA:</span>
+                            <span class="font-bold text-lg text-gray-900" id="total-tva">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 px-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <span class="font-semibold text-gray-700">Total TTC:</span>
+                            <span class="font-bold text-lg text-gray-900" id="total-ttc">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <span class="font-medium text-gray-600">Total Achats:</span>
+                            <span class="font-semibold text-gray-600" id="total-achats">0,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center py-4 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg">
+                            <span class="font-bold text-lg text-white">TOTAL FINAL:</span>
+                            <span class="font-bold text-xl text-white" id="total-final">0,00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+            {% if is_cliente_direto %}
+                <a href="{% url 'clientes:detalhe_cliente' cliente.pk %}"
+                   class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Annuler
+                </a>
+            {% else %}
+                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                   class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Annuler
+                </a>
+            {% endif %}
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button type="submit"
+                        name="action"
+                        value="draft"
+                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    <i class="fas fa-save mr-2"></i>
+                    Sauvegarder brouillon
+                </button>
+                <button type="submit"
+                        name="action"
+                        value="send"
+                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Finaliser et envoyer
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let rowCounter = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    addRow();
+
+    document.getElementById('btn-add-row').addEventListener('click', addRow);
+    document.getElementById('desconto-global').addEventListener('input', calculateTotals);
+    document.getElementById('form-orcamento').addEventListener('submit', function(e) {
+        saveItemsToJson();
+    });
+});
+
+function addRow() {
+    rowCounter++;
+    const tbody = document.getElementById('products-tbody');
+    const row = document.createElement('tr');
+    row.setAttribute('data-row', rowCounter);
+
+    row.innerHTML = `
+        <td class="px-1 py-2">
+            <div class="relative">
+                <input type="text" class="w-full px-1 py-2 border border-gray-300 rounded search-input" placeholder="Rechercher..."
+                       data-row="${rowCounter}" oninput="searchProducts(this)" style="text-align: left; padding-left: 10px; font-style: italic; font-size: 13px;">
+                <div class="search-dropdown w-full bg-white border border-gray-300" id="results-${rowCounter}"></div>
+                <input type="hidden" class="produto-id " style="font-size: 13px; cursor: pointer;">
+                <input type="hidden" class="preco-compra" style="font-size: 13px; cursor: pointer;">
+            </div>
+        </td>
+        <td class="px-1 py-2">
+            <input style="font-size: 13px;" type="text" class="excel-input w-full px-1 py-2 border border-gray-300 rounded referencia" readonly style="text-align: center; font-weight: 600; font-size: 13px; background: #f9fafb; color: #6b7280; border-left: 3px solid #e5e7eb;"></td>
+        <td class="px-1 py-2">
+            <input style="font-size: 13px;" type="text" class="excel-input w-full px-1 py-2 border border-gray-300 rounded descricao" placeholder="Description..." style="text-align: left; padding-left: 10px;"></td>
+        <td class="px-1 py-2">
+            <select style="font-size: 13px;" class="excel-select w-full px-1 py-2 border border-gray-300 rounded unidade" onchange="calculateRowTotal(this)" style="text-align: center; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 6px center; background-repeat: no-repeat; background-size: 14px; padding-right: 24px;">
+                <option value="unite">Unité</option>
+                <option value="piece">Pièce</option>
+                <option value="m2">M²</option>
+                <option value="ml">ML</option>
+                <option value="longueur">Longueur</option>
+                <option value="kg">Kg</option>
+                <option value="heure">Heure</option>
+                <option value="forfait">Forfait</option>
+            </select>
+        </td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded quantidade"
+                min="0"
+                value="1"
+                oninput="validateAndCalculateQuantity(this)"
+                onblur="formatQuantity(this)"
+                pattern="[0-9]*[.,]?[0-9]*"
+                inputmode="decimal"
+                style="text-align: right; padding-right: 10px;"></td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded preco-ht"
+                min="0"
+                value="0"
+                oninput="validateAndCalculatePrice(this)"
+                onblur="formatPrice(this)"
+                pattern="[0-9]*[.,]?[0-9]*"
+                inputmode="decimal"
+                style="text-align: right; padding-right: 10px;"></td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded preco-ttc"
+                min="0"
+                value="0"
+                readonly
+                style="text-align: right; padding-right: 10px; background: #f9fafb; color: #6b7280; font-weight: 600; border-left: 3px solid #e5e7eb;"></td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded remise"
+                min="0"
+                max="100"
+                value="0"
+                oninput="validateAndCalculateRemise(this)"
+                onblur="formatRemise(this)"
+                pattern="[0-9]*[.,]?[0-9]*"
+                inputmode="decimal"
+                style="text-align: right; padding-right: 10px;"></td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded total-ht"
+                readonly
+                style="text-align: right; padding-right: 10px; background: #f9fafb; color: #6b7280; font-weight: 600; border-left: 3px solid #e5e7eb;"></td>
+        <td style="font-size: 13px;" class="px-1 py-2">
+            <input
+                type="text"
+                class=" excel-input w-full px-1 py-2 border border-gray-300 rounded total-ttc"
+                readonly
+                style="text-align: right; padding-right: 10px; background: #f9fafb; color: #6b7280; font-weight: 600; border-left: 3px solid #e5e7eb;"></td>
+        <td class="px-1 py-2">
+            <select style="font-size: 13px;" class="excel-select w-full px-1 py-2 border border-gray-300 rounded taxa-tva" onchange="calculateRowTotal(this)" style="text-align: center; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 6px center; background-repeat: no-repeat; background-size: 14px; padding-right: 24px;">
+                <option value="20">TVA 20%</option>
+                <option value="10">TVA 10%</option>
+                <option value="5.5">TVA 5,5%</option>
+                <option value="0">Exonérée</option>
+            </select>
+        </td>
+        <td class="px-1 py-2">
+            <select style="font-size: 13px;" class="excel-select w-full px-1 py-2 border border-gray-300 rounded atividade" style="text-align: center; background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e'); background-position: right 6px center; background-repeat: no-repeat; background-size: 14px; padding-right: 24px;">
+                <option value="marchandise">Marchandise</option>
+                <option value="service">Service</option>
+            </select>
+        </td>
+        <td class="text-center p-2">
+            <button type="button"
+                    class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full hover:bg-red-700 text-xs transition-all duration-200 hover:scale-110"
+                    onclick="removeRow(this)"
+                    title="Supprimer">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+    row.querySelector('.excel-input').focus();
+}
+
+function removeRow(button) {
+    const tbody = document.getElementById('products-tbody');
+    if (tbody.children.length > 1) {
+        button.closest('tr').remove();
+        calculateTotals();
+    }
+}
+
+function searchProducts(input) {
+    const query = input.value;
+    const row = input.getAttribute('data-row');
+    const resultsDiv = document.getElementById(`results-${row}`);
+
+    if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+
+    fetch(`{% url 'orcamentos:buscar_produtos_ajax' %}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.innerHTML = '';
+
+            if (data.produtos && data.produtos.length > 0) {
+                data.produtos.forEach(produto => {
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.innerHTML = `
+                        <div style="font-weight: 500;">${produto.referencia} - ${produto.descricao}</div>
+                        <div style="font-size: 11px; color: #6b7280;">${produto.preco_venda_ht}€ HT | ${produto.unidade} | ${produto.atividade}</div>
+                    `;
+                    item.addEventListener('click', () => selectProduct(produto, input.closest('tr')));
+                    resultsDiv.appendChild(item);
+                });
+
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Erro na busca:', error);
+            resultsDiv.style.display = 'none';
+        });
+}
+
+function selectProduct(produto, row) {
+    row.querySelector('.produto-id').value = produto.id;
+    row.querySelector('.referencia').value = produto.referencia;
+    row.querySelector('.descricao').value = produto.descricao;
+    row.querySelector('.unidade').value = produto.unidade;
+    row.querySelector('.preco-ht').value = produto.preco_venda_ht;
+    row.querySelector('.preco-ttc').value = produto.preco_venda_ttc;
+    row.querySelector('.taxa-tva').value = produto.taxa_tva;
+    row.querySelector('.atividade').value = produto.atividade;
+    row.querySelector('.preco-compra').value = produto.preco_compra;
+
+    row.querySelector('.excel-input').value = produto.referencia;
+    row.querySelector('.search-dropdown').style.display = 'none';
+
+    calculateRowTotal(row.querySelector('.quantidade'));
+}
+
+// Funções de validação e formatação
+function validateAndCalculateQuantity(input) {
+    let value = input.value.replace(/[^0-9.,]/g, '');
+    value = value.replace(',', '.');
+
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    if (parts[1] && parts[1].length > 3) {
+        value = parts[0] + '.' + parts[1].substring(0, 3);
+    }
+
+    input.value = value;
+    calculateRowTotal(input);
+}
+
+function formatQuantity(input) {
+    let value = parseFloat(input.value.replace(',', '.')) || 0;
+    if (value < 0) value = 0;
+    input.value = value % 1 === 0 ? value.toString() : value.toFixed(3);
+}
+
+function validateAndCalculatePrice(input) {
+    let value = input.value.replace(/[^0-9.,]/g, '');
+    value = value.replace(',', '.');
+
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    if (parts[1] && parts[1].length > 2) {
+        value = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+
+    input.value = value;
+    calculateRowTotal(input);
+}
+
+function formatPrice(input) {
+    let value = parseFloat(input.value.replace(',', '.')) || 0;
+    if (value < 0) value = 0;
+    input.value = value.toFixed(2);
+}
+
+function validateAndCalculateRemise(input) {
+    let value = input.value.replace(/[^0-9.,]/g, '');
+    value = value.replace(',', '.');
+
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    if (parts[1] && parts[1].length > 2) {
+        value = parts[0] + '.' + parts[1].substring(0, 2);
+    }
+
+    input.value = value;
+    calculateRowTotal(input);
+}
+
+function formatRemise(input) {
+    let value = parseFloat(input.value.replace(',', '.')) || 0;
+    if (value < 0) value = 0;
+    if (value > 100) value = 100;
+    input.value = value % 1 === 0 ? value.toString() : value.toFixed(2);
+}
+
+function calculateRowTotal(input) {
+    const row = input.closest('tr');
+    const quantidade = parseFloat(row.querySelector('.quantidade').value.replace(',', '.')) || 0;
+    const precoHt = parseFloat(row.querySelector('.preco-ht').value.replace(',', '.')) || 0;
+    const remise = parseFloat(row.querySelector('.remise').value.replace(',', '.')) || 0;
+
+    // Usar mesma abordagem robusta para TVA que não trata 0 como falsy
+    const taxaTvaElement = row.querySelector('.taxa-tva');
+    const taxaTva = taxaTvaElement ? parseFloat(taxaTvaElement.value) : 20;
+
+    const precoTtc = precoHt * (1 + (taxaTva / 100));
+    row.querySelector('.preco-ttc').value = precoTtc.toFixed(2);
+
+    const totalBrutoHt = quantidade * precoHt;
+    const valorRemise = (totalBrutoHt * remise) / 100;
+    const totalLiquidoHt = totalBrutoHt - valorRemise;
+    const valorTva = totalLiquidoHt * (taxaTva / 100);
+    const totalTtc = totalLiquidoHt + valorTva;
+
+    row.querySelector('.total-ht').value = totalLiquidoHt.toFixed(2);
+    row.querySelector('.total-ttc').value = totalTtc.toFixed(2);
+
+    calculateTotals();
+}
+
+// Função calculateTotals atualizada
+function calculateTotals() {
+    let totalHt = 0;
+    let totalTtc = 0;
+    let totalAchats = 0;
+
+    document.querySelectorAll('#products-tbody tr').forEach(row => {
+        const ht = parseFloat(row.querySelector('.total-ht').value.replace(',', '.')) || 0;
+        const ttc = parseFloat(row.querySelector('.total-ttc').value.replace(',', '.')) || 0;
+        const quantidade = parseFloat(row.querySelector('.quantidade').value.replace(',', '.')) || 0;
+        const precoCompra = parseFloat(row.querySelector('.preco-compra').value.replace(',', '.')) || 0;
+
+        totalHt += ht;
+        totalTtc += ttc;
+        totalAchats += (quantidade * precoCompra);
+    });
+
+    const totalTva = totalTtc - totalHt;
+    const descontoGlobal = parseFloat(document.getElementById('desconto-global')?.value.replace(',', '.')) || 0;
+
+    // Aplicar desconto global sobre o total HT
+    const valorDescontoGlobal = (totalHt * descontoGlobal) / 100;
+    const totalHtComDesconto = totalHt - valorDescontoGlobal;
+
+    // Aplicar desconto sobre a TVA também
+    const valorDescontoTva = (totalTva * descontoGlobal) / 100;
+    const totalTvaComDesconto = totalTva - valorDescontoTva;
+
+    // Total final é HT com desconto + TVA com desconto
+    const totalFinal = totalHtComDesconto + totalTvaComDesconto;
+
+    document.getElementById('total-ht').textContent = totalHtComDesconto.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    document.getElementById('total-tva').textContent = totalTvaComDesconto.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    document.getElementById('total-ttc').textContent = totalTtc.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    document.getElementById('total-achats').textContent = totalAchats.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    document.getElementById('total-final').textContent = totalFinal.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+}
+
+// Função saveItemsToJson atualizada
+function saveItemsToJson() {
+    const itens = [];
+
+    document.querySelectorAll('#products-tbody tr').forEach(row => {
+        const descricao = row.querySelector('.descricao').value.trim();
+
+        if (descricao) {
+            const item = {
+                produto_id: row.querySelector('.produto-id').value || null,
+                referencia: row.querySelector('.referencia').value || '',
+                descricao: descricao,
+                unidade: row.querySelector('.unidade').value || 'unite',
+                atividade: row.querySelector('.atividade').value || 'marchandise',
+                quantidade: parseFloat(row.querySelector('.quantidade').value.replace(',', '.')) || 1,
+                preco_unitario_ht: parseFloat(row.querySelector('.preco-ht').value.replace(',', '.')) || 0,
+                remise_percentual: parseFloat(row.querySelector('.remise').value.replace(',', '.')) || 0,
+                taxa_tva: row.querySelector('.taxa-tva').value || '20',
+                preco_compra_unitario: parseFloat(row.querySelector('.preco-compra').value.replace(',', '.')) || 0,
+                total_ht: parseFloat(row.querySelector('.total-ht').value.replace(',', '.')) || 0,
+                total_ttc: parseFloat(row.querySelector('.total-ttc').value.replace(',', '.')) || 0
+            };
+            itens.push(item);
+        }
+    });
+
+    document.getElementById('itens-json').value = JSON.stringify(itens);
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.relative')) {
+        document.querySelectorAll('.search-dropdown').forEach(results => {
+            results.style.display = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,615 @@
+<div class="contact-map-container">
+  <div class="map-header">
+    <h3 class="map-title">{{ map_title|default:"Notre localisation" }}</h3>
+    <p class="map-subtitle">
+      {{ map_subtitle|default:"Nous intervenons dans un rayon de 50km autour de ST SAUVEUR" }}
+    </p>
+  </div>
+
+  <div id="contact-map" class="contact-map"></div>
+
+  <div class="map-info">
+    <div class="info-card">
+      <div class="info-header">
+        <i class="fas fa-map-marker-alt text-blue-600"></i>
+        <h4>Notre zone d'intervention</h4>
+      </div>
+      <div class="info-content">
+        <p><strong>{{ empresa.nome|default:"LOPES PEINTURE" }}</strong></p>
+        <p>{{ empresa.endereco|default:"261 chemin de la castellane" }}</p>
+        <p>{{ empresa.cidade|default:"ST SAUVEUR 31790 - France" }}</p>
+        <div class="contact-links">
+          <a href="tel:{{ empresa.telefone|default:'+33769273776' }}" class="contact-link phone">
+            <i class="fas fa-phone"></i>
+            {{ empresa.telefone|default:"+33 7 69 27 37 76" }}
+          </a>
+          <a
+            href="mailto:{{ empresa.email|default:'contact@lopespeinture.fr' }}"
+            class="contact-link email"
+          >
+            <i class="fas fa-envelope"></i>
+            {{ empresa.email|default:"contact@lopespeinture.fr" }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-map-container {
+    width: 100%;
+    margin: 2rem 0;
+  }
+
+  .map-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .map-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .map-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+  }
+
+  .contact-map {
+    width: 100%;
+    height: 400px;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+  }
+
+  .map-info {
+    margin-top: 1.5rem;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-header i {
+    font-size: 1.5rem;
+    color: #2563eb;
+  }
+
+  .info-header h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .info-content p {
+    margin: 0.5rem 0;
+    color: #374151;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.2s ease;
+    border: 1px solid #e5e7eb;
+  }
+
+  .contact-link:hover {
+    background: #f3f4f6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .contact-link.phone:hover {
+    color: #059669;
+    border-color: #059669;
+  }
+
+  .contact-link.email:hover {
+    color: #2563eb;
+    border-color: #2563eb;
+  }
+
+  .contact-link i {
+    font-size: 1rem;
+  }
+
+  /* Custom marker styles */
+  .custom-marker {
+    position: relative;
+  }
+
+  .marker-pin {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 3px solid white;
+  }
+
+  .marker-pin i {
+    color: white;
+    font-size: 14px;
+    transform: rotate(45deg);
+  }
+
+  .marker-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: rgba(37, 99, 235, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
+    }
+  }
+
+  /* Custom popup styles */
+  .custom-popup {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .popup-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .popup-content p {
+    margin: 0.5rem 0;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+
+  .popup-contact {
+    margin: 0.75rem 0;
+  }
+
+  .popup-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    background: #eff6ff;
+    transition: all 0.2s ease;
+  }
+
+  .popup-link:hover {
+    background: #dbeafe;
+    transform: translateY(-1px);
+  }
+
+  .popup-link i {
+    font-size: 0.875rem;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .contact-map {
+      height: 300px;
+    }
+
+    .contact-links {
+      gap: 0.5rem;
+    }
+
+    .contact-link {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .info-card {
+      padding: 1rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .contact-links {
+      flex-direction: row;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Verificar se Leaflet está carregado
+    if (typeof L === 'undefined') {
+      console.error('Leaflet não está carregado');
+      return;
+    }
+
+    // Configuração padrão
+    const config = {
+      center: [43.753, 1.3984], // ST SAUVEUR 31790
+      zoom: 13,
+      companyInfo: {
+        name: '{{ empresa.nome|default:"LOPES PEINTURE" }}',
+        address: '{{ empresa.endereco|default:"261 chemin de la castellane" }}',
+        city: '{{ empresa.cidade|default:"ST SAUVEUR 31790 - France" }}',
+        phone: '{{ empresa.telefone|default:"+33 7 69 27 37 76" }}',
+        email: '{{ empresa.email|default:"contact@lopespeinture.fr" }}',
+      },
+    };
+
+    // Inicializar a carte
+    const map = L.map('contact-map', {
+      center: config.center,
+      zoom: config.zoom,
+      zoomControl: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      dragging: true,
+    });
+
+    // Ajouter les tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18,
+    }).addTo(map);
+
+    // Créer une icône personnalisée pour l'entreprise
+    const companyIcon = L.divIcon({
+      html: `
+      <div class="custom-marker">
+        <div class="marker-pin">
+          <i class="fas fa-home"></i>
+        </div>
+        <div class="marker-pulse"></div>
+      </div>
+    `,
+      className: 'custom-div-icon',
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+    });
+
+    // Ajouter le marqueur de l'entreprise
+    const companyMarker = L.marker(config.center, { icon: companyIcon }).addTo(map);
+
+    // Contenu du popup
+    const popupContent = `
+    <div class="custom-popup">
+      <h4 class="popup-title">${config.companyInfo.name}</h4>
+      <div class="popup-content">
+        <p><strong>Adresse:</strong><br>${config.companyInfo.address}<br>${config.companyInfo.city}</p>
+        <div class="popup-contact">
+          <a href="tel:${config.companyInfo.phone}" class="popup-link">
+            <i class="fas fa-phone"></i> ${config.companyInfo.phone}
+          </a>
+        </div>
+        <div class="popup-contact">
+          <a href="mailto:${config.companyInfo.email}" class="popup-link">
+            <i class="fas fa-envelope"></i> ${config.companyInfo.email}
+          </a>
+        </div>
+        <div class="popup-contact">
+          <a href="https://wa.me/33634623320?text=Bonjour,%20j'ai%20une%20question%20concernant%20vos%20services." target="_blank" class="popup-link">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+
+    companyMarker.bindPopup(popupContent);
+
+    // Ajouter la zone de service (cercle de 25km)
+    const serviceArea = L.circle(config.center, {
+      radius: 50000, // 25km en mètres
+      color: '#2563eb',
+      fillColor: '#2563eb',
+      fillOpacity: 0.1,
+      weight: 2,
+      dashArray: '5, 5',
+    }).addTo(map);
+
+    // Ajouter un tooltip pour la zone de service
+    serviceArea.bindTooltip("Zone d'intervention - Rayon de 50 km", {
+      permanent: false,
+      direction: 'center',
+      className: 'service-area-tooltip',
+    });
+
+    // Ouvrir automatiquement le popup de l'entreprise
+    setTimeout(() => {
+      companyMarker.openPopup();
+    }, 1000);
+
+    // Gérer le redimensionnement de la fenêtre
+    window.addEventListener('resize', function () {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    });
+
+    // Ajouter des contrôles personnalisés
+    const customControl = L.Control.extend({
+      options: {
+        position: 'topright',
+      },
+      onAdd: function (map) {
+        const container = L.DomUtil.create(
+          'div',
+          'leaflet-bar leaflet-control leaflet-control-custom'
+        );
+
+        container.innerHTML = `
+        <div class="map-controls">
+          <button type="button" class="control-btn" onclick="centerMap()" title="Recentrer la carte">
+            <i class="fas fa-crosshairs"></i>
+          </button>
+          <button type="button" class="control-btn" onclick="toggleFullscreen()" title="Plein écran">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      `;
+
+        container.style.backgroundColor = 'white';
+        container.style.padding = '5px';
+        container.style.borderRadius = '4px';
+
+        return container;
+      },
+    });
+
+    map.addControl(new customControl());
+
+    // Fonctions globales pour les contrôles
+    window.centerMap = function () {
+      map.setView(config.center, config.zoom);
+      companyMarker.openPopup();
+    };
+
+    window.toggleFullscreen = function () {
+      const mapContainer = document.getElementById('contact-map');
+      if (!document.fullscreenElement) {
+        mapContainer.requestFullscreen().then(() => {
+          setTimeout(() => map.invalidateSize(), 100);
+        });
+      } else {
+        document.exitFullscreen().then(() => {
+          setTimeout(() => map.invalidateSize(), 100);
+        });
+      }
+    };
+
+    // Ajouter des marqueurs pour des projets récents (optionnel)
+    const recentProjects = [
+      {
+        position: [43.6612, 1.3542],
+        title: 'Projet récent - Maison individuelle',
+        description: 'Peinture intérieure complète - 2024',
+      },
+      {
+        position: [43.6452, 1.3689],
+        title: 'Projet récent - Appartement',
+        description: 'Rénovation peinture - 2024',
+      },
+    ];
+
+    // Icône pour les projets
+    const projectIcon = L.divIcon({
+      html: `
+      <div class="custom-marker project-marker">
+        <div class="marker-pin" style="background: linear-gradient(135deg, #059669, #047857); width: 20px; height: 20px;">
+          <i class="fas fa-paint-brush"></i>
+        </div>
+      </div>
+    `,
+      className: 'custom-div-icon',
+      iconSize: [20, 20],
+      iconAnchor: [10, 20],
+    });
+
+    // Ajouter les marqueurs de projets
+    recentProjects.forEach((project) => {
+      const marker = L.marker(project.position, { icon: projectIcon }).addTo(map);
+      marker.bindPopup(`
+      <div class="custom-popup">
+        <h4 class="popup-title">${project.title}</h4>
+        <p>${project.description}</p>
+      </div>
+    `);
+    });
+
+    // Animation d'entrée pour les marqueurs
+    setTimeout(() => {
+      const markers = document.querySelectorAll('.custom-marker');
+      markers.forEach((marker, index) => {
+        marker.style.animation = `markerBounce 0.6s ease-out ${index * 0.2}s both`;
+      });
+    }, 500);
+  });
+</script>
+
+<style>
+  /* Styles additionnels pour les contrôles et animations */
+  .leaflet-control-custom {
+    background: white !important;
+    border: 2px solid rgba(0, 0, 0, 0.2) !important;
+    border-radius: 4px !important;
+  }
+
+  .map-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .control-btn {
+    background: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    color: #374151;
+  }
+
+  .control-btn:hover {
+    background: #f3f4f6;
+    color: #2563eb;
+  }
+
+  .service-area-tooltip {
+    background: rgba(37, 99, 235, 0.9) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+    font-weight: 500;
+  }
+
+  .service-area-tooltip::before {
+    border-top-color: rgba(37, 99, 235, 0.9) !important;
+  }
+
+  /* Animation pour les marqueurs */
+  @keyframes markerBounce {
+    0% {
+      transform: translateY(-100px) scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: translateY(0) scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Styles pour le mode plein écran */
+  .leaflet-container:-webkit-full-screen {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .leaflet-container:-moz-full-screen {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .leaflet-container:fullscreen {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Responsive pour mobile */
+  @media (max-width: 768px) {
+    .leaflet-control-custom {
+      display: none;
+    }
+
+    .custom-popup {
+      font-size: 0.875rem;
+    }
+
+    .popup-title {
+      font-size: 1rem;
+    }
+
+    .popup-link {
+      padding: 0.375rem 0.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Amélioration de l'accessibilité */
+  .control-btn:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  .contact-link:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  /* Animation de chargement */
+  .contact-map::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 1000;
+  }
+
+  .contact-map.loaded::before {
+    display: none;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<!-- Inclure les dépendances Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

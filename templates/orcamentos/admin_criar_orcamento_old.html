@@ -1,0 +1,749 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .section-divider {
+        border-top: 2px solid #f3f4f6;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .section-divider::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    }
+
+    .field-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .field-label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .field-required {
+        color: #ef4444;
+    }
+
+    .field-help {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+        .form-grid-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .preview-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pendente {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header with navigation -->
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                   class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Retour à la demande
+                </a>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ page_title }}</h1>
+            <p class="mt-2 text-gray-600">Créer un devis pour la demande {{ solicitacao.numero }}</p>
+        </div>
+
+        <!-- Résumé de la demande -->
+        <div class="summary-card">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Demande {{ solicitacao.numero }}</h2>
+                    <p class="text-gray-600 mt-1">{{ solicitacao.nome_solicitante }}</p>
+                </div>
+                <span class="status-badge status-{{ solicitacao.status }}">
+                    {{ solicitacao.get_status_display }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Service:</span>
+                    <p class="text-gray-900">{{ solicitacao.get_tipo_servico_display }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Localisation:</span>
+                    <p class="text-gray-900">{{ solicitacao.cidade }}, {{ solicitacao.cep }}</p>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Budget max:</span>
+                    <p class="text-gray-900">
+                        {% if solicitacao.orcamento_maximo %}
+                            {{ solicitacao.orcamento_maximo }}€
+                        {% else %}
+                            Non spécifié
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de création du devis -->
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Messages d'erreur globaux -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400 text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Erreurs détectées</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                {{ form.non_field_errors }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Section 1: Informations générales -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-file-invoice text-blue-600 mr-3"></i>
+                        Informations générales
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid">
+                        <!-- Titre -->
+                        <div class="field-group">
+                            <label for="{{ form.titulo.id_for_label }}" class="field-label">
+                                Titre du devis <span class="field-required">*</span>
+                            </label>
+                            {{ form.titulo }}
+                            {% if form.titulo.help_text %}
+                                <p class="field-help">{{ form.titulo.help_text }}</p>
+                            {% endif %}
+                            {% if form.titulo.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="field-group">
+                            <label for="{{ form.descricao.id_for_label }}" class="field-label">
+                                Description des travaux <span class="field-required">*</span>
+                            </label>
+                            {{ form.descricao }}
+                            {% if form.descricao.help_text %}
+                                <p class="field-help">{{ form.descricao.help_text }}</p>
+                            {% endif %}
+                            {% if form.descricao.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Itens do Orçamento -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-list text-blue-600 mr-3"></i>
+                        Itens do devis
+                        <span class="ml-2 text-sm text-gray-500">(Services et produits)</span>
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <!-- Formset management form -->
+                    {{ formset.management_form }}
+
+                    <!-- Container for formset items -->
+                    <div id="formset-container">
+                        {% for form in formset %}
+                            <div class="formset-item bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4" data-form-index="{{ forloop.counter0 }}">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        <i class="fas fa-tools text-blue-600 mr-2"></i>
+                                        Item {{ forloop.counter }}
+                                    </h3>
+                                    {% if not forloop.first %}
+                                        <button type="button" class="remove-formset-item text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                            Supprimer
+                                        </button>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Hidden fields for formset -->
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <!-- Description -->
+                                    <div class="field-group lg:col-span-2">
+                                        <label for="{{ form.descricao.id_for_label }}" class="field-label">
+                                            Description du service/produit
+                                            <span class="field-required">*</span>
+                                        </label>
+                                        {{ form.descricao }}
+                                        {% if form.descricao.errors %}
+                                            <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Quantidade -->
+                                    <div class="field-group">
+                                        <label for="{{ form.quantidade.id_for_label }}" class="field-label">
+                                            Quantité
+                                            <span class="field-required">*</span>
+                                        </label>
+                                        {{ form.quantidade }}
+                                        {% if form.quantidade.errors %}
+                                            <p class="text-red-600 text-sm mt-1">{{ form.quantidade.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Unidade -->
+                                    <div class="field-group">
+                                        <label for="{{ form.unidade.id_for_label }}" class="field-label">
+                                            Unité
+                                        </label>
+                                        {{ form.unidade }}
+                                        {% if form.unidade.errors %}
+                                            <p class="text-red-600 text-sm mt-1">{{ form.unidade.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <!-- Preço Unitário -->
+                                    <div class="field-group">
+                                        <label for="{{ form.preco_unitario.id_for_label }}" class="field-label">
+                                            Prix unitaire (€)
+                                            <span class="field-required">*</span>
+                                        </label>
+                                        {{ form.preco_unitario }}
+                                        {% if form.preco_unitario.errors %}
+                                            <p class="text-red-600 text-sm mt-1">{{ form.preco_unitario.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Total calculado (readonly) -->
+                                    <div class="field-group">
+                                        <label class="field-label">Total calculé (€)</label>
+                                        <input type="text" class="form-input bg-gray-100" readonly placeholder="0,00" id="total_{{ forloop.counter0 }}">
+                                    </div>
+
+                                    <!-- Total geral -->
+                                    <div class="field-group">
+                                        <label class="field-label font-bold text-blue-600">Total du devis (€)</label>
+                                        <input type="text" class="form-input bg-blue-50 font-bold text-blue-600" readonly placeholder="0,00" id="total-general">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Botão para adicionar mais itens -->
+                    <div class="mt-6">
+                        <button type="button" id="add-formset-item" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Ajouter un item
+                        </button>
+                    </div>
+
+                    <!-- Resumo dos totais -->
+                    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-blue-700">Sous-total HT:</span>
+                                <p class="text-blue-900 font-bold text-lg" id="subtotal-display">0,00 €</p>
+                            </div>
+                            <div>
+                                <span class="font-medium text-blue-700">TVA (20%):</span>
+                                <p class="text-blue-900 font-bold text-lg" id="tva-display">0,00 €</p>
+                            </div>
+                            <div>
+                                <span class="font-medium text-blue-700">Total TTC:</span>
+                                <p class="text-blue-900 font-bold text-xl" id="total-ttc-display">0,00 €</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Conditions de paiement et délai -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>
+                        Conditions et délais
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid form-grid-2">
+                        <!-- Délai d'exécution -->
+                        <div class="field-group">
+                            <label for="{{ form.prazo_execucao.id_for_label }}" class="field-label">
+                                Délai d'exécution (jours) <span class="field-required">*</span>
+                            </label>
+                            {{ form.prazo_execucao }}
+                            {% if form.prazo_execucao.help_text %}
+                                <p class="field-help">{{ form.prazo_execucao.help_text }}</p>
+                            {% endif %}
+                            {% if form.prazo_execucao.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.prazo_execucao.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Validité du devis -->
+                        <div class="field-group">
+                            <label for="{{ form.validade_orcamento.id_for_label }}" class="field-label">
+                                Validité du devis <span class="field-required">*</span>
+                            </label>
+                            {{ form.validade_orcamento }}
+                            {% if form.validade_orcamento.help_text %}
+                                <p class="field-help">{{ form.validade_orcamento.help_text }}</p>
+                            {% endif %}
+                            {% if form.validade_orcamento.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.validade_orcamento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Conditions de paiement -->
+                        <div class="field-group">
+                            <label for="{{ form.condicoes_pagamento.id_for_label }}" class="field-label">
+                                Conditions de paiement <span class="field-required">*</span>
+                            </label>
+                            {{ form.condicoes_pagamento }}
+                            {% if form.condicoes_pagamento.help_text %}
+                                <p class="field-help">{{ form.condicoes_pagamento.help_text }}</p>
+                            {% endif %}
+                            {% if form.condicoes_pagamento.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.condicoes_pagamento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Remise et observations -->
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-percentage text-blue-600 mr-3"></i>
+                        Remise et observations
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="form-grid">
+                        <!-- Remise -->
+                        <div class="field-group">
+                            <label for="{{ form.desconto.id_for_label }}" class="field-label">
+                                Remise (%)
+                            </label>
+                            {{ form.desconto }}
+                            {% if form.desconto.help_text %}
+                                <p class="field-help">{{ form.desconto.help_text }}</p>
+                            {% endif %}
+                            {% if form.desconto.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.desconto.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Observations -->
+                        <div class="field-group">
+                            <label for="{{ form.observacoes.id_for_label }}" class="field-label">
+                                Observations particulières
+                            </label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.help_text %}
+                                <p class="field-help">{{ form.observacoes.help_text }}</p>
+                            {% endif %}
+                            {% if form.observacoes.errors %}
+                                <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations importantes -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Informations importantes</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Après création, vous pourrez ajouter des éléments détaillés au devis</li>
+                                <li>Le statut de la demande passera automatiquement à "En cours d'élaboration"</li>
+                                <li>Un numéro unique sera généré automatiquement pour ce devis</li>
+                                <li>Le client sera notifié par email une fois le devis finalisé</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                   class="btn-secondary">
+                    <i class="fas fa-times mr-2"></i>
+                    Annuler
+                </a>
+
+                <div class="flex space-x-3">
+                    <button type="button" id="preview-btn"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                        <i class="fas fa-eye mr-2"></i>
+                        Aperçu
+                    </button>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Créer le devis
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Section d'aperçu (masquée par défaut) -->
+        <div id="preview-section" class="hidden mt-8">
+            <div class="form-card">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-eye text-blue-600 mr-3"></i>
+                        Aperçu du devis
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="preview-section" id="preview-content">
+                        <p class="text-gray-500 text-center py-8">
+                            Cliquez sur "Aperçu" pour voir le rendu du devis
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formsetContainer = document.getElementById('formset-container');
+    const addButton = document.getElementById('add-formset-item');
+    let formsetCount = {{ formset.total_form_count }};
+
+    // Função para calcular totais
+    function calculateTotals() {
+        let subtotal = 0;
+
+        document.querySelectorAll('.formset-item:not([data-deleted="true"])').forEach(function(item, index) {
+            const quantidadeInput = item.querySelector('input[name$="quantidade"]');
+            const precoInput = item.querySelector('input[name$="preco_unitario"]');
+            const totalField = item.querySelector('input[id^="total_"]');
+
+            const quantidade = parseFloat(quantidadeInput.value) || 0;
+            const preco = parseFloat(precoInput.value) || 0;
+            const total = quantidade * preco;
+
+            // Atualizar campo de total do item
+            if (totalField) {
+                totalField.value = total.toFixed(2);
+            }
+
+            subtotal += total;
+        });
+
+        // Aplicar desconto se existir
+        const descontoInput = document.querySelector('input[name="desconto"]');
+        const desconto = parseFloat(descontoInput ? descontoInput.value : 0) || 0;
+        const valorDesconto = (subtotal * desconto) / 100;
+        const totalComDesconto = subtotal - valorDesconto;
+
+        // Calcular TVA (20%)
+        const tva = totalComDesconto * 0.20;
+        const totalTTC = totalComDesconto + tva;
+
+        // Atualizar displays
+        document.getElementById('subtotal-display').textContent = subtotal.toFixed(2) + ' €';
+        document.getElementById('tva-display').textContent = tva.toFixed(2) + ' €';
+        document.getElementById('total-ttc-display').textContent = totalTTC.toFixed(2) + ' €';
+
+        // Atualizar campo total geral se existir
+        const totalGeneralField = document.getElementById('total-general');
+        if (totalGeneralField) {
+            totalGeneralField.value = totalTTC.toFixed(2);
+        }
+    }
+
+    // Adicionar event listeners para cálculos automáticos
+    formsetContainer.addEventListener('input', function(e) {
+        if (e.target.matches('input[name$="quantidade"], input[name$="preco_unitario"]')) {
+            calculateTotals();
+        }
+    });
+
+    // Event listener para desconto
+    const descontoInput = document.querySelector('input[name="desconto"]');
+    if (descontoInput) {
+        descontoInput.addEventListener('input', calculateTotals);
+    }
+
+    // Função para adicionar novo item ao formset
+    function addFormsetItem() {
+        const totalFormsInput = document.getElementById('id_itens-TOTAL_FORMS');
+        const currentFormCount = parseInt(totalFormsInput.value);
+
+        // Criar novo item baseado no template vazio
+        const emptyForm = formsetContainer.querySelector('.formset-item').cloneNode(true);
+
+        // Limpar valores e atualizar índices
+        emptyForm.querySelectorAll('input, select, textarea').forEach(function(field) {
+            const name = field.name.replace(/-\d+-/, '-' + currentFormCount + '-');
+            const id = field.id.replace(/-\d+-/, '-' + currentFormCount + '-');
+
+            field.name = name;
+            field.id = id;
+            field.value = '';
+
+            // Atualizar labels correspondentes
+            const label = emptyForm.querySelector('label[for="' + field.id.replace('-' + currentFormCount + '-', '-0-') + '"]');
+            if (label) {
+                label.setAttribute('for', id);
+            }
+        });
+
+        // Atualizar título do item
+        const itemTitle = emptyForm.querySelector('h3');
+        if (itemTitle) {
+            itemTitle.innerHTML = '<i class="fas fa-tools text-blue-600 mr-2"></i>Item ' + (currentFormCount + 1);
+        }
+
+        // Atualizar data-form-index
+        emptyForm.setAttribute('data-form-index', currentFormCount);
+
+        // Adicionar botão de remoção se não for o primeiro
+        if (currentFormCount > 0) {
+            const removeButton = emptyForm.querySelector('.remove-formset-item');
+            if (!removeButton) {
+                const titleDiv = emptyForm.querySelector('.flex.items-center.justify-between');
+                const newRemoveButton = document.createElement('button');
+                newRemoveButton.type = 'button';
+                newRemoveButton.className = 'remove-formset-item text-red-600 hover:text-red-800';
+                newRemoveButton.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+                titleDiv.appendChild(newRemoveButton);
+            }
+        }
+
+        // Adicionar ao container
+        formsetContainer.appendChild(emptyForm);
+
+        // Atualizar contador de formulários
+        totalFormsInput.value = currentFormCount + 1;
+
+        // Recalcular totais
+        calculateTotals();
+    }
+
+    // Função para remover item do formset
+    function removeFormsetItem(item) {
+        const deleteInput = item.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) {
+            deleteInput.checked = true;
+            item.style.display = 'none';
+            item.setAttribute('data-deleted', 'true');
+        } else {
+            item.remove();
+        }
+        calculateTotals();
+    }
+
+    // Event listeners
+    addButton.addEventListener('click', addFormsetItem);
+
+    formsetContainer.addEventListener('click', function(e) {
+        if (e.target.matches('.remove-formset-item') || e.target.closest('.remove-formset-item')) {
+            e.preventDefault();
+            const item = e.target.closest('.formset-item');
+            if (item) {
+                removeFormsetItem(item);
+            }
+        }
+    });
+
+    // Calcular totais iniciais
+    calculateTotals();
+
+    // Validação de formulário
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let hasErrors = false;
+
+        // Validar campos obrigatórios
+        const requiredFields = form.querySelectorAll('input[required], textarea[required], select[required]');
+        requiredFields.forEach(function(field) {
+            if (!field.value.trim()) {
+                field.classList.add('border-red-300');
+                hasErrors = true;
+            } else {
+                field.classList.remove('border-red-300');
+            }
+        });
+
+        // Verificar se há pelo menos um item no formset
+        const activeItems = formsetContainer.querySelectorAll('.formset-item:not([data-deleted="true"])');
+        let hasValidItem = false;
+
+        activeItems.forEach(function(item) {
+            const descricao = item.querySelector('input[name$="descricao"]').value.trim();
+            const quantidade = item.querySelector('input[name$="quantidade"]').value.trim();
+            const preco = item.querySelector('input[name$="preco_unitario"]').value.trim();
+
+            if (descricao && quantidade && preco) {
+                hasValidItem = true;
+            }
+        });
+
+        if (!hasValidItem) {
+            alert('Veuillez ajouter au moins un item avec description, quantité et prix.');
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            e.preventDefault();
+        }
+    });
+
+    // Preview functionality
+    const previewBtn = document.getElementById('preview-btn');
+    const previewSection = document.getElementById('preview-section');
+
+    if (previewBtn && previewSection) {
+        previewBtn.addEventListener('click', function() {
+            // Toggle preview section
+            previewSection.classList.toggle('hidden');
+
+            if (!previewSection.classList.contains('hidden')) {
+                // Scroll to preview
+                previewSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,879 @@
+{% load static %}
+<!-- Footer -->
+<footer class="footer bg-gray-900 text-white relative overflow-hidden">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 opacity-5">
+    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <pattern
+          id="footer-pattern"
+          x="0"
+          y="0"
+          width="20"
+          height="20"
+          patternUnits="userSpaceOnUse"
+        >
+          {% comment %} <circle cx="10" cy="10" r="1" fill="currentColor" /> {% endcomment %}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#footer-pattern)" />
+    </svg>
+  </div>
+
+  <!-- Main Footer Content -->
+  <div class="footer-main py-16 lg:py-20 relative z-10">
+    <div class="container mx-auto px-4">
+      <div class="grid lg:grid-cols-4 md:grid-cols-2 gap-8 lg:gap-12">
+        <!-- Company Info -->
+        <div class="footer-company lg:col-span-1">
+          <div class="footer-logo mb-6">
+            <img src="{% static "img/logo_220x80_P_branco.svg" %}" alt="Lopes Peinture" class="h-12 w-auto" />
+          </div>
+
+          <p class="text-gray-300 mb-6 leading-relaxed">
+            Entreprise spécialisée dans la peinture et la décoration d'intérieur et d'extérieur.
+            Nous offrons des services de qualité pour les particuliers et les professionnels depuis
+            plus de 10 ans.
+          </p>
+
+          <!-- Social Links -->
+          <div class="footer-social flex space-x-4">
+            <a
+              href="https://www.facebook.com/lopespeinture.fr"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-500 transition-all duration-300 transform hover:scale-110"
+            >
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a
+              href="https://www.instagram.com/lopespeinture/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-500 transition-all duration-300 transform hover:scale-110"
+            >
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a
+              href="https://x.com/LopesPeinture"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-500 transition-all duration-300 transform hover:scale-110"
+            >
+              <i class="fab fa-twitter"></i>
+            </a>
+            <!--<a
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white hover:bg-primary-500 transition-all duration-300 transform hover:scale-110"
+            >
+              <i class="fab fa-youtube"></i>
+            </a>-->
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-links">
+          <h3 class="text-xl font-bold mb-6 text-white relative">
+            Liens rapides
+            <span class="absolute bottom-0 left-0 w-12 h-0.5 bg-primary-500"></span>
+          </h3>
+          <ul class="space-y-3">
+            <li>
+              <a
+                href="/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Accueil
+              </a>
+            </li>
+            <li>
+              <a
+                href="/a-propos/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                À propos
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Services
+              </a>
+            </li>
+            <li>
+              <a
+                href="/realisations/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Réalisations
+              </a>
+            </li>
+            <li>
+              <a
+                href="/contact/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Contact
+              </a>
+            </li>
+            <li>
+              <a
+                href="/devis/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Demander un devis
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Services -->
+        <div class="footer-services">
+          <h3 class="text-xl font-bold mb-6 text-white relative">
+            Nos services
+            <span class="absolute bottom-0 left-0 w-12 h-0.5 bg-primary-500"></span>
+          </h3>
+          <ul class="space-y-3">
+            <li>
+              <a
+                href="/services/peinture-interieure/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Peinture intérieure
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/peinture-exterieure/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Peinture extérieure
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/revetements-muraux/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Revêtements muraux
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/renovation/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Rénovation
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/conseil-decoration/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Conseil en décoration
+              </a>
+            </li>
+            <li>
+              <a
+                href="/services/traitement-facades/"
+                class="footer-link text-gray-300 hover:text-primary-400 transition-colors duration-300 flex items-center group"
+              >
+                <i
+                  class="fas fa-chevron-right text-xs mr-2 text-primary-500 group-hover:translate-x-1 transition-transform duration-300"
+                ></i>
+                Traitement de façades
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="footer-contact">
+          <h3 class="text-xl font-bold mb-6 text-white relative">
+            Contact
+            <span class="absolute bottom-0 left-0 w-12 h-0.5 bg-primary-500"></span>
+          </h3>
+
+          <div class="space-y-4">
+            <!-- Address -->
+            <div class="contact-item flex items-start group">
+              <div
+                class="contact-icon w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-primary-500 transition-colors duration-300"
+              >
+                <i class="fas fa-map-marker-alt text-white"></i>
+              </div>
+              <div>
+                <p class="text-gray-300 leading-relaxed">
+                  261 Chemin de la Castellane<br />
+                  31790 ST Sauveur, France
+                </p>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="contact-item flex items-start group">
+              <div
+                class="contact-icon w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-primary-500 transition-colors duration-300"
+              >
+                <i class="fas fa-phone-alt text-white"></i>
+              </div>
+              <div>
+                <a
+                  href="tel:+33769273776"
+                  class="text-gray-300 hover:text-primary-400 transition-colors duration-300"
+                >
+                  +33 7 69 27 37 76
+                </a>
+                <p class="text-sm text-gray-400">Lun-Ven: 8h-18h</p>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="contact-item flex items-start group">
+              <div
+                class="contact-icon w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-primary-500 transition-colors duration-300"
+              >
+                <i class="fas fa-envelope text-white"></i>
+              </div>
+              <div>
+                <a
+                  href="mailto:contact@lopes-peinture.fr"
+                  class="text-gray-300 hover:text-primary-400 transition-colors duration-300"
+                >
+                  contact@lopespeinture.fr
+                </a>
+                <p class="text-sm text-gray-400">Réponse sous 48h</p>
+              </div>
+            </div>
+
+            <!-- Emergency -->
+            {% comment %} <div class="contact-item flex items-start group">
+              <div
+                class="contact-icon w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-red-500 transition-colors duration-300"
+              >
+                <i class="fas fa-exclamation-triangle text-white"></i>
+              </div>
+              <div>
+                <a
+                  href="tel:+33769273776"
+                  class="text-gray-300 hover:text-red-400 transition-colors duration-300 font-semibold"
+                >
+                  Urgence 24h/7j
+                </a>
+                <p class="text-sm text-gray-400">Dégâts des eaux, fissures</p>
+              </div>
+            </div> {% endcomment %}
+          </div>
+
+          <!-- CTA Button -->
+          <div class="mt-8">
+            <a
+              href="{% url 'orcamentos:solicitar_publico' %}"
+              class="inline-flex items-center justify-center bg-primary-600 hover:bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <i class="fas fa-calculator mr-2"></i>
+              Devis gratuit
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications & Partners -->
+      <div class="footer-certifications mt-16 pt-8 border-t border-gray-700">
+        <div class="text-center mb-8">
+          <h4 class="text-lg font-semibold text-white mb-6">Nos certifications et partenaires</h4>
+        </div>
+
+        <div
+          class="flex flex-wrap justify-center items-center gap-8 opacity-60 hover:opacity-100 transition-opacity duration-300"
+        >
+          <!-- Certification badges -->
+          <!--<div class="certification-item flex flex-col items-center group">
+            <div
+              class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-certificate text-2xl text-primary-600"></i>
+            </div>
+            <span class="text-xs text-gray-400">RGE Qualibat</span>
+          </div>-->
+
+          <div class="certification-item flex flex-col items-center group">
+            <div
+              class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+            </div>
+            <span class="text-xs text-gray-400">Assurance décennale</span>
+          </div>
+
+          <div class="certification-item flex flex-col items-center group">
+            <div
+              class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-leaf text-2xl text-green-500"></i>
+            </div>
+            <span class="text-xs text-gray-400">Éco-responsable</span>
+          </div>
+
+          <div class="certification-item flex flex-col items-center group">
+            <div
+              class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-award text-2xl text-yellow-500"></i>
+            </div>
+            <span class="text-xs text-gray-400">Artisan de confiance</span>
+          </div>
+
+          <div class="certification-item flex flex-col items-center group">
+            <div
+              class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300"
+            >
+              <i class="fas fa-handshake text-2xl text-blue-600"></i>
+            </div>
+            <span class="text-xs text-gray-400">Garantie 10 ans</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Bottom -->
+  <div class="footer-bottom bg-gray-800 py-6 relative z-10">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+        <!-- Copyright -->
+        <div class="footer-copyright text-center lg:text-left">
+          <p class="text-gray-400 text-sm">
+            &copy; <span id="current-year">2024</span> Lopes Peinture. Tous droits réservés.
+          </p>
+        </div>
+
+        <!-- Legal Links -->
+        <div
+          class="footer-legal flex flex-wrap justify-center lg:justify-end items-center space-x-6 text-sm"
+        >
+          <a
+            href="/mentions-legales/"
+            class="text-gray-400 hover:text-primary-400 transition-colors duration-300"
+          >
+            Mentions légales
+          </a>
+          <a
+            href="/politique-confidentialite/"
+            class="text-gray-400 hover:text-primary-400 transition-colors duration-300"
+          >
+            Politique de confidentialité
+          </a>
+          <a
+            href="/conditions-generales/"
+            class="text-gray-400 hover:text-primary-400 transition-colors duration-300"
+          >
+            CGV
+          </a>
+          <a
+            href="/cookies/"
+            class="text-gray-400 hover:text-primary-400 transition-colors duration-300"
+          >
+            Cookies
+          </a>
+          <a
+            href="/plan-du-site/"
+            class="text-gray-400 hover:text-primary-400 transition-colors duration-300"
+          >
+            Plan du site
+          </a>
+        </div>
+
+        
+      </div>
+    </div>
+  </div>
+
+  
+</footer>
+
+<!-- Footer Styles -->
+<style>
+  /* Footer animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .footer-company,
+  .footer-links,
+  .footer-services,
+  .footer-contact {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .footer-links {
+    animation-delay: 0.1s;
+  }
+
+  .footer-services {
+    animation-delay: 0.2s;
+  }
+
+  .footer-contact {
+    animation-delay: 0.3s;
+  }
+
+  /* Hover effects */
+  .footer-link:hover i {
+    color: #3b82f6;
+  }
+
+  .social-link:hover {
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .footer-main {
+      padding: 3rem 0;
+    }
+
+    .footer .grid {
+      gap: 2rem;
+    }
+
+    .footer-certifications .flex {
+      gap: 1rem;
+    }
+
+    .certification-item .w-16 {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .footer-company,
+    .footer-links,
+    .footer-services,
+    .footer-contact {
+      animation: none;
+    }
+
+    .social-link,
+    .contact-icon,
+    .certification-item {
+      transition: none;
+    }
+
+    .animate-pulse {
+      animation: none;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .footer {
+      background-color: #000;
+      color: #fff;
+    }
+
+    .footer-bottom {
+      background-color: #111;
+    }
+
+    .text-gray-300,
+    .text-gray-400 {
+      color: #fff;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .footer {
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    .footer-social,
+    .footer-back-to-top,
+    .fixed {
+      display: none !important;
+    }
+  }
+</style>
+
+<!-- Footer JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Update current year
+    const currentYearElement = document.getElementById('current-year');
+    if (currentYearElement) {
+      currentYearElement.textContent = new Date().getFullYear();
+    }
+
+    // Back to top functionality
+    const backToTopButton = document.getElementById('back-to-top');
+    if (backToTopButton) {
+      // Show/hide button based on scroll position
+      window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 300) {
+          backToTopButton.style.opacity = '1';
+          backToTopButton.style.visibility = 'visible';
+        } else {
+          backToTopButton.style.opacity = '0';
+          backToTopButton.style.visibility = 'hidden';
+        }
+      });
+
+      // Smooth scroll to top
+      backToTopButton.addEventListener('click', function () {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      });
+
+      // Initial state
+      backToTopButton.style.opacity = '0';
+      backToTopButton.style.visibility = 'hidden';
+      backToTopButton.style.transition = 'opacity 0.3s, visibility 0.3s';
+    }
+
+    // Social links tracking
+    const socialLinks = document.querySelectorAll('.social-link');
+    socialLinks.forEach((link) => {
+      link.addEventListener('click', function (e) {
+        const platform = this.querySelector('i').className.includes('facebook')
+          ? 'facebook'
+          : this.querySelector('i').className.includes('instagram')
+          ? 'instagram'
+          : this.querySelector('i').className.includes('linkedin')
+          ? 'linkedin'
+          : this.querySelector('i').className.includes('youtube')
+          ? 'youtube'
+          : 'unknown';
+
+        // Track social media clicks
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'social_click', {
+            event_category: 'social',
+            event_label: platform,
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Phone number tracking
+    const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+    phoneLinks.forEach((link) => {
+      link.addEventListener('click', function () {
+        // Track phone clicks
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'phone_call', {
+            event_category: 'contact',
+            event_label: 'footer_phone',
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Email tracking
+    const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
+    emailLinks.forEach((link) => {
+      link.addEventListener('click', function () {
+        // Track email clicks
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'email_click', {
+            event_category: 'contact',
+            event_label: 'footer_email',
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Footer link tracking
+    const footerLinks = document.querySelectorAll('.footer-link');
+    footerLinks.forEach((link) => {
+      link.addEventListener('click', function () {
+        const linkText = this.textContent.trim();
+
+        // Track footer navigation
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'footer_navigation', {
+            event_category: 'navigation',
+            event_label: linkText,
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Certification hover effects
+    const certificationItems = document.querySelectorAll('.certification-item');
+    certificationItems.forEach((item) => {
+      item.addEventListener('mouseenter', function () {
+        const tooltip = this.querySelector('span').textContent;
+
+        // Create tooltip if it doesn't exist
+        if (!this.querySelector('.tooltip')) {
+          const tooltipElement = document.createElement('div');
+          tooltipElement.className =
+            'tooltip absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 transition-opacity duration-300 pointer-events-none z-10';
+          tooltipElement.textContent = tooltip;
+          this.style.position = 'relative';
+          this.appendChild(tooltipElement);
+
+          // Show tooltip
+          setTimeout(() => {
+            tooltipElement.style.opacity = '1';
+          }, 100);
+        }
+      });
+
+      item.addEventListener('mouseleave', function () {
+        const tooltip = this.querySelector('.tooltip');
+        if (tooltip) {
+          tooltip.style.opacity = '0';
+          setTimeout(() => {
+            if (tooltip.parentNode) {
+              tooltip.parentNode.removeChild(tooltip);
+            }
+          }, 300);
+        }
+      });
+    });
+
+    // Lazy load footer images
+    const footerImages = document.querySelectorAll('.footer img');
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            }
+            observer.unobserve(img);
+          }
+        });
+      });
+
+      footerImages.forEach((img) => {
+        imageObserver.observe(img);
+      });
+    }
+
+    // Newsletter subscription tracking (if newsletter form exists in footer)
+    const newsletterForm = document.querySelector('.footer form[action*="newsletter"]');
+    if (newsletterForm) {
+      newsletterForm.addEventListener('submit', function () {
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'newsletter_subscribe', {
+            event_category: 'engagement',
+            event_label: 'footer_newsletter',
+            value: 1,
+          });
+        }
+      });
+    }
+
+    // Keyboard navigation for footer links
+    const focusableElements = document.querySelectorAll('.footer a, .footer button');
+    focusableElements.forEach((element, index) => {
+      element.addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') {
+          // Custom tab navigation logic if needed
+        }
+      });
+    });
+
+    // Footer visibility tracking
+    const footer = document.querySelector('.footer');
+    if (footer && 'IntersectionObserver' in window) {
+      const footerObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Track footer view
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'footer_view', {
+                  event_category: 'engagement',
+                  event_label: 'footer_visible',
+                  value: 1,
+                });
+              }
+              footerObserver.unobserve(footer);
+            }
+          });
+        },
+        {
+          threshold: 0.5,
+        }
+      );
+
+      footerObserver.observe(footer);
+    }
+
+    // Emergency contact highlight
+    const emergencyContact = document.querySelector('.contact-item .bg-red-600');
+    if (emergencyContact) {
+      // Add pulsing effect for emergency contact
+      setInterval(() => {
+        emergencyContact.style.animation = 'pulse 2s infinite';
+      }, 5000);
+    }
+
+    // Dynamic copyright year update
+    setInterval(() => {
+      const currentYear = new Date().getFullYear();
+      const yearElement = document.getElementById('current-year');
+      if (yearElement && yearElement.textContent != currentYear) {
+        yearElement.textContent = currentYear;
+      }
+    }, 60000); // Check every minute
+
+    // Footer performance optimization
+    const footerElements = document.querySelectorAll('.footer [class*="hover:"]');
+    let isFooterVisible = false;
+
+    const footerVisibilityObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        isFooterVisible = entry.isIntersecting;
+
+        if (isFooterVisible) {
+          // Enable hover effects when footer is visible
+          footerElements.forEach((el) => {
+            el.style.pointerEvents = 'auto';
+          });
+        } else {
+          // Disable hover effects when footer is not visible
+          footerElements.forEach((el) => {
+            el.style.pointerEvents = 'none';
+          });
+        }
+      });
+    });
+
+    if (footer) {
+      footerVisibilityObserver.observe(footer);
+    }
+
+    // Accessibility improvements
+    const footerHeadings = document.querySelectorAll('.footer h3');
+    footerHeadings.forEach((heading) => {
+      // Add ARIA labels for screen readers
+      const section = heading.closest('div');
+      if (section) {
+        section.setAttribute('role', 'navigation');
+        section.setAttribute('aria-labelledby', heading.id || 'footer-section');
+      }
+    });
+
+    // Add skip link for footer
+    const skipFooterLink = document.createElement('a');
+    skipFooterLink.href = '#main-content';
+    skipFooterLink.textContent = 'Passer le pied de page';
+    skipFooterLink.className =
+      'sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-primary-600 text-white p-2 z-50';
+    footer.insertBefore(skipFooterLink, footer.firstChild);
+  });
+
+  // Service Worker registration for offline footer functionality
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    });
+  }
+</script>
+
+<!-- Schema.org structured data for footer -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Lopes Peinture",
+    "url": "https://www.lopes-peinture.fr",
+    "logo": "https://www.lopes-peinture.fr/static/images/logo-white.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+33-1-23-45-67-89",
+      "contactType": "customer service",
+      "availableLanguage": ["French"],
+      "areaServed": "FR"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "123 Rue de la Peinture",
+      "addressLocality": "Paris",
+      "postalCode": "75001",
+      "addressCountry": "FR"
+    },
+    "sameAs": [
+      "https://www.facebook.com/lopespeinture",
+      "https://www.instagram.com/lopespeinture",
+      "https://www.linkedin.com/company/lopespeinture"
+    ],
+    "serviceArea": {
+      "@type": "GeoCircle",
+      "geoMidpoint": {
+        "@type": "GeoCoordinates",
+        "latitude": "48.8566",
+        "longitude": "2.3522"
+      },
+      "geoRadius": "50000"
+    }
+  }
+</script>

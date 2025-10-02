@@ -1,994 +1,389 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{{ projeto.titulo }} - LOPES PEINTURE{% endblock %}
-
-{% block extra_css %}
-<style>
-/* Garantir que o Tailwind CSS funcione corretamente */
-.max-w-6xl { max-width: 72rem !important; }
-.mx-auto { margin-left: auto !important; margin-right: auto !important; }
-.space-y-4 > * + * { margin-top: 1rem !important; }
-.space-y-6 > * + * { margin-top: 1.5rem !important; }
-.space-y-8 > * + * { margin-top: 2rem !important; }
-.space-y-3 > * + * { margin-top: 0.75rem !important; }
-.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-.py-3 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
-.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-.py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-.px-6 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
-.px-8 { padding-left: 2rem !important; padding-right: 2rem !important; }
-.px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-.p-2 { padding: 0.5rem !important; }
-.p-3 { padding: 0.75rem !important; }
-.p-4 { padding: 1rem !important; }
-.p-6 { padding: 1.5rem !important; }
-.p-8 { padding: 2rem !important; }
-.p-12 { padding: 3rem !important; }
-.mb-1 { margin-bottom: 0.25rem !important; }
-.mb-2 { margin-bottom: 0.5rem !important; }
-.mb-3 { margin-bottom: 0.75rem !important; }
-.mb-4 { margin-bottom: 1rem !important; }
-.mb-6 { margin-bottom: 1.5rem !important; }
-.mb-8 { margin-bottom: 2rem !important; }
-.mt-1 { margin-top: 0.25rem !important; }
-.mx-2 { margin-left: 0.5rem !important; margin-right: 0.5rem !important; }
-.mx-4 { margin-left: 1rem !important; margin-right: 1rem !important; }
-.mr-4 { margin-right: 1rem !important; }
-
-/* Backgrounds */
-.bg-white { background-color: #ffffff !important; }
-.bg-gray-50 { background-color: #f9fafb !important; }
-.bg-gray-100 { background-color: #f3f4f6 !important; }
-.bg-gray-200 { background-color: #e5e7eb !important; }
-.bg-gray-300 { background-color: #d1d5db !important; }
-.bg-gray-400 { background-color: #9ca3af !important; }
-.bg-gray-500 { background-color: #6b7280 !important; }
-.bg-blue-50 { background-color: #eff6ff !important; }
-.bg-blue-100 { background-color: #dbeafe !important; }
-.bg-blue-200 { background-color: #bfdbfe !important; }
-.bg-blue-600 { background-color: #2563eb !important; }
-.bg-green-50 { background-color: #f0fdf4 !important; }
-.bg-green-100 { background-color: #dcfce7 !important; }
-.bg-green-200 { background-color: #bbf7d0 !important; }
-.bg-green-600 { background-color: #16a34a !important; }
-.bg-green-700 { background-color: #15803d !important; }
-.bg-purple-50 { background-color: #faf5ff !important; }
-.bg-purple-100 { background-color: #f3e8ff !important; }
-.bg-purple-200 { background-color: #e9d5ff !important; }
-.bg-purple-600 { background-color: #9333ea !important; }
-.bg-purple-700 { background-color: #7c3aed !important; }
-.bg-red-50 { background-color: #fef2f2 !important; }
-.bg-red-100 { background-color: #fee2e2 !important; }
-.bg-red-200 { background-color: #fecaca !important; }
-.bg-red-600 { background-color: #dc2626 !important; }
-.bg-red-700 { background-color: #b91c1c !important; }
-.bg-yellow-100 { background-color: #fef3c7 !important; }
-.bg-yellow-200 { background-color: #fde68a !important; }
-.bg-orange-100 { background-color: #ffedd5 !important; }
-.bg-orange-200 { background-color: #fed7aa !important; }
-.bg-emerald-50 { background-color: #ecfdf5 !important; }
-.bg-emerald-100 { background-color: #d1fae5 !important; }
-.bg-emerald-200 { background-color: #a7f3d0 !important; }
-.bg-cyan-50 { background-color: #ecfeff !important; }
-.bg-cyan-100 { background-color: #cffafe !important; }
-.bg-rose-50 { background-color: #fff1f2 !important; }
-.bg-rose-100 { background-color: #ffe4e6 !important; }
-.bg-black { background-color: #000000 !important; }
-
-/* Text Colors */
-.text-white { color: #ffffff !important; }
-.text-gray-400 { color: #9ca3af !important; }
-.text-gray-500 { color: #6b7280 !important; }
-.text-gray-600 { color: #4b5563 !important; }
-.text-gray-700 { color: #374151 !important; }
-.text-gray-900 { color: #111827 !important; }
-.text-blue-600 { color: #2563eb !important; }
-.text-blue-700 { color: #1d4ed8 !important; }
-.text-blue-800 { color: #1e40af !important; }
-.text-blue-900 { color: #1e3a8a !important; }
-.text-green-600 { color: #16a34a !important; }
-.text-green-700 { color: #15803d !important; }
-.text-green-800 { color: #166534 !important; }
-.text-green-900 { color: #14532d !important; }
-.text-purple-600 { color: #9333ea !important; }
-.text-purple-700 { color: #7c3aed !important; }
-.text-purple-900 { color: #581c87 !important; }
-.text-red-600 { color: #dc2626 !important; }
-.text-red-700 { color: #b91c1c !important; }
-.text-red-800 { color: #991b1b !important; }
-.text-yellow-500 { color: #eab308 !important; }
-.text-yellow-800 { color: #92400e !important; }
-.text-orange-800 { color: #9a3412 !important; }
-.text-emerald-800 { color: #065f46 !important; }
-
-/* Border Radius */
-.rounded-lg { border-radius: 0.5rem !important; }
-.rounded-xl { border-radius: 0.75rem !important; }
-.rounded-2xl { border-radius: 1rem !important; }
-.rounded-full { border-radius: 9999px !important; }
-
-/* Shadows */
-.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; }
-.shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important; }
-.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important; }
-.hover\:shadow-xl:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important; }
-.hover\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; }
-
-/* Borders */
-.border { border-width: 1px !important; }
-.border-2 { border-width: 2px !important; }
-.border-gray-100 { border-color: #f3f4f6 !important; }
-.border-gray-200 { border-color: #e5e7eb !important; }
-.border-gray-300 { border-color: #d1d5db !important; }
-.border-blue-200 { border-color: #bfdbfe !important; }
-.border-blue-300 { border-color: #93c5fd !important; }
-.border-blue-600 { border-color: #2563eb !important; }
-.border-green-200 { border-color: #bbf7d0 !important; }
-.border-purple-200 { border-color: #e9d5ff !important; }
-.border-red-200 { border-color: #fecaca !important; }
-
-/* Display */
-.flex { display: flex !important; }
-.grid { display: grid !important; }
-.hidden { display: none !important; }
-.block { display: block !important; }
-.inline { display: inline !important; }
-.inline-flex { display: inline-flex !important; }
-
-/* Grid */
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
-
-/* Flexbox */
-.items-center { align-items: center !important; }
-.items-start { align-items: flex-start !important; }
-.justify-center { justify-content: center !important; }
-.justify-between { justify-content: space-between !important; }
-.justify-end { justify-content: flex-end !important; }
-
-/* Gaps */
-.gap-2 { gap: 0.5rem !important; }
-.gap-3 { gap: 0.75rem !important; }
-.gap-4 { gap: 1rem !important; }
-.gap-6 { gap: 1.5rem !important; }
-
-/* Flex */
-.flex-1 { flex: 1 1 0% !important; }
-.flex-col { flex-direction: column !important; }
-.flex-shrink-0 { flex-shrink: 0 !important; }
-
-/* Typography */
-.font-bold { font-weight: 700 !important; }
-.font-semibold { font-weight: 600 !important; }
-.font-medium { font-weight: 500 !important; }
-.text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
-.text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-.text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
-.text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-.text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
-.text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-.text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
-.text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
-
-/* Sizing */
-.w-8 { width: 2rem !important; }
-.h-8 { height: 2rem !important; }
-.w-10 { width: 2.5rem !important; }
-.h-10 { height: 2.5rem !important; }
-.w-12 { width: 3rem !important; }
-.h-12 { height: 3rem !important; }
-.w-16 { width: 4rem !important; }
-.h-16 { height: 4rem !important; }
-.w-20 { width: 5rem !important; }
-.h-20 { height: 5rem !important; }
-.w-full { width: 100% !important; }
-.max-w-md { max-width: 28rem !important; }
-.max-w-sm { max-width: 24rem !important; }
-
-/* Position */
-.relative { position: relative !important; }
-.absolute { position: absolute !important; }
-.fixed { position: fixed !important; }
-.inset-0 { top: 0px !important; right: 0px !important; bottom: 0px !important; left: 0px !important; }
-.top-4 { top: 1rem !important; }
-.right-4 { right: 1rem !important; }
-.z-50 { z-index: 50 !important; }
-
-/* Transitions */
-.transition-all { transition-property: all !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-duration: 150ms !important; }
-.transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke !important; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important; transition-duration: 150ms !important; }
-.duration-200 { transition-duration: 200ms !important; }
-.duration-300 { transition-duration: 300ms !important; }
-
-/* Transform */
-.transform { transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important; }
-.scale-95 { --tw-scale-x: .95; --tw-scale-y: .95; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important; }
-.translate-x-full { --tw-translate-x: 100%; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important; }
-
-/* Hover states */
-.hover\:bg-blue-50:hover { background-color: #eff6ff !important; }
-.hover\:bg-blue-100:hover { background-color: #dbeafe !important; }
-.hover\:bg-gray-50:hover { background-color: #f9fafb !important; }
-.hover\:text-blue-600:hover { color: #2563eb !important; }
-.hover\:text-blue-700:hover { color: #1d4ed8 !important; }
-.hover\:text-red-700:hover { color: #b91c1c !important; }
-.hover\:scale-105:hover { --tw-scale-x: 1.05; --tw-scale-y: 1.05; transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important; }
-.hover\:border-blue-300:hover { border-color: #93c5fd !important; }
-
-/* Gradients */
-.bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)) !important; }
-.bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)) !important; }
-.from-blue-500 { --tw-gradient-from: #3b82f6 !important; --tw-gradient-to: rgb(59 130 246 / 0) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.to-blue-600 { --tw-gradient-to: #2563eb !important; }
-.from-green-600 { --tw-gradient-from: #16a34a !important; --tw-gradient-to: rgb(22 163 74 / 0) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.to-green-700 { --tw-gradient-to: #15803d !important; }
-.from-green-700 { --tw-gradient-from: #15803d !important; --tw-gradient-to: rgb(21 128 61 / 0) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.to-green-800 { --tw-gradient-to: #166534 !important; }
-.from-purple-500 { --tw-gradient-from: #a855f7 !important; --tw-gradient-to: rgb(168 85 247 / 0) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.to-purple-600 { --tw-gradient-to: #9333ea !important; }
-.from-red-500 { --tw-gradient-from: #ef4444 !important; --tw-gradient-to: rgb(239 68 68 / 0) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important; }
-.to-red-600 { --tw-gradient-to: #dc2626 !important; }
-
-/* Utilities */
-.break-words { overflow-wrap: break-word !important; }
-.self-start { align-self: flex-start !important; }
-.leading-relaxed { line-height: 1.625 !important; }
-.text-center { text-align: center !important; }
-.items-stretch { align-items: stretch !important; }
-.backdrop-blur-sm { backdrop-filter: blur(4px) !important; }
-.bg-opacity-50 { --tw-bg-opacity: 0.5 !important; }
-.py-12 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
-
-@media (min-width: 640px) {
-    .sm\:px-6 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
-    .sm\:p-6 { padding: 1.5rem !important; }
-    .sm\:p-4 { padding: 1rem !important; }
-    .sm\:px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-    .sm\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
-    .sm\:text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-    .sm\:text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-    .sm\:text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
-    .sm\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
-    .sm\:text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
-    .sm\:w-10 { width: 2.5rem !important; }
-    .sm\:h-10 { height: 2.5rem !important; }
-    .sm\:w-12 { width: 3rem !important; }
-    .sm\:h-12 { height: 3rem !important; }
-    .sm\:flex-row { flex-direction: row !important; }
-    .sm\:items-center { align-items: center !important; }
-    .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-    .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-    .sm\:space-y-6 > * + * { margin-top: 1.5rem !important; }
-    .sm\:space-y-8 > * + * { margin-top: 2rem !important; }
-    .sm\:space-y-4 > * + * { margin-top: 1rem !important; }
-    .sm\:mb-8 { margin-bottom: 2rem !important; }
-    .sm\:mb-6 { margin-bottom: 1.5rem !important; }
-    .sm\:mb-4 { margin-bottom: 1rem !important; }
-    .sm\:gap-6 { gap: 1.5rem !important; }
-    .sm\:w-auto { width: auto !important; }
-    .sm\:hidden { display: none !important; }
-    .sm\:inline { display: inline !important; }
-}
-
-@media (min-width: 1024px) {
-    .lg\:px-8 { padding-left: 2rem !important; padding-right: 2rem !important; }
-    .lg\:p-8 { padding: 2rem !important; }
-    .lg\:text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
-    .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-    .lg\:col-span-2 { grid-column: span 2 / span 2 !important; }
-    .lg\:gap-8 { gap: 2rem !important; }
-    .lg\:space-y-8 > * + * { margin-top: 2rem !important; }
-}
-</style>
-{% endblock %}
+{% block title %}{{ projeto.titulo }}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-4 sm:space-y-8 px-4 sm:px-6 lg:px-8">
-    <!-- Header com breadcrumb -->
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 sm:mb-8">
-        <a href="{% url 'orcamentos:cliente_projetos' %}"
-           class="self-start p-2 sm:p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200">
-            <i class="fas fa-arrow-left text-lg"></i>
-        </a>
-        <div class="flex-1">
-            <nav class="text-sm text-gray-600 mb-2">
-                <a href="{% url 'orcamentos:cliente_projetos' %}" class="hover:text-blue-600 transition-colors">Mes Projets</a>
-                <span class="mx-2">/</span>
-                <span class="text-gray-900 font-medium">{{ projeto.titulo }}</span>
-            </nav>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 break-words">{{ projeto.titulo }}</h1>
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="mb-4">
+            <a href="{% url 'orcamentos:cliente_projetos' %}"
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Retour aux projets
+            </a>
         </div>
 
-        <!-- Actions menu - Mobile friendly -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <a href="{% url 'orcamentos:cliente_editar_projeto' projeto.uuid %}"
-               class="px-4 sm:px-6 py-3 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base">
-                <i class="fas fa-edit"></i>
-                <span class="hidden sm:inline">Éditer</span>
-                <span class="sm:hidden">Éditer</span>
-            </a>
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ projeto.titulo }}</h1>
+                    <p class="text-gray-600 mb-4">{{ projeto.descricao|truncatewords:30 }}</p>
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-calendar-alt text-blue-500"></i>
+                            Créé le {{ projeto.created_at|date:"d/m/Y" }}
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-paint-brush text-green-500"></i>
+                            {{ projeto.get_tipo_servico_display }}
+                        </span>
+                    </div>
+                </div>
 
-            <a href="{% url 'orcamentos:cliente_solicitar_orcamento' projeto.uuid %}"
-               class="px-4 sm:px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <span class="hidden sm:inline">Demander devis</span>
-                <span class="sm:hidden">Devis</span>
-            </a>
+                <div class="flex flex-col gap-3">
+                    {% if projeto.status == 'planejando' %}
+                        <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-bold text-center">
+                            {{ projeto.get_status_display }}
+                        </span>
+                    {% elif projeto.status == 'em_andamento' %}
+                        <span class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold text-center">
+                            {{ projeto.get_status_display }}
+                        </span>
+                    {% elif projeto.status == 'concluido' %}
+                        <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-bold text-center">
+                            {{ projeto.get_status_display }}
+                        </span>
+                    {% else %}
+                        <span class="bg-gray-100 text-gray-800 px-4 py-2 rounded-full text-sm font-bold text-center">
+                            {{ projeto.get_status_display }}
+                        </span>
+                    {% endif %}
+
+                    {% if projeto.urgencia == 'alta' or projeto.urgencia == 'critica' %}
+                        <span class="bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-medium text-center border border-red-200">
+                            {{ projeto.get_urgencia_display }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <!-- Coluna principal -->
-        <div class="lg:col-span-2 space-y-6 lg:space-y-8">
-            <!-- Informações do projeto -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-info-circle text-white text-sm sm:text-base"></i>
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Détails du Projet -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-info-circle text-white"></i>
                     </div>
-                    <span class="break-words">Détails du projet</span>
-                </h2>
-
-                <div class="space-y-4 sm:space-y-6">
-                    <div>
-                        <h3 class="font-semibold text-gray-900 mb-3">Description</h3>
-                        <p class="text-gray-700 leading-relaxed bg-gray-50 p-3 sm:p-4 rounded-xl text-sm sm:text-base">{{ projeto.descricao }}</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <div class="bg-blue-50 p-3 sm:p-4 rounded-xl">
-                            <h3 class="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Type de service</h3>
-                            <span class="inline-flex items-center px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 rounded-full text-xs sm:text-sm font-semibold">
-                                {{ projeto.get_tipo_servico_display }}
-                            </span>
-                        </div>
-
-                        <div class="bg-purple-50 p-3 sm:p-4 rounded-xl">
-                            <h3 class="font-semibold text-purple-900 mb-2 text-sm sm:text-base">Urgence</h3>
-                            <span class="inline-flex items-center px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold
-                                {% if projeto.urgencia == 'baixa' %}bg-gradient-to-r from-green-100 to-green-200 text-green-800
-                                {% elif projeto.urgencia == 'media' %}bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
-                                {% elif projeto.urgencia == 'alta' %}bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800
-                                {% else %}bg-gradient-to-r from-red-100 to-red-200 text-red-800{% endif %}">
-                                {{ projeto.get_urgencia_display }}
-                            </span>
-                        </div>
-                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Détails du projet</h2>
                 </div>
-            </div>
 
-            <!-- Localisation -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-map-marker-alt text-white text-sm sm:text-base"></i>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Type de service</div>
+                        <div class="font-semibold text-gray-900">{{ projeto.get_tipo_servico_display }}</div>
                     </div>
-                    Localisation
-                </h2>
 
-                <div class="space-y-3 sm:space-y-4">
-                    <div class="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
-                        <i class="fas fa-home text-green-600 mt-1 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium text-sm sm:text-base break-words">{{ projeto.endereco_projeto }}</span>
-                    </div>
-                    <div class="flex items-center gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl">
-                        <i class="fas fa-city text-green-600 flex-shrink-0"></i>
-                        <span class="text-gray-700 font-medium text-sm sm:text-base">{{ projeto.cidade_projeto }} - {{ projeto.cep_projeto }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Détails técnicas -->
-            {% if projeto.area_aproximada or projeto.numero_comodos or projeto.altura_teto %}
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-ruler-combined text-white text-sm sm:text-base"></i>
-                    </div>
-                    Détails técnicas
-                </h2>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                     {% if projeto.area_aproximada %}
-                    <div class="text-center p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-expand-arrows-alt text-white text-sm sm:text-base"></i>
-                        </div>
-                        <p class="text-2xl sm:text-3xl font-bold text-purple-900">{{ projeto.area_aproximada }}</p>
-                        <p class="text-xs sm:text-sm text-purple-700 font-medium">m² surface</p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Surface approximative</div>
+                        <div class="font-semibold text-gray-900">{{ projeto.area_aproximada }} m²</div>
                     </div>
                     {% endif %}
 
                     {% if projeto.numero_comodos %}
-                    <div class="text-center p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-door-open text-white text-sm sm:text-base"></i>
-                        </div>
-                        <p class="text-2xl sm:text-3xl font-bold text-blue-900">{{ projeto.numero_comodos }}</p>
-                        <p class="text-xs sm:text-sm text-blue-700 font-medium">pièce{{ projeto.numero_comodos|pluralize }}</p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Nombre de pièces</div>
+                        <div class="font-semibold text-gray-900">{{ projeto.numero_comodos }}</div>
                     </div>
                     {% endif %}
 
                     {% if projeto.altura_teto %}
-                    <div class="text-center p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200">
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-arrows-alt-v text-white text-sm sm:text-base"></i>
-                        </div>
-                        <p class="text-2xl sm:text-3xl font-bold text-green-900">{{ projeto.altura_teto }}</p>
-                        <p class="text-xs sm:text-sm text-green-700 font-medium">m hauteur</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Solicitações de orçamento -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <div class="flex justify-between items-center mb-4 sm:mb-6">
-                    <h2 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-file-invoice-dollar text-white text-sm sm:text-base"></i>
-                        </div>
-                        Demandes de devis ({{ solicitacoes.count }})
-                    </h2>
-
-                    <a href="{% url 'orcamentos:cliente_solicitar_orcamento' projeto.uuid %}"
-                       class="px-4 sm:px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base">
-                        <i class="fas fa-plus"></i>
-                        <span class="hidden sm:inline">Nouvelle demande</span>
-                        <span class="sm:hidden">Demande</span>
-                    </a>
-                </div>
-
-                {% if solicitacoes %}
-                    <div class="space-y-4">
-                        {% for solicitacao in solicitacoes %}
-                            <div class="border-2 border-gray-200 rounded-2xl p-4 sm:p-6 hover:border-blue-300 hover:shadow-md transition-all duration-300">
-                                <div class="flex justify-between items-start mb-3 sm:mb-4">
-                                    <div>
-                                        <h3 class="font-bold text-gray-900 text-lg">#{{ solicitacao.numero }}</h3>
-                                        <p class="text-sm text-gray-600">{{ solicitacao.created_at|date:"d/m/Y à H:i" }}</p>
-                                    </div>
-
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold
-                                        {% if solicitacao.status == 'pendente' %}bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
-                                        {% elif solicitacao.status == 'em_elaboracao' %}bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
-                                        {% elif solicitacao.status == 'enviado' %}bg-gradient-to-r from-green-100 to-green-200 text-green-800
-                                        {% elif solicitacao.status == 'aceito' %}bg-gradient-to-r from-emerald-100 to-emerald-200 text-emerald-800
-                                        {% else %}bg-gradient-to-r from-red-100 to-red-200 text-red-800{% endif %}">
-                                        {{ solicitacao.get_status_display }}
-                                    </span>
-                                </div>
-
-                                {% if solicitacao.observacoes %}
-                                    <p class="text-sm text-gray-700 mb-3 sm:mb-4 bg-gray-50 p-3 rounded-lg">{{ solicitacao.observacoes }}</p>
-                                {% endif %}
-
-                                {% if solicitacao.orcamento %}
-                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-3 sm:p-4">
-                                        <div class="flex justify-between items-center">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                                                    <i class="fas fa-check text-white text-sm"></i>
-                                                </div>
-                                                <span class="text-xs sm:text-sm font-semibold text-green-800">
-                                                    Devis #{{ solicitacao.orcamento.numero }} disponible
-                                                </span>
-                                            </div>
-                                            <span class="text-xl sm:text-2xl font-bold text-green-900">
-                                                €{{ solicitacao.orcamento.total }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-12">
-                        <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-file-invoice-dollar text-gray-400 text-2xl"></i>
-                        </div>
-                        <p class="text-gray-600 font-medium">Aucune demande de devis pour ce projet</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Status et infos rapides -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <h3 class="font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-                    <i class="fas fa-info-circle text-blue-600"></i>
-                    Informations
-                </h3>
-
-                <div class="space-y-4">
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <label class="text-sm font-semibold text-gray-600 block mb-1">Statut</label>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-semibold
-                            {% if projeto.status == 'planejando' %}bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800
-                            {% elif projeto.status == 'em_andamento' %}bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800
-                            {% elif projeto.status == 'concluido' %}bg-gradient-to-r from-green-100 to-green-200 text-green-800
-                            {% elif projeto.status == 'pausado' %}bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800
-                            {% else %}bg-gradient-to-r from-red-100 to-red-200 text-red-800{% endif %}">
-                            {{ projeto.get_status_display }}
-                        </span>
-                    </div>
-
-                    <div class="p-3 bg-gray-50 rounded-lg">
-                        <label class="text-sm font-semibold text-gray-600 block mb-1">Créé le</label>
-                        <p class="text-gray-900 font-semibold">{{ projeto.created_at|date:"d/m/Y" }}</p>
-                    </div>
-
-                    {% if projeto.data_inicio_desejada %}
-                    <div class="p-3 bg-blue-50 rounded-lg">
-                        <label class="text-sm font-semibold text-blue-600 block mb-1">Début souhaité</label>
-                        <p class="text-blue-900 font-semibold">{{ projeto.data_inicio_desejada|date:"d/m/Y" }}</p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Hauteur du plafond</div>
+                        <div class="font-semibold text-gray-900">{{ projeto.altura_teto }} m</div>
                     </div>
                     {% endif %}
 
                     {% if projeto.orcamento_estimado %}
-                    <div class="p-3 bg-green-50 rounded-lg">
-                        <label class="text-sm font-semibold text-green-600 block mb-1">Budget estimé</label>
-                        <p class="text-2xl font-bold text-green-600">€{{ projeto.orcamento_estimado }}</p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Budget estimé</div>
+                        <div class="font-bold text-green-600 text-lg">{{ projeto.orcamento_estimado }}€</div>
+                    </div>
+                    {% endif %}
+
+                    {% if projeto.data_inicio_desejada %}
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Date de début souhaitée</div>
+                        <div class="font-semibold text-gray-900">{{ projeto.data_inicio_desejada|date:"d/m/Y" }}</div>
                     </div>
                     {% endif %}
                 </div>
-            </div>
 
-            <!-- Anexos -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <div class="flex justify-between items-center mb-4 sm:mb-6">
-                    <h3 class="font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fas fa-paperclip text-purple-600"></i>
-                        Fichiers ({{ anexos.count }})
-                    </h3>
-                    <button onclick="document.getElementById('file-input').click()"
-                            class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <i class="fas fa-plus text-sm"></i>
-                        Ajouter
-                    </button>
+                <div class="mb-4">
+                    <div class="text-xs font-semibold text-gray-500 uppercase mb-3">Description complète</div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4">
+                        {{ projeto.descricao|linebreaks }}
+                    </div>
                 </div>
 
-                <!-- Upload form (hidden) -->
-                <form id="upload-form" enctype="multipart/form-data" class="hidden">
-                    {% csrf_token %}
-                    <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx" multiple onchange="uploadFiles()">
-                </form>
-
-                {% if anexos %}
-                    <div class="space-y-3" id="anexos-list">
-                        {% for anexo in anexos %}
-                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-300" data-anexo-id="{{ anexo.id }}">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-paperclip text-white text-xs"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ anexo.descricao|default:"Fichier" }}</p>
-                                        <p class="text-xs text-gray-500">{{ anexo.created_at|date:"d/m/Y" }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <a href="{{ anexo.arquivo.url }}" target="_blank"
-                                       class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-all duration-200">
-                                        <i class="fas fa-download text-sm"></i>
-                                    </a>
-                                    <button onclick="deleteAnexo({{ anexo.id }})"
-                                            class="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-lg transition-all duration-200">
-                                        <i class="fas fa-trash text-sm"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        {% endfor %}
+                {% if projeto.observacoes %}
+                <div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mb-3">Observations</div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
+                        {{ projeto.observacoes|linebreaks }}
                     </div>
-                {% else %}
-                    <div class="text-center py-8 text-gray-500" id="no-files">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-folder-open text-gray-400 text-xl"></i>
-                        </div>
-                        <p class="font-medium">Aucun fichier</p>
-                    </div>
+                </div>
                 {% endif %}
             </div>
 
+            <!-- Localisation -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Localisation</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Adresse complète</div>
+                        <div class="font-semibold text-gray-900">
+                            {{ projeto.endereco_projeto }}<br>
+                            {{ projeto.cidade_projeto }}, {{ projeto.cep_projeto }}
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Google Maps</div>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ projeto.endereco_projeto|urlencode }}, {{ projeto.cidade_projeto|urlencode }}, {{ projeto.cep_projeto|urlencode }}"
+                           target="_blank" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2">
+                            <i class="fas fa-external-link-alt"></i>
+                            Voir sur la carte
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demandes de Devis -->
+            {% if solicitacoes %}
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Demandes de devis</h2>
+                </div>
+
+                <div class="space-y-4">
+                    {% for solicitacao in solicitacoes %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-blue-600">{{ solicitacao.numero }}</span>
+                                <span class="bg-{{ solicitacao.status }}-100 text-{{ solicitacao.status }}-800 px-2 py-1 rounded-full text-xs font-bold">
+                                    {{ solicitacao.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                Créée le {{ solicitacao.created_at|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
             <!-- Actions -->
-            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 lg:p-8 hover:shadow-xl transition-all duration-300">
-                <h3 class="font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
-                    <i class="fas fa-bolt text-yellow-500"></i>
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bolt text-blue-500"></i>
                     Actions
                 </h3>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <a href="{% url 'orcamentos:cliente_editar_projeto' projeto.uuid %}"
-                       class="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 hover:from-blue-100 hover:to-cyan-100 rounded-xl font-semibold text-blue-700 transition-all duration-300 hover:scale-105">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-edit text-white"></i>
-                        </div>
-                        Modifier le projet
+                       class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-edit"></i>
+                        Éditer le projet
                     </a>
 
                     <a href="{% url 'orcamentos:cliente_solicitar_orcamento' projeto.uuid %}"
-                       class="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 hover:from-green-100 hover:to-emerald-100 rounded-xl font-semibold text-green-700 transition-all duration-300 hover:scale-105">
-                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-file-invoice-dollar text-white"></i>
-                        </div>
+                       class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-file-invoice"></i>
                         Demander un devis
                     </a>
 
-                    <button onclick="showDeleteModal()"
-                            class="w-full flex items-center gap-4 p-4 bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 hover:from-red-100 hover:to-rose-100 rounded-xl font-semibold text-red-700 transition-all duration-300 hover:scale-105">
-                        <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                            <i class="fas fa-trash text-white"></i>
-                        </div>
-                        Supprimer le projet
+                    <button onclick="window.print()"
+                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-print"></i>
+                        Imprimer
                     </button>
                 </div>
+            </div>
+
+            <!-- Annexes -->
+            {% if anexos %}
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-paperclip text-blue-500"></i>
+                    Fichiers annexes
+                </h3>
+
+                <div class="space-y-3">
+                    {% for anexo in anexos %}
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                                    <i class="fas fa-file text-white text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900 text-sm">{{ anexo.descricao|default:"Arquivo" }}</div>
+                                    <div class="text-xs text-gray-500">{{ anexo.created_at|date:"d/m/Y H:i" }}</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="{{ anexo.arquivo.url }}" target="_blank"
+                                   class="text-blue-600 hover:text-blue-800 p-1">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                <button onclick="deleteAnexo({{ anexo.id }})"
+                                        class="text-red-600 hover:text-red-800 p-1">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Upload de Annexes -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-upload text-blue-500"></i>
+                    Ajouter des fichiers
+                </h3>
+
+                <form id="upload-form" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <input type="text" id="anexo-descricao" placeholder="Description du fichier..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fichier</label>
+                        <input type="file" id="anexo-file" accept="image/*,.pdf,.doc,.docx"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-upload"></i>
+                        Télécharger
+                    </button>
+                </form>
+            </div>
+
+            <!-- Actions Danger -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-red-200">
+                <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                    Zone de danger
+                </h3>
+
+                <button onclick="deleteProject()"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                    <i class="fas fa-trash"></i>
+                    Supprimer le projet
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de confirmação de exclusão -->
-<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-all duration-300">
-        <div class="p-8">
-            <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mr-4">
-                    <i class="fas fa-trash text-white text-lg"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900">Supprimer le projet</h3>
+<!-- Modal de confirmação -->
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div class="text-center">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
             </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Supprimer le projet</h3>
+            <p class="text-gray-600 mb-6">Cette action est irréversible. Voulez-vous vraiment supprimer ce projet?</p>
 
-            <p class="text-gray-600 mb-8 leading-relaxed">
-                Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
-            </p>
-
-            <div class="flex flex-col sm:flex-row justify-end gap-4">
-                <button onclick="hideDeleteModal()"
-                        class="px-6 py-3 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-semibold transition-all duration-300">
+            <div class="flex gap-3">
+                <button onclick="closeModal()"
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium">
                     Annuler
                 </button>
                 <a href="{% url 'orcamentos:cliente_excluir_projeto' projeto.uuid %}"
-                   class="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-center">
+                   class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-center">
                     Supprimer
                 </a>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-function showDeleteModal() {
+function deleteProject() {
     document.getElementById('delete-modal').classList.remove('hidden');
+    document.getElementById('delete-modal').classList.add('flex');
 }
 
-function hideDeleteModal() {
+function closeModal() {
     document.getElementById('delete-modal').classList.add('hidden');
-}
-
-function uploadFiles() {
-    const fileInput = document.getElementById('file-input');
-
-    if (fileInput.files.length === 0) {
-        return;
-    }
-
-    // Show loading indicator
-    showUploadProgress();
-
-    let uploadPromises = [];
-    let uploadedCount = 0;
-    let totalFiles = fileInput.files.length;
-
-    // Process each file separately with its own FormData
-    for (let file of fileInput.files) {
-        // Validate file before upload
-        if (!validateFile(file)) {
-            continue;
-        }
-
-        const formData = new FormData();
-        formData.append('arquivo', file);
-        formData.append('descricao', file.name);
-
-        const uploadPromise = fetch('{% url "orcamentos:upload_anexo_projeto" projeto.uuid %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            uploadedCount++;
-            if (data.success) {
-                addAnexoToList(data.anexo);
-                updateFileCounter();
-            } else {
-                console.error('Erro do servidor:', data.errors);
-                showNotification('Erreur lors du téléchargement de ' + file.name, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erro na requisição:', error);
-            showNotification('Erreur lors du téléchargement de ' + file.name + ': ' + error.message, 'error');
-        });
-
-        uploadPromises.push(uploadPromise);
-    }
-
-    // Wait for all uploads to complete
-    Promise.allSettled(uploadPromises).then(() => {
-        hideUploadProgress();
-        if (uploadedCount > 0) {
-            showNotification(`${uploadedCount} fichier(s) téléchargé(s) avec succès!`, 'success');
-        }
-        // Clear the input after processing
-        fileInput.value = '';
-    });
-}
-
-// File validation function
-function validateFile(file) {
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = [
-        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'text/plain'
-    ];
-    const allowedExtensions = [
-        '.jpg', '.jpeg', '.png', '.gif', '.webp',
-        '.pdf',
-        '.doc', '.docx',
-        '.txt'
-    ];
-
-    // Check file size
-    if (file.size > maxSize) {
-        showNotification(`Le fichier "${file.name}" est trop volumineux (max 10MB)`, 'error');
-        return false;
-    }
-
-    // Check file type
-    if (!allowedTypes.includes(file.type)) {
-        showNotification(`Type de fichier non autorisé: "${file.name}"`, 'error');
-        return false;
-    }
-
-    // Check file extension as additional security
-    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-    if (!allowedExtensions.includes(fileExtension)) {
-        showNotification(`Extension de fichier non autorisée: "${file.name}"`, 'error');
-        return false;
-    }
-
-    // Check for suspicious file names
-    const suspiciousPatterns = [
-        /\.exe$/i, /\.bat$/i, /\.cmd$/i, /\.scr$/i, /\.pif$/i,
-        /\.com$/i, /\.vbs$/i, /\.js$/i, /\.jar$/i, /\.php$/i,
-        /\.asp$/i, /\.aspx$/i, /\.jsp$/i, /\.py$/i, /\.rb$/i
-    ];
-
-    for (let pattern of suspiciousPatterns) {
-        if (pattern.test(file.name)) {
-            showNotification(`Fichier potentiellement dangereux détecté: "${file.name}"`, 'error');
-            return false;
-        }
-    }
-
-    return true;
-}
-
-// Show upload progress
-function showUploadProgress() {
-    const button = document.querySelector('[onclick="document.getElementById(\'file-input\').click()"]');
-    if (button) {
-        button.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i> Upload...';
-        button.disabled = true;
-    }
-}
-
-// Hide upload progress
-function hideUploadProgress() {
-    const button = document.querySelector('[onclick="document.getElementById(\'file-input\').click()"]');
-    if (button) {
-        button.innerHTML = '<i class="fas fa-plus text-sm"></i> Ajouter';
-        button.disabled = false;
-    }
-}
-
-// Update file counter
-function updateFileCounter() {
-    const counter = document.querySelector('h3 .fas.fa-paperclip').parentNode;
-    const anexosList = document.getElementById('anexos-list');
-    const count = anexosList ? anexosList.children.length : 0;
-    counter.innerHTML = `<i class="fas fa-paperclip text-purple-600"></i> Fichiers (${count})`;
-}
-
-// Show notification instead of alert
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existingNotifications = document.querySelectorAll('.upload-notification');
-    existingNotifications.forEach(n => n.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `upload-notification fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 translate-x-full`;
-
-    if (type === 'success') {
-        notification.className += ' bg-green-50 border border-green-200 text-green-800';
-        notification.innerHTML = `
-            <div class="flex items-center gap-3">
-                <i class="fas fa-check-circle text-green-600"></i>
-                <span class="font-medium">${message}</span>
-            </div>
-        `;
-    } else if (type === 'error') {
-        notification.className += ' bg-red-50 border border-red-200 text-red-800';
-        notification.innerHTML = `
-            <div class="flex items-center gap-3">
-                <i class="fas fa-exclamation-circle text-red-600"></i>
-                <span class="font-medium">${message}</span>
-            </div>
-        `;
-    }
-
-    document.body.appendChild(notification);
-
-    // Animate in
-    setTimeout(() => {
-        notification.classList.remove('translate-x-full');
-    }, 100);
-
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
-
-// Close modal on outside click
-document.getElementById('delete-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideDeleteModal();
-    }
-});
-
-function addAnexoToList(anexo) {
-    const anexosList = document.getElementById('anexos-list');
-    const noFiles = document.getElementById('no-files');
-
-    // Remove "no files" message if exists
-    if (noFiles) {
-        noFiles.remove();
-    }
-
-    // Create list if it doesn't exist
-    if (!anexosList) {
-        const filesContainer = document.querySelector('.bg-white.rounded-2xl.shadow-lg.border.border-gray-100.p-6.hover\\:shadow-xl.transition-all.duration-300:has(.fas.fa-paperclip)');
-        const newList = document.createElement('div');
-        newList.id = 'anexos-list';
-        newList.className = 'space-y-3';
-        filesContainer.appendChild(newList);
-    }
-
-    // Create new file element
-    const anexoElement = document.createElement('div');
-    anexoElement.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-300';
-    anexoElement.setAttribute('data-anexo-id', anexo.id);
-    anexoElement.innerHTML = `
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fas fa-paperclip text-white text-xs"></i>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-900">${anexo.descricao || 'Fichier'}</p>
-                <p class="text-xs text-gray-500">${new Date().toLocaleDateString('fr-FR')}</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="${anexo.arquivo}" target="_blank"
-               class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-all duration-200">
-                <i class="fas fa-download text-sm"></i>
-            </a>
-            <button onclick="deleteAnexo(${anexo.id})"
-                    class="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-lg transition-all duration-200">
-                <i class="fas fa-trash text-sm"></i>
-            </button>
-        </div>
-    `;
-
-    // Add to list with smooth animation
-    anexoElement.style.opacity = '0';
-    anexoElement.style.transform = 'translateY(-10px)';
-    document.getElementById('anexos-list').appendChild(anexoElement);
-
-    // Animate in
-    setTimeout(() => {
-        anexoElement.style.transition = 'all 0.3s ease';
-        anexoElement.style.opacity = '1';
-        anexoElement.style.transform = 'translateY(0)';
-    }, 50);
+    document.getElementById('delete-modal').classList.remove('flex');
 }
 
 function deleteAnexo(anexoId) {
-    if (!confirm('Supprimer ce fichier ?')) return;
-
-    // Show loading on delete button
-    const deleteButton = document.querySelector(`[data-anexo-id="${anexoId}"] [onclick="deleteAnexo(${anexoId})"]`);
-    if (deleteButton) {
-        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
-        deleteButton.disabled = true;
+    if (confirm('Supprimer ce fichier?')) {
+        fetch(`{% url 'orcamentos:excluir_anexo_projeto' projeto.uuid 0 %}`.replace('0', anexoId), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de la suppression');
+        });
     }
+}
 
-    fetch(`{% url "orcamentos:excluir_anexo_projeto" projeto.uuid 0 %}`.replace('0', anexoId), {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
+// Upload form
+document.getElementById('upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('descricao', document.getElementById('anexo-descricao').value);
+    formData.append('arquivo', document.getElementById('anexo-file').files[0]);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    fetch(`{% url 'orcamentos:upload_anexo_projeto' projeto.uuid %}`, {
+        method: 'POST',
+        body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Animate out and remove
-            const element = document.querySelector(`[data-anexo-id="${anexoId}"]`);
-            if (element) {
-                element.style.transition = 'all 0.3s ease';
-                element.style.opacity = '0';
-                element.style.transform = 'translateX(-20px)';
-                setTimeout(() => element.remove(), 300);
-            }
-
-            // Update counter
-            updateFileCounter();
-
-            // Show "no files" message if list is empty
-            setTimeout(() => {
-                const anexosList = document.getElementById('anexos-list');
-                if (anexosList && anexosList.children.length === 0) {
-                    anexosList.innerHTML = `
-                        <div class="text-center py-8 text-gray-500" id="no-files">
-                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-folder-open text-gray-400 text-xl"></i>
-                            </div>
-                            <p class="font-medium">Aucun fichier</p>
-                        </div>
-                    `;
-                    updateFileCounter();
-                }
-            }, 350);
-
-            showNotification('Fichier supprimé avec succès', 'success');
+            location.reload();
         } else {
-            throw new Error(data.error || 'Erreur lors de la suppression');
+            alert('Erreur lors du téléchargement');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Erreur lors de la suppression: ' + error.message, 'error');
-
-        // Restore delete button
-        if (deleteButton) {
-            deleteButton.innerHTML = '<i class="fas fa-trash text-sm"></i>';
-            deleteButton.disabled = false;
-        }
+        alert('Erreur lors du téléchargement');
     });
-}
+});
 </script>
 {% endblock %}

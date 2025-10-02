@@ -1,0 +1,424 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .products-container {
+        background: #f8fafc;
+        min-height: calc(100vh - 200px);
+
+    }
+
+    .products-header {
+        background: white;
+        border-bottom: 2px solid #e5e7eb;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 24px;
+        padding: 0 24px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .product-header {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .product-ref {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e40af;
+        margin-bottom: 4px;
+    }
+
+    .product-desc {
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .product-body {
+        padding: 20px;
+    }
+
+    .product-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .detail-item i {
+        width: 16px;
+        color: #3b82f6;
+    }
+
+    .price-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 16px 0;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .price-label {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .price-value {
+        font-weight: 600;
+        color: #1f2937;
+        font-size:13px ;
+    }
+
+    .price-ttc {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        border: 1px solid;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border-color: #d1d5db;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-danger {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    .btn-danger:hover {
+        background: #fee2e2;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="products-container">
+    <!-- Header -->
+    <div class="products-header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">
+                    <i class="fas fa-boxes text-blue-600 mr-3"></i>
+                    Gestion des Produits/Services
+                </h1>
+                <p class="text-gray-600 mt-2">Gérez votre catalogue de produits et services</p>
+            </div>
+
+            <div class="flex gap-3">
+                <a href="{% url 'orcamentos:fornecedores_list' %}" class="btn-action btn-secondary">
+                    <i class="fas fa-truck"></i>
+                    Fournisseurs
+                </a>
+                <a href="{% url 'orcamentos:produtos_create' %}" class="btn-action btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Nouveau Produit
+                </a>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="mt-6">
+            <form method="get" class="flex gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher</label>
+                    <input type="text" name="search" value="{{ search_query }}"
+                           placeholder="Référence ou description..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Activité</label>
+                    <select name="atividade" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Toutes</option>
+                        {% for value, label in atividade_choices %}
+                            <option value="{{ value }}" {% if atividade_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                    <select name="ativo" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Tous</option>
+                        <option value="true" {% if ativo_filter == 'true' %}selected{% endif %}>Actifs</option>
+                        <option value="false" {% if ativo_filter == 'false' %}selected{% endif %}>Inactifs</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-action btn-primary">
+                    <i class="fas fa-search"></i>
+                    Filtrer
+                </button>
+
+                {% if search_query or atividade_filter or ativo_filter %}
+                    <a href="{% url 'orcamentos:produtos_list' %}" class="btn-action btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Reset
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de produtos -->
+    {% if page_obj.object_list %}
+        <div class="products-grid">
+            {% for produto in page_obj.object_list %}
+                <div class="product-card ">
+                    <div class="product-header">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="product-ref">{{ produto.referencia }}</div>
+                                <div class="product-desc">{{ produto.descricao }}</div>
+                            </div>
+                            <span class="status-badge {% if produto.ativo %}status-active{% else %}status-inactive{% endif %}">
+                                {% if produto.ativo %}Actif{% else %}Inactif{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="product-body">
+                        <div class="product-details">
+                            <div class="detail-item">
+                                <i class="fas fa-tag"></i>
+                                <span>{{ produto.get_atividade_display }}</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <i class="fas fa-ruler"></i>
+                                <span>{{ produto.get_unidade_display }}</span>
+                            </div>
+
+                            {% if produto.fornecedor %}
+                            <div class="detail-item">
+                                <i class="fas fa-truck"></i>
+                                <span>{{ produto.fornecedor.nome }}</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="detail-item">
+                                <i class="fas fa-percent"></i>
+                                <span>TVA {{ produto.taxa_tva }}%</span>
+                            </div>
+                        </div>
+
+                        <div class="price-section">
+                            <div class="price-row">
+                                <span class="price-label">Prix d'achat:</span>
+                                <span class="price-value">{{ produto.preco_compra }}€</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">Marge ({{ produto.margem_percentual }}%):</span>
+                                <span class="price-value">{{ produto.margem_ht }}€</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">Prix HT:</span>
+                                <span class="price-value">{{ produto.preco_venda_ht }}€</span>
+                            </div>
+                            <div class="price-row price-ttc">
+                                <span class="price-label">Prix TTC:</span>
+                                <span class="price-value">{{ produto.preco_venda_ttc }}€</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 mt-4">
+                            <a href="{% url 'orcamentos:produtos_detail' produto.pk %}" class="btn-action btn-primary flex-1">
+                                <i class="fas fa-eye"></i>
+                                Voir
+                            </a>
+                            <a href="{% url 'orcamentos:produtos_edit' produto.pk %}" class="btn-action btn-secondary">
+                                <i class="fas fa-edit"></i>
+                                Modifier
+                            </a>
+                            <button onclick="toggleProductStatus({{ produto.pk }})"
+                                    class="btn-action {% if produto.ativo %}btn-danger{% else %}btn-primary{% endif %}">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginação -->
+        {% if page_obj.has_other_pages %}
+            <div class="flex justify-center mt-8 pb-8">
+                <nav class="flex gap-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    <span class="px-3 py-2 bg-blue-600 text-white border border-blue-600 rounded-lg">
+                        {{ page_obj.number }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-16">
+            <div class="text-6xl text-gray-400 mb-4">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun produit trouvé</h3>
+            <p class="text-gray-600 mb-6">
+                {% if search_query or atividade_filter or ativo_filter %}
+                    Aucun produit ne correspond à vos critères de recherche.
+                {% else %}
+                    Commencez par ajouter vos premiers produits et services.
+                {% endif %}
+            </p>
+            <a href="{% url 'orcamentos:produtos_create' %}" class="btn-action btn-primary">
+                <i class="fas fa-plus"></i>
+                Créer le premier produit
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleProductStatus(productId) {
+    fetch(`/orcamentos/admin/produtos/${productId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Recarregar página para atualizar status
+        } else {
+            alert('Erreur lors du changement de statut');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors du changement de statut');
+    });
+}
+
+// Auto-submit dos filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const selects = form.querySelectorAll('select');
+
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6 mb-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="mb-4">
+            <a href="{% url 'orcamentos:lista_produtos' %}"
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Retour aux produits
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                {% if action == 'criar' %}
+                    <i class="fas fa-plus-circle text-green-600"></i>
+                    Nouveau Produit
+                {% else %}
+                    <i class="fas fa-edit text-blue-600"></i>
+                    Éditer Produit
+                {% endif %}
+            </h1>
+            {% if action == 'editar' %}
+                <p class="text-gray-600">{{ produto.referencia }} - {{ produto.descricao }}</p>
+            {% else %}
+                <p class="text-gray-600">Ajoutez un nouveau produit à votre catalogue</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="max-w-6xl">
+        {% csrf_token %}
+
+        <!-- Informations de base -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                Informations de base
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Référence *</label>
+                    {{ form.referencia }}
+                    {% if form.referencia.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.referencia.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Fournisseur</label>
+                    {{ form.fornecedor }}
+                    {% if form.fornecedor.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.fornecedor.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.descricao.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Type d'unité</label>
+                    {{ form.unidade }}
+                    {% if form.unidade.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.unidade.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Activité</label>
+                    {{ form.atividade }}
+                    {% if form.atividade.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.atividade.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Preços e Margens -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-euro-sign text-green-600"></i>
+                Preços et marges
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Prix d'achat (€) *</label>
+                    {{ form.preco_compra }}
+                    {% if form.preco_compra.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.preco_compra.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Marge (%)</label>
+                    {{ form.margem_percentual }}
+                    {% if form.margem_percentual.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.margem_percentual.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Marge (€)</label>
+                    {{ form.margem_ht }}
+                    {% if form.margem_ht.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.margem_ht.errors }}</div>
+                    {% endif %}
+                    <div class="text-xs text-gray-500 mt-1">Calculé automatiquement</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Prix de vente HT (€)</label>
+                    {{ form.preco_venda_ht }}
+                    {% if form.preco_venda_ht.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.preco_venda_ht.errors }}</div>
+                    {% endif %}
+                    <div class="text-xs text-gray-500 mt-1">Calculé automatiquement</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Taxe TVA</label>
+                    {{ form.taxa_tva }}
+                    {% if form.taxa_tva.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.taxa_tva.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Prix de vente TTC (€)</label>
+                    {{ form.preco_venda_ttc }}
+                    {% if form.preco_venda_ttc.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.preco_venda_ttc.errors }}</div>
+                    {% endif %}
+                    <div class="text-xs text-gray-500 mt-1">Calculé automatiquement</div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Calcul automatique:</strong> Entrez le prix d'achat et la marge %. Les autres prix seront calculés automatiquement.
+                </div>
+            </div>
+        </div>
+
+        <!-- Image et Statut -->
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-image text-purple-600"></i>
+                Image et statut
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Photo du produit</label>
+                    {{ form.foto }}
+                    {% if form.foto.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.foto.errors }}</div>
+                    {% endif %}
+                    <div class="text-xs text-gray-500 mt-1">Formats acceptés: JPG, PNG, GIF (max 5MB)</div>
+
+                    <!-- Preview da imagem -->
+                    <div id="imagePreview" class="mt-4 hidden">
+                        <div class="relative">
+                            <img id="previewImg" src="" alt="Preview" class="max-w-full h-48 object-cover rounded-lg border border-gray-300">
+                            <button type="button" id="removePreview" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Exibir imagem existente -->
+                    {% if form.instance.foto %}
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 mb-2">Image actuelle:</p>
+                            <img src="{{ form.instance.foto.url }}" alt="Image actuelle" class="max-w-full h-48 object-cover rounded-lg border border-gray-300">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-start">
+                    <div class="flex items-center gap-3">
+                        {{ form.ativo }}
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Produit actif</label>
+                            <p class="text-xs text-gray-500">Le produit sera visible dans les catalogues</p>
+                        </div>
+                    </div>
+                    {% if form.ativo.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.ativo.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="flex justify-between items-center">
+            <a href="{% url 'orcamentos:lista_produtos' %}"
+               class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                <i class="fas fa-times"></i>
+                Annuler
+            </a>
+
+            <button type="submit"
+                    class="{% if action == 'criar' %}bg-green-600 hover:bg-green-700{% else %}bg-blue-600 hover:bg-blue-700{% endif %} text-white px-8 py-3 rounded-lg font-medium flex items-center gap-2">
+                <i class="fas fa-{% if action == 'criar' %}plus{% else %}save{% endif %}"></i>
+                {% if action == 'criar' %}Créer le produit{% else %}Sauvegarder{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Form styling */
+input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="file"],
+select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+/* Error states */
+.form-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular preços automaticamente
+    const precoCompra = document.querySelector('input[name="preco_compra"]');
+    const margemPercentual = document.querySelector('input[name="margem_percentual"]');
+    const margemHt = document.querySelector('input[name="margem_ht"]');
+    const precoVendaHt = document.querySelector('input[name="preco_venda_ht"]');
+    const taxaTva = document.querySelector('select[name="taxa_tva"]');
+    const precoVendaTtc = document.querySelector('input[name="preco_venda_ttc"]');
+
+    function calcularPrecos() {
+        const compra = parseFloat(precoCompra.value) || 0;
+        const margem = parseFloat(margemPercentual.value) || 0;
+        const tva = parseFloat(taxaTva.value) || 20;
+
+        // Calcular margem em euros
+        const margemEuros = (compra * margem) / 100;
+        margemHt.value = margemEuros.toFixed(2);
+
+        // Calcular preço de venda HT
+        const vendaHt = compra + margemEuros;
+        precoVendaHt.value = vendaHt.toFixed(2);
+
+        // Calcular preço de venda TTC
+        const vendaTtc = vendaHt * (1 + (tva / 100));
+        precoVendaTtc.value = vendaTtc.toFixed(2);
+    }
+
+    if (precoCompra && margemPercentual && taxaTva) {
+        precoCompra.addEventListener('input', calcularPrecos);
+        margemPercentual.addEventListener('input', calcularPrecos);
+        taxaTva.addEventListener('change', calcularPrecos);
+    }
+
+    // Preview da imagem
+    const fotoInput = document.querySelector('input[name="foto"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const removePreview = document.getElementById('removePreview');
+
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removePreview) {
+        removePreview.addEventListener('click', function() {
+            fotoInput.value = '';
+            imagePreview.classList.add('hidden');
+        });
+    }
+});
+</script>
+{% endblock %}

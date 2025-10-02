@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle demande de devis</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #2563eb; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .footer { background: #374151; color: white; padding: 15px; text-align: center; font-size: 12px; }
+        .btn { background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }
+        .info-box { background: white; border-left: 4px solid #2563eb; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LOPES PEINTURE</h1>
+            <h2>Nouvelle demande de devis reçue</h2>
+        </div>
+
+        <div class="content">
+            <p>Bonjour,</p>
+
+            <p>Une nouvelle demande de devis <strong>#{{ solicitacao.numero }}</strong> a été reçue sur le site.</p>
+
+            <div class="info-box">
+                <h3>Informations du client :</h3>
+                <p><strong>Nom :</strong> {{ solicitacao.nome_solicitante }}</p>
+                <p><strong>Email :</strong> {{ solicitacao.email_solicitante }}</p>
+                <p><strong>Téléphone :</strong> {{ solicitacao.telefone_solicitante }}</p>
+                <p><strong>Adresse :</strong> {{ solicitacao.endereco }}, {{ solicitacao.cidade }} {{ solicitacao.cep }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Détails du projet :</h3>
+                <p><strong>Type de service :</strong> {{ solicitacao.get_tipo_servico_display }}</p>
+                <p><strong>Urgence :</strong> {{ solicitacao.get_urgencia_display }}</p>
+                {% if solicitacao.area_aproximada %}
+                    <p><strong>Surface approximative :</strong> {{ solicitacao.area_aproximada }} m²</p>
+                {% endif %}
+                {% if solicitacao.orcamento_maximo %}
+                    <p><strong>Budget maximum :</strong> {{ solicitacao.orcamento_maximo }}€</p>
+                {% endif %}
+                <p><strong>Description :</strong></p>
+                <p>{{ solicitacao.descricao_servico }}</p>
+                {% if solicitacao.observacoes %}
+                    <p><strong>Observations :</strong> {{ solicitacao.observacoes }}</p>
+                {% endif %}
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ site_url }}/orcamentos/admin/solicitacao/{{ solicitacao.numero }}/" class="btn">Voir la demande</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>LOPES PEINTURE - Système de gestion des devis</p>
+        </div>
+    </div>
+</body>
+</html>
+

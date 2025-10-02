@@ -1,1058 +1,531 @@
+{% load currency_filters %}
+
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devis {{ orcamento.numero }} - {{ company_info.name }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devis - Lopes Peinture</title>
     <style>
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-blue: #1e40af;
-            --secondary-blue: #3b82f6;
-            --light-blue: #eff6ff;
-            --accent-blue: #1d4ed8;
-            --dark-gray: #1f2937;
-            --medium-gray: #6b7280;
-            --light-gray: #f9fafb;
-            --border-color: #e5e7eb;
-            --success-green: #059669;
-            --warning-orange: #d97706;
-            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-strong: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
-            color: var(--dark-gray);
-            background: #ffffff;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .document {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 25mm;
-            margin: 0 auto;
-            background: white;
-            position: relative;
-            box-shadow: var(--shadow-strong);
-        }
-
-        /* ===== HEADER SECTION ===== */
-        .header {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-            padding-bottom: 30px;
-            position: relative;
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue), var(--accent-blue));
-            border-radius: 2px;
-        }
-
-        .company-section {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .company-logo {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            color: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-medium);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .company-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
-        }
-
-        .company-name {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 5px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .company-tagline {
-            font-size: 13px;
-            opacity: 0.9;
-            font-weight: 400;
-            position: relative;
-            z-index: 1;
-        }
-
-        .company-details {
-            background: var(--light-gray);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 18px;
-            font-size: 12px;
-            line-height: 1.6;
-            color: var(--medium-gray);
-        }
-
-        .company-details .detail-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .company-details .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .company-details .detail-icon {
-            width: 16px;
-            margin-right: 8px;
-            color: var(--secondary-blue);
-            font-weight: 600;
-        }
-
-        .client-section {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-
-        .client-header {
-            background: linear-gradient(135deg, var(--light-blue), #dbeafe);
-            border: 2px solid var(--secondary-blue);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .client-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--primary-blue);
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .client-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark-gray);
-            margin-bottom: 10px;
-        }
-
-        .client-info {
-            font-size: 12px;
-            color: var(--medium-gray);
-            line-height: 1.6;
-        }
-
-        /* ===== DEVIS INFO BANNER ===== */
-        .devis-banner {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            color: white;
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-strong);
-        }
-
-        .devis-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(50px, -50px);
-        }
-
-        .devis-banner-content {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 30px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .devis-number {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 5px;
-        }
-
-        .devis-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .devis-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            font-size: 12px;
-        }
-
-        .meta-group {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px 16px;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-        }
-
-        .meta-label {
-            font-weight: 600;
-            margin-bottom: 4px;
-            opacity: 0.9;
-        }
-
-        .meta-value {
-            font-weight: 500;
-        }
-
-        /* ===== SECTION TITLES ===== */
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark-gray);
-            background: var(--light-gray);
-            border-left: 5px solid var(--secondary-blue);
-            padding: 15px 20px;
-            margin: 30px 0 20px 0;
-            border-radius: 0 8px 8px 0;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 30px;
-            height: 2px;
-            background: var(--secondary-blue);
-        }
-
-        /* ===== DESCRIPTION ===== */
-        .description-content {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            font-size: 13px;
-            line-height: 1.7;
-            color: var(--dark-gray);
-            position: relative;
-        }
-
-        .description-content::before {
-            content: '"';
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            font-size: 60px;
-            color: var(--secondary-blue);
-            opacity: 0.3;
-            font-family: serif;
-        }
-
-        /* ===== ITEMS TABLE ===== */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow-medium);
-            border: 1px solid var(--border-color);
-            margin-bottom: 30px;
-        }
-
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-
-        .items-table thead tr {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            color: white;
-        }
-
-        .items-table th {
-            padding: 15px 10px;
-            text-align: center;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 10px;
-            position: relative;
-        }
-
-        .items-table th:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 20%;
-            bottom: 20%;
-            width: 1px;
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .items-table tbody tr {
-            transition: all 0.2s ease;
-        }
-
-        .items-table tbody tr:nth-child(even) {
-            background: #fafbfc;
-        }
-
-        .items-table tbody tr:hover {
-            background: var(--light-blue);
-            transform: scale(1.005);
-        }
-
-        .items-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #f0f1f2;
-            vertical-align: middle;
-        }
-
-        /* Column specific styles */
-        .col-ref {
-            width: 8%;
-            text-align: center;
-            font-weight: 600;
-            color: var(--secondary-blue);
-        }
-
-        .col-designation {
-            width: 28%;
-            text-align: left;
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
-
-        .col-unite { width: 8%; text-align: center; }
-        .col-quantite { width: 8%; text-align: center; font-weight: 600; }
-        .col-pu-ht { width: 10%; text-align: right; }
-        .col-pu-ttc { width: 10%; text-align: right; }
-        .col-remise { width: 8%; text-align: center; color: var(--warning-orange); }
-        .col-total-ht { width: 10%; text-align: right; font-weight: 700; }
-        .col-total-ttc { width: 10%; text-align: right; font-weight: 700; color: var(--success-green); }
-        .col-taxe { width: 10%; text-align: right; color: var(--medium-gray); }
-
-        /* ===== TOTALS SECTION ===== */
-        .totals-container {
-            display: flex;
-            justify-content: flex-end;
-            margin: 30px 0;
-        }
-
-        .totals-card {
-            background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 16px;
-            padding: 25px;
-            min-width: 400px;
-            box-shadow: var(--shadow-medium);
-        }
-
-        .totals-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .totals-table tr:not(:last-child) td {
-            border-bottom: 1px solid #f0f1f2;
-        }
-
-        .totals-table td {
-            padding: 12px 0;
-            font-size: 13px;
-        }
-
-        .totals-table .label {
-            font-weight: 500;
-            color: var(--dark-gray);
-        }
-
-        .totals-table .value {
-            text-align: right;
-            font-weight: 600;
-            color: var(--dark-gray);
-        }
-
-        .totals-table .total-final {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            color: white;
-            font-size: 16px;
-            font-weight: 800;
-        }
-
-        .totals-table .total-final td {
-            padding: 18px 20px;
-            border-radius: 10px;
-        }
-
-        /* ===== CONDITIONS SECTION ===== */
-        .conditions-card {
-            background: linear-gradient(135deg, #fffbeb, #fef3c7);
-            border: 2px solid #f59e0b;
-            border-radius: 16px;
-            padding: 30px;
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .conditions-card::before {
-            content: '⚖️';
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 24px;
-            opacity: 0.6;
-        }
-
-        .conditions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 20px;
-        }
-
-        .condition-item h4 {
-            color: #92400e;
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .condition-item h4::before {
-            content: '•';
-            color: #f59e0b;
-            margin-right: 8px;
-            font-size: 16px;
-        }
-
-        .condition-item p {
-            font-size: 12px;
-            color: #78350f;
-            line-height: 1.6;
-        }
-
-        .conditions-list {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .conditions-list h4 {
-            color: #92400e;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .conditions-list ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .conditions-list li {
-            font-size: 12px;
-            color: #78350f;
-            margin-bottom: 8px;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .conditions-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: #059669;
-            font-weight: bold;
-        }
-
-        /* ===== VALIDITY WARNING ===== */
-        .validity-alert {
-            background: linear-gradient(135deg, #fef2f2, #fee2e2);
-            border: 2px solid #f87171;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin: 30px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .validity-alert::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
-        }
-
-        .validity-alert-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .validity-icon {
-            font-size: 24px;
-        }
-
-        .validity-text {
-            font-weight: 700;
-            color: #991b1b;
-            font-size: 14px;
-        }
-
-        /* ===== SIGNATURE SECTION ===== */
-        .signature-section {
-            margin-top: 50px;
-            padding-top: 40px;
-            border-top: 2px dashed var(--border-color);
-        }
-
-        .signature-title {
-            text-align: center;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--dark-gray);
-            margin-bottom: 15px;
-        }
-
-        .signature-subtitle {
-            text-align: center;
-            font-size: 13px;
-            color: var(--medium-gray);
-            margin-bottom: 40px;
-        }
-
-        .signature-area {
-            display: flex;
-            justify-content: center;
-            gap: 60px;
-        }
-
-        .signature-box {
-            border: 3px dashed var(--secondary-blue);
-            border-radius: 12px;
-            padding: 40px 50px;
-            text-align: center;
-            background: var(--light-blue);
-            transition: all 0.3s ease;
-        }
-
-        .signature-box:hover {
-            background: #dbeafe;
-            border-color: var(--primary-blue);
-        }
-
-        .signature-label {
-            font-weight: 600;
-            color: var(--primary-blue);
-            font-size: 14px;
-        }
-
-        /* ===== NO ITEMS STATE ===== */
-        .no-items-card {
-            text-align: center;
-            padding: 60px 40px;
-            background: linear-gradient(135deg, var(--light-gray), #f3f4f6);
-            border: 3px dashed var(--border-color);
-            border-radius: 16px;
-            position: relative;
-        }
-
-        .no-items-icon {
-            font-size: 48px;
-            color: var(--medium-gray);
-            margin-bottom: 20px;
-        }
-
-        .no-items-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--dark-gray);
-            margin-bottom: 10px;
-        }
-
-        .no-items-text {
-            font-size: 14px;
-            color: var(--medium-gray);
-            line-height: 1.6;
-        }
-
-        /* ===== PRINT CONTROLS ===== */
-        .print-controls {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 1000;
-            display: flex;
-            gap: 15px;
-        }
-
-        .print-btn {
-            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: var(--shadow-medium);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .print-btn:hover {
-            background: linear-gradient(135deg, var(--primary-blue), var(--accent-blue));
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-strong);
-        }
-
-        .download-btn {
-            background: linear-gradient(135deg, var(--success-green), #047857);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: var(--shadow-medium);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .download-btn:hover {
-            background: linear-gradient(135deg, #047857, #065f46);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-strong);
-        }
-
-        /* ===== FOOTER ===== */
-        .document-footer {
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 11px;
-            color: var(--medium-gray);
-            line-height: 1.6;
-        }
-
-        /* ===== PRINT STYLES ===== */
-        @media print {
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .document {
-                margin: 0;
-                width: auto;
-                min-height: auto;
-                box-shadow: none;
-                padding: 15mm;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .items-table tbody tr:hover {
-                background: transparent;
-                transform: none;
-            }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .document {
-                padding: 15px;
-                width: 100%;
-            }
-            .header {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            .client-section {
-                text-align: left;
-            }
-            .devis-banner-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .devis-meta {
-                grid-template-columns: 1fr;
-            }
-            .conditions-grid {
-                grid-template-columns: 1fr;
-            }
-            .signature-area {
-                flex-direction: column;
-                align-items: center;
-                gap: 30px;
-            }
-        }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 9pt;
+        line-height: 1.5;
+        color: #000;
+        background: #fff;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 15mm;
+        margin: 0 auto;
+        background: white;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+      }
+
+      .logo-section {
+        flex: 1;
+      }
+
+      .logo {
+        max-width: 100%;
+        height: auto;
+        font-size: 32pt;
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 0;
+        line-height: 1;
+      }
+      .company-tagline {
+        font-size: 12pt;
+        opacity: 0.9;
+        font-weight: 400;
+        position: relative;
+        color: #6b9c3d;
+        z-index: 1;
+      }
+
+      .logo-subtitle {
+        font-size: 18pt;
+        color: #6b9c3d;
+        font-weight: bold;
+        margin-left: 5px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+      }
+      .company-info {
+        font-size: 8pt;
+        line-height: 1.5;
+        margin-top: 15px;
+      }
+
+      .date-section {
+        text-align: right;
+        font-size: 9pt;
+      }
+
+      .client-header {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        margin-bottom: 5px;
+      }
+
+      .client-info {
+        flex: 1;
+        font-size: 9pt;
+        line-height: 1.6;
+      }
+
+      .devis-title {
+        font-size: 18pt;
+        font-weight: bold;
+        color: #5b9bd5;
+        margin-bottom: 10px;
+      }
+
+      .devis-meta {
+        display: flex;
+
+        gap: 40px;
+        font-size: 9pt;
+        margin-bottom: 3px;
+      }
+      .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 8pt;
+      }
+
+      .invoice-table th {
+        background: linear-gradient(to bottom, #5b9bd5 0%, #4a8ec4 100%);
+        color: white;
+        padding: 8px 4px;
+        text-align: center;
+        font-size: 7.5pt;
+        font-weight: bold;
+        border: 2px solid #4a8ec4;
+      }
+
+      .invoice-table th:first-child,
+      .invoice-table th:nth-child(2) {
+        text-align: left;
+      }
+
+      .invoice-table td {
+        padding: 5px 4px;
+        border: 2px solid #e0e0e0;
+        text-align: right;
+      }
+
+      .invoice-table td:first-child,
+      .invoice-table td:nth-child(2) {
+        text-align: left;
+      }
+
+      .invoice-table tbody tr:nth-child(even) {
+        background: #fffef5;
+      }
+
+      .item-title {
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+
+      .item-detail {
+        color: #666;
+        font-size: 7.5pt;
+        line-height: 1.4;
+      }
+
+      .item-description {
+        grid-column: 1 / 3;
+        padding-right: 10px;
+      }
+
+      .item-title {
+        font-weight: bold;
+        margin-bottom: 3px;
+      }
+
+      .item-detail {
+        color: #666;
+        font-size: 7.5pt;
+        line-height: 1.4;
+      }
+
+      .footer {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 2px solid #ddd;
+      }
+
+      .payment-note {
+        font-size: 8pt;
+        margin-bottom: 10px;
+      }
+
+      .payment-note strong {
+        color: #000;
+      }
+
+      .validity-note {
+        color: red;
+        font-size: 8pt;
+        margin-bottom: 15px;
+      }
+
+      .totals-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+      }
+
+      .totals-box {
+        width: 300px;
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 15px;
+        background: #e8f0f8;
+        margin-bottom: 2px;
+        font-size: 9pt;
+      }
+
+      .total-row.highlight {
+        background: #5b9bd5;
+        color: white;
+        font-weight: bold;
+        font-size: 10pt;
+      }
+
+      .payment-info {
+        font-size: 7.5pt;
+        line-height: 1.6;
+        color: #333;
+        text-align: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+
+      .text-right {
+        text-align: right !important;
+      }
+
+      .text-center {
+        text-align: center !important;
+      }
+
+      /* ===== PRINT CONTROLS ===== */
+      .print-controls {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        z-index: 1000;
+        display: flex;
+        gap: 15px;
+      }
+
+      .print-btn {
+        background: linear-gradient(135deg, #3b82f6, #1e40af);
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .print-btn:hover {
+        background: linear-gradient(135deg, #1e40af, #1d4ed8);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .download-btn {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .download-btn:hover {
+        background: linear-gradient(135deg, #047857, #065f46);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Print Controls -->
     <div class="print-controls no-print">
-        <button class="print-btn" onclick="window.print()">
-            🖨️ Imprimer PDF
-        </button>
-        <button class="download-btn" onclick="downloadHTML()">
-            💾 Télécharger HTML
-        </button>
+      <button class="print-btn" onclick="window.print()">🖨️ Imprimer PDF</button>
+      <button class="download-btn" onclick="downloadHTML()">💾 Télécharger HTML</button>
     </div>
-
-    <div class="document">
-        <!-- HEADER -->
+    <div class="page">
+      <div class="content-area">
         <div class="header">
-            <!-- Company Section -->
-            <div class="company-section">
-                <div class="company-logo">
-                    <div class="company-name">{{ company_info.name }}</div>
-                    <div class="company-tagline">Spécialiste en travaux de peinture</div>
-                </div>
-                <div class="company-details">
-                    <div class="detail-row">
-                        <span class="detail-icon">📍</span>
-                        <span>{{ company_info.address }}, {{ company_info.city }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-icon">📞</span>
-                        <span>{{ company_info.phone }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-icon">✉️</span>
-                        <span>{{ company_info.email }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-icon">🏢</span>
-                        <span>SIRET: {{ company_info.siret }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-icon">💼</span>
-                        <span>APE: {{ company_info.ape }} - TVA: {{ company_info.tva }}</span>
-                    </div>
-                </div>
+          <div class="logo-section">
+            <div>
+              <img
+                class="logo"
+                src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
+                alt="LOPES"
+              />
             </div>
-
-            <!-- Client Section -->
-            <div class="client-section">
-                <div class="client-header">
-                    <div class="client-title">Facturé à</div>
-                    <div class="client-name">{{ orcamento.solicitacao.nome_solicitante }}</div>
-                    <div class="client-info">
-                        {{ orcamento.solicitacao.endereco }}<br>
+            <div class="row">
+              <div class="company-info">
+                <strong>EI : {{ company_info.name }}</strong> <br />
+                SIRET: {{ company_info.siret }}<br />
+                APE: {{ company_info.ape }} - TVA: {{ company_info.tva }} <br>
+                  {{ company_info.address }}<br />
+                {{ company_info.city }}<br />
+                France<br />
+                {{ company_info.phone }}<br />
+                {{ company_info.email }}<br />
+                www.lopespeinture.fr
+              </div>
+              <div class="client-header">
+                <div class="client-info">
+                  <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong><br />
+                  {{ orcamento.solicitacao.endereco }}<br>
                         {{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}<br>
                         {{ orcamento.solicitacao.email_solicitante }}<br>
-                        {% if orcamento.solicitacao.telefone_solicitante %}
-                            {{ orcamento.solicitacao.telephone_solicitante }}
-                        {% endif %}
-                    </div>
+
                 </div>
+              </div>
             </div>
+          </div>
+          <div class="date-section">Le {{ date_generation|date:"d/m/Y" }}</div>
         </div>
 
-        <!-- DEVIS BANNER -->
-        <div class="devis-banner">
-            <div class="devis-banner-content">
-                <div>
-                    <div class="devis-number">DEVIS N° {{ orcamento.numero }}</div>
-                    <div class="devis-subtitle">Devis professionnel pour travaux de peinture</div>
-                </div>
-                <div class="devis-meta">
-                    <div class="meta-group">
-                        <div class="meta-label">Date d'émission</div>
-                        <div class="meta-value">{{ date_generation|date:"d/m/Y" }}</div>
-                    </div>
-                    <div class="meta-group">
-                        <div class="meta-label">Validité</div>
-                        <div class="meta-value">{{ orcamento.validade_orcamento|date:"d/m/Y" }}</div>
-                    </div>
-                    <div class="meta-group">
-                        <div class="meta-label">Délai d'exécution</div>
-                        <div class="meta-value">{{ orcamento.prazo_execucao }} jours</div>
-                    </div>
-                    <div class="meta-group">
-                        <div class="meta-label">Service</div>
-                        <div class="meta-value">{{ orcamento.solicitacao.get_tipo_servico_display }}</div>
-                    </div>
-                </div>
-            </div>
+        <div class="devis-title">Devis</div>
+
+        <div class="devis-meta">
+          <div><strong>DEVIS N° {{ orcamento.numero }}</strong></div>
+          <div><strong>Code Client : 1</strong></div>
+          <div><strong>TVA Client :</strong></div>
         </div>
-
-        <!-- DESCRIPTION -->
-        {% if orcamento.descricao %}
-        <div class="section-title">Description des travaux</div>
-        <div class="description-content">
-            {{ orcamento.descricao|linebreaks }}
-        </div>
-        {% endif %}
-
-        <!-- ITEMS TABLE -->
-        <div class="section-title">Détail des prestations</div>
-
         {% if items_data %}
-        <div class="table-container">
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th class="col-ref">Réf</th>
-                        <th class="col-designation">Désignation</th>
-                        <th class="col-unite">Unité</th>
-                        <th class="col-quantite">Qté</th>
-                        <th class="col-pu-ht">PU HT</th>
-                        <th class="col-pu-ttc">PU TTC</th>
-                        <th class="col-remise">Remise</th>
-                        <th class="col-total-ht">Total HT</th>
-                        <th class="col-total-ttc">Total TTC</th>
-                        <th class="col-taxe">Taxe</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items_data %}
-                    <tr>
-                        <td class="col-ref">{{ item.ref }}</td>
-                        <td class="col-designation">{{ item.designation }}</td>
-                        <td class="col-unite">{{ item.unite }}</td>
-                        <td class="col-quantite">{{ item.quantite }}</td>
-                        <td class="col-pu-ht">{{ item.pu_ht|floatformat:2 }}€</td>
-                        <td class="col-pu-ttc">{{ item.pu_ttc|floatformat:2 }}€</td>
-                        <td class="col-remise">{{ item.remise }}%</td>
-                        <td class="col-total-ht">{{ item.total_ht|floatformat:2 }}€</td>
-                        <td class="col-total-ttc">{{ item.total_ttc|floatformat:2 }}€</td>
-                        <td class="col-taxe">{{ item.taxe|floatformat:2 }}€</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Réf</th>
+              <th>Désignation</th>
+              <th>Unité</th>
+              <th>Quantité</th>
+              <th>P.U. HT</th>
+              <th>P.U.TTC</th>
+              <th>Remise</th>
+              <th>Total HT</th>
+              <th>Total TTC</th>
+              <th>Taux</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items_data %}
+            <tr>
+              <td>{{ item.ref }}</td>
+              <td class="text-left item-detail">{{ item.designation }}</td>
+              <td class="text-center">{{ item.unite }}</td>
+              <td class="text-right">{{ item.quantite }}</td>
+              <td class="text-right">{{ item.pu_ht|floatformat:2 }}€</td>
+              <td class="text-right">{{ item.pu_ttc|floatformat:2 }}€</td>
+              <td class="text-right">{{ item.remise|floatformat:2 }}€</td>
+              <td class="text-right">{{ item.total_ht|floatformat:2 }}€</td>
+              <td class="text-right">{{ item.total_ttc|floatformat:2 }}€</td>
+              <td class="text-right">{{ item.taxe|floatformat:2 }}€</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        <div class="payment-note"><strong>Mode de reglement :</strong> Virement</div>
+        <div class="condition-item">
+          <h4>Conditions de paiement</h4>
+          <p>{{ orcamento.condicoes_pagamento|linebreaks }}</p>
         </div>
 
-        <!-- TOTALS -->
-        <div class="totals-container">
-            <div class="totals-card">
-                <table class="totals-table">
-                    <tr>
-                        <td class="label">Sous-total HT:</td>
-                        <td class="value">{{ subtotal_ht|floatformat:2 }}€</td>
-                    </tr>
-                    {% if remise_global > 0 %}
-                    <tr>
-                        <td class="label">Remise ({{ remise_global }}%):</td>
-                        <td class="value">-{{ valor_remise|floatformat:2 }}€</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Sous-total après remise:</td>
-                        <td class="value">{{ subtotal_apres_remise_ht|floatformat:2 }}€</td>
-                    </tr>
-                    {% endif %}
-                    <tr>
-                        <td class="label">Total TVA (20%):</td>
-                        <td class="value">{{ taxe_finale|floatformat:2 }}€</td>
-                    </tr>
-                    <tr class="total-final">
-                        <td class="label">TOTAL TTC:</td>
-                        <td class="value">{{ subtotal_apres_remise_ttc|floatformat:2 }}€</td>
-                    </tr>
-                </table>
+        <div class="validity-note">
+          <strong>Devis valable jusqu'au : {{ orcamento.validade_orcamento|date:"d/m/Y" }}</strong>
+        </div>
+        <br />
+        <div class="meta-group">
+          <div class="meta-label">Délai d'exécution</div>
+          <div class="meta-value">{{ orcamento.prazo_execucao }} jours</div>
+        </div>
+        <br />
+        <div class="meta-group">
+          <div class="meta-label">Service</div>
+          <div class="meta-value">{{ orcamento.solicitacao.get_tipo_servico_display }}</div>
+        </div>
+
+        <div class="totals-section">
+          <div class="totals-box">
+            <div class="total-row">
+              <span>Total HT :</span>
+              <span>{{ subtotal_ht|floatformat:2 }}€</span>
             </div>
+            {% if remise_global > 0 %}
+            <div class="total-row">
+              <span>Remise ({{ remise_global }}%):</span>
+              <span>-{{ valor_remise|floatformat:2 }}€</span>
+            </div>
+            <div class="total-row">
+              <span>Sous-total après remise:</span>
+              <span>{{ subtotal_apres_remise_ht|floatformat:2 }}€</span>
+            </div>
+            {% endif %}
+            <div class="total-row">
+              {% if taxa_tva_media == "Variável" %}
+                <span>TVA ({{ taxa_tva_media }}) :</span>
+              {% elif taxa_tva_media == "0" %}
+                <span>TVA (Exonérée) :</span>
+              {% else %}
+                <span>TVA ({{ taxa_tva_media }}%) :</span>
+              {% endif %}
+              <span>{{ taxe_finale|floatformat:2 }}€</span>
+            </div>
+            <div class="total-row">
+              <span>Total TTC :</span>
+              <span>{{ subtotal_apres_remise_ttc|floatformat:2 }}€</span>
+            </div>
+            <div class="total-row">
+              <span>Acomptés :</span>
+              <span>0.00€</span>
+            </div>
+            <div class="total-row highlight">
+              <span>Net à Payer :</span>
+              <span>{{ subtotal_apres_remise_ttc|floatformat:2 }}€</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: right; font-size: 8pt; margin-top: 10px">
+          Net à payer {{ subtotal_apres_remise_ttc|currency_to_words }}.
         </div>
         {% else %}
         <div class="no-items-card">
-            <div class="no-items-icon">📋</div>
-            <div class="no-items-title">Aucun élément détaillé</div>
-            <div class="no-items-text">
-                Les prestations détaillées seront précisées lors de la finalisation du devis.<br>
-                Le montant final sera communiqué après étude complète de votre projet.
-            </div>
+          <div class="no-items-icon">📋</div>
+          <div class="no-items-title">Aucun élément détaillé</div>
+          <div class="no-items-text">
+            Les prestations détaillées seront précisées lors de la finalisation du devis.<br />
+            Le montant final sera communiqué après étude complète de votre projet.
+          </div>
         </div>
         {% endif %}
-
-        <!-- CONDITIONS -->
-        <div class="section-title">Conditions générales</div>
-        <div class="conditions-card">
-            <div class="conditions-grid">
-                <div class="condition-item">
-                    <h4>Conditions de paiement</h4>
-                    <p>{{ orcamento.condicoes_pagamento|linebreaks }}</p>
-                </div>
-                <div class="condition-item">
-                    <h4>Délai d'exécution</h4>
-                    <p>{{ orcamento.prazo_execucao }} jours à compter de la signature du présent devis</p>
-                </div>
-                {% if orcamento.observacoes %}
-                <div class="condition-item">
-                    <h4>Observations particulières</h4>
-                    <p>{{ orcamento.observacoes|linebreaks }}</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="conditions-list">
-                <h4>Conditions générales</h4>
-                <ul>
-                    <li>Ce devis est établi pour les prestations décrites ci-dessus</li>
-                    <li>Les travaux supplémentaires feront l'objet d'un avenant</li>
-                    <li>Matériel et fournitures de première qualité conformes aux normes</li>
-                    <li>Garantie décennale selon la législation en vigueur</li>
-                    <li>Responsabilité civile professionnelle souscrite</li>
-                    <li>Travaux réalisés selon les règles de l'art</li>
-                </ul>
-            </div>
+        <div class="payment-info">
+          <strong>TVA non applicable, article 293 B du CGI</strong><br />
+          PAIEMENT PAR VIREMENT BANCAIRE : LOPES DE SOUZA FABIANO (EI) IBAN FR76 1027 8022 3400 0206
+          6300 131
         </div>
-
-        <!-- VALIDITY ALERT -->
-        <div class="validity-alert">
-            <div class="validity-alert-content">
-                <span class="validity-icon">⚠️</span>
-                <span class="validity-text">
-                    Ce devis est valable jusqu'au {{ orcamento.validade_orcamento|date:"d F Y" }}
-                </span>
-            </div>
-        </div>
-
-        <!-- SIGNATURE -->
-        <div class="signature-section">
-            <div class="signature-title">Bon pour accord</div>
-            <div class="signature-subtitle">
-                Date et signature du client précédées de la mention "Bon pour accord"
-            </div>
-
-            <div class="signature-area">
-                <div class="signature-box">
-                    <div style="height: 80px; margin-bottom: 15px;"></div>
-                    <div class="signature-label">Signature du client</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="document-footer">
-            <strong>{{ company_info.name }}</strong> - Société spécialisée en travaux de peinture et rénovation<br>
-            Document généré le {{ date_generation|date:"d F Y à H:i" }}<br>
-            TVA non applicable, art. 293 B du CGI - Garantie décennale - RCP professionnelle
-        </div>
+      </div>
     </div>
-
     <script>
-        // Enhanced functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Print button
-            const printBtn = document.querySelector('.print-btn');
-            if (printBtn) {
-                printBtn.addEventListener('click', function() {
-                    window.print();
-                });
-            }
+      // Enhanced functionality
+      document.addEventListener('DOMContentLoaded', function () {
+        // Print button
+        const printBtn = document.querySelector('.print-btn');
+        if (printBtn) {
+          printBtn.addEventListener('click', function () {
+            window.print();
+          });
+        }
 
-            // Download HTML button
-            window.downloadHTML = function() {
-                const element = document.documentElement.outerHTML;
-                const blob = new Blob([element], {type: 'text/html'});
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}.html';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            };
-        });
-
-        // Print optimization
-        window.addEventListener('beforeprint', function() {
-            document.title = 'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}';
-        });
-
-        window.addEventListener('afterprint', function() {
-            document.title = 'Devis {{ orcamento.numero }} - {{ company_info.name }}';
-        });
-
-        // Add smooth animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+        // Download HTML button
+        window.downloadHTML = function () {
+          const element = document.documentElement.outerHTML;
+          const blob = new Blob([element], { type: 'text/html' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download =
+            'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}.html';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
         };
+      });
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
+      // Print optimization
+      window.addEventListener('beforeprint', function () {
+        document.title =
+          'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}';
+      });
 
-        // Observe elements for animation
-        document.querySelectorAll('.section-title, .table-container, .totals-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'all 0.6s ease';
-            observer.observe(el);
+      window.addEventListener('afterprint', function () {
+        document.title = 'Devis {{ orcamento.numero }} - {{ company_info.name }}';
+      });
+
+      // Add smooth animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px',
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
         });
-    </script>
-</body>
-</html>
+      }, observerOptions);
 
+      // Observe elements for animation
+      document.querySelectorAll('.section-title, .table-container, .totals-card').forEach((el) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease';
+        observer.observe(el);
+      });
+    </script>
+  </body>
+</html>

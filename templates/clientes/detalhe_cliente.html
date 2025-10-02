@@ -1,0 +1,340 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ cliente.nom_complet }} - Détails du client - LOPES PEINTURE{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Header da Página -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user text-white text-lg"></i>
+                    </div>
+                    {{ cliente.nom_complet }}
+                </h1>
+                <div class="flex flex-wrap items-center gap-3">
+                    {% if cliente.status == 'prospect' %}
+                        <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200">
+                            <i class="fas fa-clock mr-2"></i>
+                            {{ cliente.get_status_display }}
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200">
+                            <i class="fas fa-handshake mr-2"></i>
+                            {{ cliente.get_status_display }}
+                        </span>
+                    {% endif %}
+                    <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                        <i class="fas fa-hashtag mr-2"></i>
+                        {{ cliente.code }}
+                    </span>
+                    <span class="text-sm text-gray-500 flex items-center gap-1">
+                        <i class="fas fa-calendar"></i>
+                       Créé en {{ cliente.date_creation|date:"d/m/Y" }}
+                    </span>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'clientes:lista_clientes' %}"
+                   class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à la liste
+                </a>
+                <a href="{% url 'clientes:editar_cliente' cliente.pk %}"
+                   class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-edit"></i>
+                    Modifier
+                </a>
+                {% if cliente.status == 'prospect' %}
+                <a href="{% url 'clientes:converter_prospect_cliente' cliente.pk %}"
+                   class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-4 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-arrow-up"></i>
+                    Convertisseur
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações Principais -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-info-circle text-blue-600"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900">Informations principales</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if cliente.raison_sociale %}
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+                        <i class="fas fa-building text-purple-600 text-xs"></i>
+                    </div>
+                    Nom de l'entreprise
+                </div>
+                <div class="font-semibold text-gray-900">{{ cliente.raison_sociale }}</div>
+            </div>
+            {% endif %}
+
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                        <i class="fas fa-user text-blue-600 text-xs"></i>
+                    </div>
+                    Nom et prénom
+                </div>
+                <div class="font-semibold text-gray-900">
+                    {% if cliente.civilite %}{{ cliente.get_civilite_display }} {% endif %}
+                    {{ cliente.nom }} {{ cliente.prenom }}
+                </div>
+            </div>
+
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                        <i class="fas fa-envelope text-green-600 text-xs"></i>
+                    </div>
+                    Email
+                </div>
+                <div class="font-semibold">
+                    {% if cliente.email %}
+                        <a href="mailto:{{ cliente.email }}" class="text-blue-600 hover:text-blue-700 hover:underline">
+                            {{ cliente.email }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-400">Pas informé</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center">
+                        <i class="fas fa-phone text-emerald-600 text-xs"></i>
+                    </div>
+                    Téléphone
+                </div>
+                <div class="font-semibold">
+                    {% if cliente.telephone %}
+                        <a href="tel:{{ cliente.telephone }}" class="text-blue-600 hover:text-blue-700 hover:underline">
+                            {{ cliente.telephone }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-400">Pas informé</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if cliente.mobile %}
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-teal-100 rounded flex items-center justify-center">
+                        <i class="fas fa-mobile-alt text-teal-600 text-xs"></i>
+                    </div>
+                    Mobile
+                </div>
+                <div class="font-semibold">
+                    <a href="tel:{{ cliente.mobile }}" class="text-blue-600 hover:text-blue-700 hover:underline">
+                        {{ cliente.mobile }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if cliente.url %}
+            <div class="bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-indigo-100 rounded flex items-center justify-center">
+                        <i class="fas fa-globe text-indigo-600 text-xs"></i>
+                    </div>
+                    Site Web
+                </div>
+                <div class="font-semibold">
+                    <a href="{{ cliente.url }}" target="_blank" class="text-blue-600 hover:text-blue-700 hover:underline">
+                        {{ cliente.url }}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Endereço Principal -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-map-marker-alt text-red-600"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Adresse principale</h2>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div class="whitespace-pre-line text-gray-700 leading-relaxed">{{ cliente.adresse_complete }}</div>
+            </div>
+        </div>
+
+        <!-- Condições Comerciais -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-handshake text-orange-600"></i>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900">Conditions commerciales</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <span class="text-gray-700 font-medium">Taux de TVA standard:</span>
+                    <span class="font-bold text-blue-700">{{ cliente.taux_tva_defaut }}%</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg border border-green-200">
+                    <span class="text-gray-700 font-medium">Remise mondiale:</span>
+                    <span class="font-bold text-green-700">{{ cliente.remise_globale }}%</span>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <span class="text-gray-700 font-medium">Conditions de paiement:</span>
+                    <span class="font-bold text-purple-700">{{ cliente.get_conditions_paiement_display }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if cliente.activite or cliente.siret or cliente.code_ape or cliente.tva_intra %}
+    <!-- Informações Empresariais -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-building text-purple-600"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900">Informations commerciales</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if cliente.activite %}
+            <div class="bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+                        <i class="fas fa-briefcase text-purple-600 text-xs"></i>
+                    </div>
+                    Activité
+                </div>
+                <div class="font-semibold text-gray-900">{{ cliente.activite }}</div>
+            </div>
+            {% endif %}
+
+            {% if cliente.siret %}
+            <div class="bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-indigo-100 rounded flex items-center justify-center">
+                        <i class="fas fa-id-card text-indigo-600 text-xs"></i>
+                    </div>
+                    SIRET
+                </div>
+                <div class="font-semibold text-gray-900">{{ cliente.siret }}</div>
+            </div>
+            {% endif %}
+
+            {% if cliente.code_ape %}
+            <div class="bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-cyan-100 rounded flex items-center justify-center">
+                        <i class="fas fa-code text-cyan-600 text-xs"></i>
+                    </div>
+                    Code APE
+                </div>
+                <div class="font-semibold text-gray-900">{{ cliente.code_ape }}</div>
+            </div>
+            {% endif %}
+
+            {% if cliente.tva_intra %}
+            <div class="bg-gray-50 hover:bg-purple-50 border border-gray-200 hover:border-purple-200 rounded-lg p-4 transition-all duration-200">
+                <div class="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+                    <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center">
+                        <i class="fas fa-percent text-emerald-600 text-xs"></i>
+                    </div>
+                    TVA Intracomunitária
+                </div>
+                <div class="font-semibold text-gray-900">{{ cliente.tva_intra }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if cliente.notes %}
+    <!-- Observações -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-sticky-note text-yellow-600"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900">Observations</h2>
+        </div>
+
+        <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 border-l-4 border-l-yellow-500 p-4 rounded-lg">
+            <div class="whitespace-pre-line text-gray-700 leading-relaxed">{{ cliente.notes }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ações Rápidas -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-bolt text-yellow-600"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900">Actions rapides</h2>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+            <a href="{% url 'clientes:editar_cliente' cliente.pk %}"
+               class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-edit"></i>
+                Modifier le client
+            </a>
+
+            {% if cliente.origem == 'dashboard' %}
+            <a href="{% url 'orcamentos:admin_criar_orcamento_cliente' cliente.pk %}"
+               class="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-file-invoice-dollar"></i>
+                Créer un Devis
+            </a>
+            {% endif %}
+
+            {% if cliente.status == 'prospect' %}
+            <a href="{% url 'clientes:converter_prospect_cliente' cliente.pk %}"
+               class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-arrow-up"></i>
+                Convertir en client
+            </a>
+            {% endif %}
+
+            {% if cliente.email %}
+            <a href="mailto:{{ cliente.email }}"
+               class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-envelope"></i>
+                Envoyer un e-mail
+            </a>
+            {% endif %}
+
+            {% if cliente.telephone %}
+            <a href="tel:{{ cliente.telephone }}"
+               class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-phone"></i>
+                Appeler
+            </a>
+            {% endif %}
+
+            <a href="{% url 'clientes:deletar_cliente' cliente.pk %}"
+               class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-trash"></i>
+                Supprimer le client
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

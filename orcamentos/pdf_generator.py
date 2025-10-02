@@ -145,11 +145,17 @@ class OrcamentoPDFGenerator:
         elements = []
 
         # Dados da empresa e cliente lado a lado
+        cliente_nome = orcamento.solicitacao.nome_solicitante
+        cliente_email = orcamento.solicitacao.email_solicitante
+        cliente_telefone = orcamento.solicitacao.telefone_solicitante or "N/A"
+        cliente_endereco = f"{orcamento.solicitacao.endereco}"
+        cliente_cidade = f"{orcamento.solicitacao.cidade} {orcamento.solicitacao.cep}"
+
         data = [
             [
                 Paragraph("<b>LOPES PEINTURE</b>", self.styles["SectionHeader"]),
                 Paragraph(
-                    f"<b>{orcamento.cliente.nom_complet}</b>",
+                    f"<b>{cliente_nome}</b>",
                     self.styles["SectionHeader"],
                 ),
             ],
@@ -159,7 +165,7 @@ class OrcamentoPDFGenerator:
                     self.styles["CustomNormal"],
                 ),
                 Paragraph(
-                    f'Email: {orcamento.cliente.email}<br/>Tél: {orcamento.cliente.telephone or "N/A"}',
+                    f'Email: {cliente_email}<br/>Tél: {cliente_telefone}',
                     self.styles["CustomNormal"],
                 ),
             ],
@@ -169,7 +175,7 @@ class OrcamentoPDFGenerator:
                     self.styles["CustomNormal"],
                 ),
                 Paragraph(
-                    f'{orcamento.cliente.adresse}<br/>{orcamento.cliente.ville} {orcamento.cliente.code_postal or "N/A"}',
+                    f'{cliente_endereco}<br/>{cliente_cidade}',
                     self.styles["CustomNormal"],
                 ),
             ],
@@ -209,26 +215,27 @@ class OrcamentoPDFGenerator:
         # Dados do projeto
         project_data = []
 
-        if orcamento.titre:
+        if orcamento.titulo:
             project_data.append(
                 [
                     Paragraph("<b>Projet:</b>", self.styles["CustomNormal"]),
-                    Paragraph(orcamento.titre, self.styles["CustomNormal"]),
+                    Paragraph(orcamento.titulo, self.styles["CustomNormal"]),
                 ]
             )
 
-        if orcamento.description:
+        if orcamento.descricao:
             project_data.append(
                 [
                     Paragraph("<b>Description:</b>", self.styles["CustomNormal"]),
-                    Paragraph(orcamento.description, self.styles["CustomNormal"]),
+                    Paragraph(orcamento.descricao, self.styles["CustomNormal"]),
                 ]
             )
 
-        if orcamento.adresse_projet:
-            adresse_complete = f"{orcamento.adresse_projet}"
-            if orcamento.ville_projet:
-                adresse_complete += f", {orcamento.ville_projet}"
+        # Usar dados da solicitação para endereço
+        if orcamento.solicitacao.endereco:
+            adresse_complete = f"{orcamento.solicitacao.endereco}"
+            if orcamento.solicitacao.cidade:
+                adresse_complete += f", {orcamento.solicitacao.cidade}"
 
             project_data.append(
                 [
@@ -238,23 +245,23 @@ class OrcamentoPDFGenerator:
             )
 
         # Datas
-        if orcamento.date_creation:
+        if orcamento.data_elaboracao:
             project_data.append(
                 [
                     Paragraph("<b>Date de création:</b>", self.styles["CustomNormal"]),
                     Paragraph(
-                        orcamento.date_creation.strftime("%d/%m/%Y"),
+                        orcamento.data_elaboracao.strftime("%d/%m/%Y"),
                         self.styles["CustomNormal"],
                     ),
                 ]
             )
 
-        if orcamento.date_expiration:
+        if orcamento.validade_orcamento:
             project_data.append(
                 [
                     Paragraph("<b>Valable jusqu'au:</b>", self.styles["CustomNormal"]),
                     Paragraph(
-                        orcamento.date_expiration.strftime("%d/%m/%Y"),
+                        orcamento.validade_orcamento.strftime("%d/%m/%Y"),
                         self.styles["CustomNormal"],
                     ),
                 ]
@@ -296,33 +303,31 @@ class OrcamentoPDFGenerator:
         # Cabeçalho da tabela
         data = [
             [
-                Paragraph("<b>Service</b>", self.styles["CustomNormal"]),
+                Paragraph("<b>Référence</b>", self.styles["CustomNormal"]),
                 Paragraph("<b>Description</b>", self.styles["CustomNormal"]),
                 Paragraph("<b>Qté</b>", self.styles["CustomNormal"]),
                 Paragraph("<b>Unité</b>", self.styles["CustomNormal"]),
-                Paragraph("<b>Prix Unit.</b>", self.styles["CustomNormal"]),
-                Paragraph("<b>Total</b>", self.styles["CustomNormal"]),
+                Paragraph("<b>Prix Unit. HT</b>", self.styles["CustomNormal"]),
+                Paragraph("<b>Total HT</b>", self.styles["CustomNormal"]),
             ]
         ]
 
         # Itens
         for item in orcamento.itens.all():
-            service_desc = Paragraph(
-                f"<b>{item.get_type_service_display()}</b>", self.styles["CustomNormal"]
-            )
-            description = Paragraph(item.description, self.styles["CustomNormal"])
+            ref_text = item.referencia if item.referencia else "N/A"
+            description = Paragraph(item.descricao, self.styles["CustomNormal"])
 
             data.append(
                 [
-                    service_desc,
+                    Paragraph(ref_text, self.styles["CustomNormal"]),
                     description,
-                    Paragraph(str(item.quantite), self.styles["CustomNormal"]),
-                    Paragraph(item.unite, self.styles["CustomNormal"]),
+                    Paragraph(str(item.quantidade), self.styles["CustomNormal"]),
+                    Paragraph(item.unidade, self.styles["CustomNormal"]),
                     Paragraph(
-                        f"{item.prix_unitaire:.2f} €", self.styles["CustomNormal"]
+                        f"{item.preco_unitario_ht:.2f} €", self.styles["CustomNormal"]
                     ),
                     Paragraph(
-                        f"<b>{item.total:.2f} €</b>", self.styles["CustomNormal"]
+                        f"<b>{item.total_ht:.2f} €</b>", self.styles["CustomNormal"]
                     ),
                 ]
             )
@@ -343,7 +348,7 @@ class OrcamentoPDFGenerator:
                 ]
             )
 
-            # Criar tabela
+        # Criar tabela
         table = Table(
             data, colWidths=[3 * cm, 7.2 * cm, 1.8 * cm, 1.5 * cm, 2.5 * cm, 2.5 * cm]
         )
@@ -370,7 +375,7 @@ class OrcamentoPDFGenerator:
                         (0, 1),
                         (1, -1),
                         "LEFT",
-                    ),  # Serviço e descrição à esquerda
+                    ),  # Referência e descrição à esquerda
                     # Bordas
                     ("GRID", (0, 0), (-1, -1), 1, colors.black),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -394,26 +399,28 @@ class OrcamentoPDFGenerator:
         """Construir seção de totais"""
         elements = []
 
+        # Calcular totais se não existirem nos campos do modelo
+        subtotal_ht = orcamento.subtotal if hasattr(orcamento, 'subtotal') else orcamento.total
+        total_final = orcamento.total
+
         # Tabela de totais
         data = [
             [
                 Paragraph("<b>Sous-total HT:</b>", self.styles["CustomNormal"]),
                 Paragraph(
-                    f"<b>{orcamento.sous_total:.2f} €</b>", self.styles["CustomNormal"]
+                    f"<b>{subtotal_ht:.2f} €</b>", self.styles["CustomNormal"]
                 ),
             ],
             [
+                Paragraph("<b>TVA (20%):</b>", self.styles["CustomNormal"]),
                 Paragraph(
-                    f"<b>TVA ({orcamento.taux_tva}%):</b>", self.styles["CustomNormal"]
-                ),
-                Paragraph(
-                    f"<b>{orcamento.montant_tva:.2f} €</b>", self.styles["CustomNormal"]
+                    f"<b>{(total_final - subtotal_ht):.2f} €</b>", self.styles["CustomNormal"]
                 ),
             ],
             [
                 Paragraph("<b>TOTAL TTC:</b>", self.styles["CustomNormal"]),
                 Paragraph(
-                    f"<b>{orcamento.total:.2f} €</b>", self.styles["CustomNormal"]
+                    f"<b>{total_final:.2f} €</b>", self.styles["CustomNormal"]
                 ),
             ],
         ]
@@ -453,13 +460,14 @@ class OrcamentoPDFGenerator:
         elements.append(title)
 
         # Condições de pagamento
-        if orcamento.conditions_paiement:
+        if orcamento.condicoes_pagamento:
             payment = Paragraph(
-                f"<b>Conditions de paiement:</b> {orcamento.conditions_paiement}",
+                f"<b>Conditions de paiement:</b> {orcamento.condicoes_pagamento}",
                 self.styles["CustomNormal"],
             )
             elements.append(payment)
             elements.append(Spacer(1, 6))
+
         if orcamento.total:
             from decimal import Decimal
             acompte = Paragraph(
@@ -470,9 +478,9 @@ class OrcamentoPDFGenerator:
             elements.append(Spacer(1, 6))
 
         # Validade
-        if orcamento.date_expiration:
+        if orcamento.validade_orcamento:
             validity = Paragraph(
-                f"<b>Validité du devis:</b> {orcamento.date_expiration.strftime('%d/%m/%Y')}",
+                f"<b>Validité du devis:</b> {orcamento.validade_orcamento.strftime('%d/%m/%Y')}",
                 self.styles["CustomNormal"],
             )
             elements.append(validity)
@@ -574,3 +582,12 @@ class OrcamentoPDFGenerator:
         elements.append(thank_you)
 
         return elements
+
+
+def gerar_pdf_orcamento(orcamento):
+    """
+    Função wrapper para gerar PDF do orçamento
+    Retorna um buffer BytesIO com o PDF gerado
+    """
+    generator = OrcamentoPDFGenerator()
+    return generator.generate_pdf(orcamento)

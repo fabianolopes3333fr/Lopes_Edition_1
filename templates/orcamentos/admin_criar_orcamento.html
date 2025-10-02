@@ -5,505 +5,825 @@
 
 {% block extra_css %}
 <style>
-    .form-card {
+    :root {
+        --excel-border: #d1d5db;
+        --excel-header: #f3f4f6;
+        --excel-hover: #f8fafc;
+        --excel-selected: #eff6ff;
+        --primary-blue: #3b82f6;
+        --success-green: #059669;
+        --warning-orange: #d97706;
+        --danger-red: #dc2626;
+    }
+
+    .devis-container {
+        background: #f8fafc;
+        min-height: calc(100vh - 100px);
+        padding: 20px;
+    }
+
+    .devis-header {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .excel-table-container {
         background: white;
         border-radius: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e5e7eb;
         overflow: hidden;
+        margin-bottom: 24px;
     }
 
-    .section-divider {
-        border-top: 2px solid #f3f4f6;
-        margin: 2rem 0;
+    .excel-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 13px;
+    }
+
+    .excel-table thead th {
+        background: var(--excel-header);
+        border: 1px solid var(--excel-border);
+        padding: 12px 8px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 12px;
+        color: #374151;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .excel-table tbody td {
+        border: 1px solid var(--excel-border);
+        padding: 8px;
+        background: white;
+        transition: background-color 0.2s;
+    }
+
+    .excel-table tbody tr:hover td {
+        background: var(--excel-hover);
+    }
+
+    .excel-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 4px;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .excel-input:focus {
+        background: var(--excel-selected);
+        outline: 2px solid var(--primary-blue);
+        border-radius: 4px;
+    }
+
+    .excel-select {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 4px;
+        font-size: 13px;
+    }
+
+    .excel-select:focus {
+        background: var(--excel-selected);
+        outline: 2px solid var(--primary-blue);
+        border-radius: 4px;
+    }
+
+    /* Apply excel styling to all form inputs and selects in the table */
+    .excel-table input[type="text"],
+    .excel-table input[type="number"],
+    .excel-table textarea,
+    .excel-table select {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 4px;
+        font-size: 13px;
+        text-align: center;
+        font-family: inherit;
+    }
+
+    .excel-table input[type="text"]:focus,
+    .excel-table input[type="number"]:focus,
+    .excel-table textarea:focus,
+    .excel-table select:focus {
+        background: var(--excel-selected);
+        outline: 2px solid var(--primary-blue);
+        border-radius: 4px;
+    }
+
+    .excel-table textarea {
+        text-align: left;
+        resize: vertical;
+        min-height: 32px;
+    }
+
+    /* Remove Django form styling conflicts */
+    .excel-table input,
+    .excel-table select,
+    .excel-table textarea {
+        box-shadow: none !important;
+        border-color: transparent !important;
+    }
+
+    /* Style for readonly calculated fields */
+    .excel-table input[readonly] {
+        background-color: #f9fafb;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    /* Hide delete checkboxes and style delete buttons */
+    .excel-table input[name$="-DELETE"] {
+        display: none;
+    }
+
+    .btn-remove-line {
+        background: none;
+        border: none;
+        padding: 6px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-remove-line:hover {
+        background: #fee2e2;
+        transform: scale(1.1);
+    }
+
+    /* Row deletion styling */
+    .excel-row[data-deleted="true"] {
+        opacity: 0.5;
+        background-color: #fef2f2 !important;
+    }
+
+    .excel-row[data-deleted="true"] td {
+        background-color: #fef2f2 !important;
+        text-decoration: line-through;
+    }
+
+    .search-product {
         position: relative;
     }
 
-    .section-divider::before {
-        content: '';
+    .product-dropdown {
         position: absolute;
-        top: -1px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100px;
-        height: 2px;
-        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-    }
-
-    .field-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .field-label {
-        display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .field-required {
-        color: #ef4444;
-    }
-
-    .field-help {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    @media (min-width: 768px) {
-        .form-grid-2 {
-            grid-template-columns: 1fr 1fr;
-        }
-        .form-grid-3 {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-    }
-
-    .summary-card {
-        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-        border: 2px solid #0ea5e9;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .preview-section {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid var(--excel-border);
         border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        border: none;
-        color: white;
-        padding: 0.75rem 2rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        transition: all 0.2s;
+    .product-dropdown-item {
+        padding: 12px;
         cursor: pointer;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background-color 0.2s;
     }
 
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #1d4ed8, #1e40af);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    .product-dropdown-item:hover {
+        background: var(--excel-hover);
     }
 
-    .btn-secondary {
-        background: #f3f4f6;
-        border: 1px solid #d1d5db;
-        color: #374151;
-        padding: 0.75rem 2rem;
-        border-radius: 0.5rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
+    .product-dropdown-item:last-child {
+        border-bottom: none;
     }
 
-    .btn-secondary:hover {
-        background: #e5e7eb;
-        border-color: #9ca3af;
+    .totals-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 12px;
-        border-radius: 20px;
+    .totals-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .total-card {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #3b82f6;
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .total-label {
         font-size: 12px;
         font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
-    .status-pendente {
-        background-color: #fef3c7;
-        color: #92400e;
-        border: 1px solid #fcd34d;
+    .total-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1e40af;
+    }
+
+    .btn-add-line {
+        background: var(--success-green);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 16px;
+    }
+
+    .btn-add-line:hover {
+        background: #047857;
+        transform: translateY(-2px);
+    }
+
+    .btn-remove-line {
+        background: var(--danger-red);
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .col-search { width: 200px; }
+    .col-ref { width: 100px; }
+    .col-designation { width: 250px; }
+    .col-unite { width: 80px; }
+    .col-qte { width: 80px; }
+    .col-pu { width: 100px; }
+    .col-putc { width: 100px; }
+    .col-remise { width: 80px; }
+    .col-total-ht { width: 100px; }
+    .col-total-ttc { width: 100px; }
+    .col-taxe { width: 100px; }
+    .col-activite { width: 100px; }
+    .col-actions { width: 80px; }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header with navigation -->
-        <div class="mb-8">
-            <div class="flex items-center mb-4">
-                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
-                   class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    <i class="fas fa-arrow-left mr-2"></i>
-                    Retour à la demande
-                </a>
+<div class="devis-container">
+    <!-- Header -->
+    <div class="devis-header">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">
+                    <i class="fas fa-file-invoice text-blue-600 mr-3"></i>
+                    {{ page_title }}
+                </h1>
+                <p class="text-gray-600 mt-2">Créer un devis pour la demande {{ solicitacao.numero }}</p>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ page_title }}</h1>
-            <p class="mt-2 text-gray-600">Créer un devis pour la demande {{ solicitacao.numero }}</p>
+
+            <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+               class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Retour
+            </a>
         </div>
 
         <!-- Résumé de la demande -->
-        <div class="summary-card">
-            <div class="flex items-start justify-between mb-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                    <h2 class="text-xl font-semibold text-gray-900">Demande {{ solicitacao.numero }}</h2>
-                    <p class="text-gray-600 mt-1">{{ solicitacao.nome_solicitante }}</p>
-                </div>
-                <span class="status-badge status-{{ solicitacao.status }}">
-                    {{ solicitacao.get_status_display }}
-                </span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                    <span class="font-medium text-gray-700">Service:</span>
-                    <p class="text-gray-900">{{ solicitacao.get_tipo_servico_display }}</p>
+                    <span class="font-medium text-blue-700">Client:</span>
+                    <p class="text-blue-900">{{ solicitacao.nome_solicitante }}</p>
                 </div>
                 <div>
-                    <span class="font-medium text-gray-700">Localisation:</span>
-                    <p class="text-gray-900">{{ solicitacao.cidade }}, {{ solicitacao.cep }}</p>
+                    <span class="font-medium text-blue-700">Service:</span>
+                    <p class="text-blue-900">{{ solicitacao.get_tipo_servico_display }}</p>
                 </div>
                 <div>
-                    <span class="font-medium text-gray-700">Budget max:</span>
-                    <p class="text-gray-900">
-                        {% if solicitacao.orcamento_maximo %}
-                            {{ solicitacao.orcamento_maximo }}€
-                        {% else %}
-                            Non spécifié
-                        {% endif %}
-                    </p>
+                    <span class="font-medium text-blue-700">Localisation:</span>
+                    <p class="text-blue-900">{{ solicitacao.cidade }}</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Formulaire de création du devis -->
-        <form method="post" class="space-y-8">
-            {% csrf_token %}
-
-            <!-- Messages d'erreur globaux -->
-            {% if form.non_field_errors %}
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-red-400 text-lg"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">Erreurs détectées</h3>
-                            <div class="mt-2 text-sm text-red-700">
-                                {{ form.non_field_errors }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- Section 1: Informations générales -->
-            <div class="form-card">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-file-invoice text-blue-600 mr-3"></i>
-                        Informations générales
-                    </h2>
-                </div>
-                <div class="p-6">
-                    <div class="form-grid">
-                        <!-- Titre -->
-                        <div class="field-group">
-                            <label for="{{ form.titulo.id_for_label }}" class="field-label">
-                                Titre du devis <span class="field-required">*</span>
-                            </label>
-                            {{ form.titulo }}
-                            {% if form.titulo.help_text %}
-                                <p class="field-help">{{ form.titulo.help_text }}</p>
-                            {% endif %}
-                            {% if form.titulo.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-
-                        <!-- Description -->
-                        <div class="field-group">
-                            <label for="{{ form.descricao.id_for_label }}" class="field-label">
-                                Description des travaux <span class="field-required">*</span>
-                            </label>
-                            {{ form.descricao }}
-                            {% if form.descricao.help_text %}
-                                <p class="field-help">{{ form.descricao.help_text }}</p>
-                            {% endif %}
-                            {% if form.descricao.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 2: Conditions et délais -->
-            <div class="form-card">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>
-                        Conditions et délais
-                    </h2>
-                </div>
-                <div class="p-6">
-                    <div class="form-grid form-grid-2">
-                        <!-- Délai d'exécution -->
-                        <div class="field-group">
-                            <label for="{{ form.prazo_execucao.id_for_label }}" class="field-label">
-                                Délai d'exécution (jours) <span class="field-required">*</span>
-                            </label>
-                            {{ form.prazo_execucao }}
-                            {% if form.prazo_execucao.help_text %}
-                                <p class="field-help">{{ form.prazo_execucao.help_text }}</p>
-                            {% endif %}
-                            {% if form.prazo_execucao.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.prazo_execucao.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-
-                        <!-- Validité du devis -->
-                        <div class="field-group">
-                            <label for="{{ form.validade_orcamento.id_for_label }}" class="field-label">
-                                Validité du devis <span class="field-required">*</span>
-                            </label>
-                            {{ form.validade_orcamento }}
-                            {% if form.validade_orcamento.help_text %}
-                                <p class="field-help">{{ form.validade_orcamento.help_text }}</p>
-                            {% endif %}
-                            {% if form.validade_orcamento.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.validade_orcamento.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <!-- Conditions de paiement -->
-                        <div class="field-group">
-                            <label for="{{ form.condicoes_pagamento.id_for_label }}" class="field-label">
-                                Conditions de paiement <span class="field-required">*</span>
-                            </label>
-                            {{ form.condicoes_pagamento }}
-                            {% if form.condicoes_pagamento.help_text %}
-                                <p class="field-help">{{ form.condicoes_pagamento.help_text }}</p>
-                            {% endif %}
-                            {% if form.condicoes_pagamento.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.condicoes_pagamento.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Remise et observations -->
-            <div class="form-card">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-percentage text-blue-600 mr-3"></i>
-                        Remise et observations
-                    </h2>
-                </div>
-                <div class="p-6">
-                    <div class="form-grid">
-                        <!-- Remise -->
-                        <div class="field-group">
-                            <label for="{{ form.desconto.id_for_label }}" class="field-label">
-                                Remise (%)
-                            </label>
-                            {{ form.desconto }}
-                            {% if form.desconto.help_text %}
-                                <p class="field-help">{{ form.desconto.help_text }}</p>
-                            {% endif %}
-                            {% if form.desconto.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.desconto.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-
-                        <!-- Observations -->
-                        <div class="field-group">
-                            <label for="{{ form.observacoes.id_for_label }}" class="field-label">
-                                Observations particulières
-                            </label>
-                            {{ form.observacoes }}
-                            {% if form.observacoes.help_text %}
-                                <p class="field-help">{{ form.observacoes.help_text }}</p>
-                            {% endif %}
-                            {% if form.observacoes.errors %}
-                                <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Informations importantes -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-info-circle text-blue-400 text-xl"></i>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-blue-800">Informations importantes</h3>
-                        <div class="mt-2 text-sm text-blue-700">
-                            <ul class="list-disc list-inside space-y-1">
-                                <li>Après création, vous pourrez ajouter des éléments détaillés au devis</li>
-                                <li>Le statut de la demande passera automatiquement à "En cours d'élaboration"</li>
-                                <li>Un numéro unique sera généré automatiquement pour ce devis</li>
-                                <li>Le client sera notifié par email une fois le devis finalisé</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Boutons d'action -->
-            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
-                   class="btn-secondary">
-                    <i class="fas fa-times mr-2"></i>
-                    Annuler
-                </a>
-
-                <div class="flex space-x-3">
-                    <button type="button" id="preview-btn"
-                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200">
-                        <i class="fas fa-eye mr-2"></i>
-                        Aperçu
-                    </button>
-
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-save mr-2"></i>
-                        Créer le devis
-                    </button>
-                </div>
-            </div>
-        </form>
-
-        <!-- Section d'aperçu (masquée par défaut) -->
-        <div id="preview-section" class="hidden mt-8">
-            <div class="form-card">
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                        <i class="fas fa-eye text-blue-600 mr-3"></i>
-                        Aperçu du devis
-                    </h2>
-                </div>
-                <div class="p-6">
-                    <div class="preview-section" id="preview-content">
-                        <p class="text-gray-500 text-center py-8">
-                            Cliquez sur "Aperçu" pour voir le rendu du devis
-                        </p>
-                    </div>
+                <div>
+                    <span class="font-medium text-blue-700">Budget max:</span>
+                    <p class="text-blue-900">{{ solicitacao.orcamento_maximo|default:"Non spécifié" }}€</p>
                 </div>
             </div>
         </div>
     </div>
+
+    <form method="post" id="devis-form">
+        {% csrf_token %}
+
+        <!-- Informations générales du devis -->
+        <div class="form-section">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                Informations générales
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Titre du devis <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.titulo }}
+                    {% if form.titulo.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.prazo_execucao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Délai (jours) <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.prazo_execucao }}
+                    {% if form.prazo_execucao.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.prazo_execucao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description des travaux <span class="text-red-500">*</span>
+                </label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}
+                    <p class="text-red-600 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tabla estilo Excel para produtos/serviços -->
+        <div class="excel-table-container">
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-table text-green-600 mr-2"></i>
+                    Produits et Services
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Ajoutez les produits et services pour ce devis</p>
+            </div>
+
+            <!-- Formset management -->
+            {{ formset.management_form }}
+
+            <div class="overflow-x-auto">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th class="col-search">Recherche Produit</th>
+                            <th class="col-ref">Référence</th>
+                            <th class="col-designation">Désignation</th>
+                            <th class="col-unite">Unité</th>
+                            <th class="col-qte">Qté</th>
+                            <th class="col-pu">P.U HT</th>
+                            <th class="col-putc">P.U TTC</th>
+                            <th class="col-remise">%Remise</th>
+                            <th class="col-total-ht">Total HT</th>
+                            <th class="col-total-ttc">Total TTC</th>
+                            <th class="col-taxe">Taxe</th>
+                            <th class="col-activite">Activité</th>
+                            <th class="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="excel-tbody">
+                        {% for form in formset %}
+                            <tr class="excel-row" data-row-index="{{ forloop.counter0 }}">
+                                <!-- Hidden fields -->
+                                {% for hidden in form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+
+                                <!-- Recherche Produit -->
+                                <td class="search-product">
+                                    <input type="text" class="excel-input product-search"
+                                           placeholder="Rechercher..."
+                                           data-row="{{ forloop.counter0 }}">
+                                    <div class="product-dropdown" id="dropdown-{{ forloop.counter0 }}"></div>
+                                </td>
+
+                                <!-- Référence -->
+                                <td>
+                                    {{ form.referencia }}
+                                </td>
+
+                                <!-- Désignation -->
+                                <td>
+                                    {{ form.descricao }}
+                                </td>
+
+                                <!-- Unité -->
+                                <td>
+                                    {{ form.unidade }}
+                                </td>
+
+                                <!-- Quantité -->
+                                <td>
+                                    {{ form.quantidade }}
+                                </td>
+
+                                <!-- P.U HT -->
+                                <td>
+                                    {{ form.preco_unitario_ht }}
+                                </td>
+
+                                <!-- P.U TTC -->
+                                <td>
+                                    <input type="text" class="excel-input pu-ttc" readonly data-field="pu-ttc">
+                                </td>
+
+                                <!-- %Remise -->
+                                <td>
+                                    {{ form.remise_percentual }}
+                                </td>
+
+                                <!-- Total HT -->
+                                <td>
+                                    <input type="text" class="excel-input total-ht" readonly data-field="total-ht">
+                                </td>
+
+                                <!-- Total TTC -->
+                                <td>
+                                    <input type="text" class="excel-input total-ttc" readonly data-field="total-ttc">
+                                </td>
+
+                                <!-- Taxe -->
+                                <td>
+                                    {{ form.taxa_tva }}
+                                </td>
+
+                                <!-- Activité -->
+                                <td>
+                                    {{ form.atividade }}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    {% if formset.can_delete %}
+                                        {{ form.DELETE }}
+                                        <button type="button" class="btn-remove-line text-red-600 hover:text-red-800"
+                                                onclick="toggleDeleteRow({{ forloop.counter0 }})"
+                                                title="Supprimer cette ligne">
+                                            <i class="fas fa-trash text-sm"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                <button type="button" class="btn-add-line" onclick="addNewRow()">
+                    <i class="fas fa-plus mr-2"></i>
+                    Ajouter une ligne
+                </button>
+            </div>
+        </div>
+
+        <!-- Totaux généraux -->
+        <div class="totals-section">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6 text-center">
+                <i class="fas fa-calculator text-green-600 mr-2"></i>
+                Totaux du Devis
+            </h2>
+
+            <div class="totals-grid">
+                <div class="total-card">
+                    <div class="total-label">Total HT</div>
+                    <div class="total-value" id="grand-total-ht">0,00 €</div>
+                </div>
+
+                <div class="total-card">
+                    <div class="total-label">Total TTC</div>
+                    <div class="total-value" id="grand-total-ttc">0,00 €</div>
+                </div>
+
+                <div class="total-card">
+                    <div class="total-label">Total TVA</div>
+                    <div class="total-value" id="grand-total-tva">0,00 €</div>
+                </div>
+
+                <div class="total-card">
+                    <div class="total-label">Total Achats</div>
+                    <div class="total-value" id="grand-total-achats">0,00 €</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations complémentaires -->
+        <div class="form-section">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                <i class="fas fa-file-alt text-purple-600 mr-2"></i>
+                Informations complémentaires
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.validade_orcamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Validité du devis <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.validade_orcamento }}
+                </div>
+
+                <div>
+                    <label for="{{ form.desconto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Remise globale (%)
+                    </label>
+                    {{ form.desconto }}
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <label for="{{ form.condicoes_pagamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Conditions de paiement <span class="text-red-500">*</span>
+                </label>
+                {{ form.condicoes_pagamento }}
+            </div>
+
+            <div class="mt-6">
+                <label for="{{ form.observacoes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Observations particulières
+                </label>
+                {{ form.observacoes }}
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="flex items-center justify-center gap-6 py-8">
+            <button type="button" onclick="previewDevis()"
+                    class="bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                <i class="fas fa-eye mr-2"></i>
+                Aperçu
+            </button>
+
+            <button type="submit"
+                    class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                <i class="fas fa-save mr-2"></i>
+                Créer le Devis
+            </button>
+        </div>
+    </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+let rowCounter = {{ formset.total_form_count }};
+let productsCache = {};
+
 document.addEventListener('DOMContentLoaded', function() {
-    const previewBtn = document.getElementById('preview-btn');
-    const previewSection = document.getElementById('preview-section');
-    const previewContent = document.getElementById('preview-content');
+    initializeExcelTable();
+    loadProductsCache();
+});
 
-    // Função de prévia
-    previewBtn.addEventListener('click', function() {
-        const formData = new FormData(document.querySelector('form'));
-
-        // Mostrar seção de prévia
-        previewSection.classList.remove('hidden');
-
-        // Gerar conteúdo da prévia
-        const titre = formData.get('titulo') || 'Sans titre';
-        const description = formData.get('descricao') || 'Aucune description';
-        const delai = formData.get('prazo_execucao') || 'Non spécifié';
-        const validite = formData.get('validade_orcamento') || 'Non spécifiée';
-        const conditions = formData.get('condicoes_pagamento') || 'Non spécifiées';
-        const remise = formData.get('desconto') || '0';
-        const observations = formData.get('observacoes') || 'Aucune observation';
-
-        previewContent.innerHTML = `
-            <div class="space-y-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">${titre}</h3>
-                    <p class="text-gray-600 text-sm">Devis pour: {{ solicitacao.nome_solicitante }}</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Description des travaux</h4>
-                        <p class="text-gray-700 text-sm bg-white p-3 rounded border">${description}</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div>
-                            <span class="font-medium text-gray-900">Délai d'exécution:</span>
-                            <span class="text-gray-700"> ${delai} jours</span>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-900">Validité:</span>
-                            <span class="text-gray-700"> ${validite}</span>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-900">Remise:</span>
-                            <span class="text-gray-700"> ${remise}%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Conditions de paiement</h4>
-                    <p class="text-gray-700 text-sm bg-white p-3 rounded border">${conditions}</p>
-                </div>
-
-                ${observations !== 'Aucune observation' ? `
-                    <div>
-                        <h4 class="font-medium text-gray-900 mb-2">Observations particulières</h4>
-                        <p class="text-gray-700 text-sm bg-blue-50 p-3 rounded border border-blue-200">${observations}</p>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-
-        // Scroll vers la prévia
-        previewSection.scrollIntoView({ behavior: 'smooth' });
+function initializeExcelTable() {
+    // Inicializar event listeners para cálculos
+    document.getElementById('excel-tbody').addEventListener('input', function(e) {
+        if (e.target.matches('.excel-input')) {
+            calculateRowTotals(e.target.closest('tr'));
+            calculateGrandTotals();
+        }
     });
 
-    // Validação de formulário em tempo real
-    const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required]');
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function() {
-            if (!this.value.trim()) {
-                this.classList.add('border-red-300');
-                this.classList.remove('border-gray-300');
-            } else {
-                this.classList.remove('border-red-300');
-                this.classList.add('border-gray-300');
+    // Event listeners para busca de produtos
+    document.querySelectorAll('.product-search').forEach(input => {
+        input.addEventListener('input', function() {
+            searchProducts(this);
+        });
+
+        input.addEventListener('focus', function() {
+            if (this.value.length > 0) {
+                searchProducts(this);
             }
         });
     });
 
-    // Auto-resize textareas
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
+    // Calcular totais iniciais
+    calculateAllTotals();
+}
+
+function loadProductsCache() {
+    // Carregar produtos do servidor via AJAX
+    fetch('/orcamentos/admin/produtos/search-ajax/')
+        .then(response => response.json())
+        .then(data => {
+            productsCache = data.results || [];
+        })
+        .catch(error => console.error('Erro ao carregar produtos:', error));
+}
+
+function searchProducts(input) {
+    const query = input.value.toLowerCase();
+    const rowIndex = input.dataset.row;
+    const dropdown = document.getElementById(`dropdown-${rowIndex}`);
+
+    if (query.length < 2) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    // Filtrar produtos localmente primeiro
+    const filteredProducts = productsCache.filter(product =>
+        product.referencia.toLowerCase().includes(query) ||
+        product.descricao.toLowerCase().includes(query)
+    );
+
+    // Mostrar dropdown com resultados
+    showProductDropdown(dropdown, filteredProducts, rowIndex);
+}
+
+function showProductDropdown(dropdown, products, rowIndex) {
+    dropdown.innerHTML = '';
+
+    if (products.length === 0) {
+        dropdown.innerHTML = '<div class="product-dropdown-item">Aucun produit trouvé</div>';
+    } else {
+        products.forEach(product => {
+            const item = document.createElement('div');
+            item.className = 'product-dropdown-item';
+            item.innerHTML = `
+                <div class="font-semibold">${product.referencia}</div>
+                <div class="text-sm text-gray-600">${product.descricao}</div>
+                <div class="text-xs text-blue-600">${product.preco_venda_ht}€ HT - ${product.get_atividade_display}</div>
+            `;
+
+            item.addEventListener('click', function() {
+                selectProduct(rowIndex, product);
+                dropdown.style.display = 'none';
+            });
+
+            dropdown.appendChild(item);
         });
+    }
+
+    dropdown.style.display = 'block';
+}
+
+function selectProduct(rowIndex, product) {
+    const row = document.querySelector(`tr[data-row-index="${rowIndex}"]`);
+
+    // Preencher campos da linha
+    row.querySelector('.product-ref').value = product.referencia;
+    row.querySelector('input[name$="descricao"]').value = product.descricao;
+    row.querySelector('select[name^="unite"]').value = product.unidade;
+    row.querySelector('input[name$="preco_unitario"]').value = product.preco_venda_ht;
+    row.querySelector('.tva-select').value = product.taxa_tva;
+    row.querySelector('.activite-select').value = product.atividade;
+
+    // Calcular totais da linha
+    calculateRowTotals(row);
+    calculateGrandTotals();
+
+    // Limpar busca
+    row.querySelector('.product-search').value = product.referencia;
+}
+
+function calculateRowTotals(row) {
+    const quantidade = parseFloat(row.querySelector('input[name$="quantidade"]').value) || 0;
+    const precoUnitario = parseFloat(row.querySelector('input[name$="preco_unitario"]').value) || 0;
+    const remisePercent = parseFloat(row.querySelector('.remise-percent').value) || 0;
+    const tvaPercent = parseFloat(row.querySelector('.tva-select').value) || 20;
+
+    // Calcular preço unitário TTC
+    const precoUnitarioTTC = precoUnitario * (1 + (tvaPercent / 100));
+    row.querySelector('.pu-ttc').value = precoUnitarioTTC.toFixed(2);
+
+    // Calcular totais
+    const totalBrutoHT = quantidade * precoUnitario;
+    const valorRemise = (totalBrutoHT * remisePercent) / 100;
+    const totalLiquidoHT = totalBrutoHT - valorRemise;
+    const valorTVA = totalLiquidoHT * (tvaPercent / 100);
+    const totalTTC = totalLiquidoHT + valorTVA;
+
+    // Atualizar campos
+    row.querySelector('.total-ht').value = totalLiquidoHT.toFixed(2);
+    row.querySelector('.total-ttc').value = totalTTC.toFixed(2);
+}
+
+function calculateGrandTotals() {
+    let grandTotalHT = 0;
+    let grandTotalTTC = 0;
+    let grandTotalTVA = 0;
+    let grandTotalAchats = 0;
+
+    document.querySelectorAll('.excel-row:not([data-deleted="true"])').forEach(row => {
+        const totalHT = parseFloat(row.querySelector('.total-ht').value) || 0;
+        const totalTTC = parseFloat(row.querySelector('.total-ttc').value) || 0;
+        const quantidade = parseFloat(row.querySelector('input[name$="quantidade"]').value) || 0;
+
+        // Buscar preço de compra do produto (se disponível)
+        const ref = row.querySelector('.product-ref').value;
+        const product = productsCache.find(p => p.referencia === ref);
+        const precoCompra = product ? parseFloat(product.preco_compra) : 0;
+
+        grandTotalHT += totalHT;
+        grandTotalTTC += totalTTC;
+        grandTotalTVA += (totalTTC - totalHT);
+        grandTotalAchats += (quantidade * precoCompra);
     });
+
+    // Atualizar displays
+    document.getElementById('grand-total-ht').textContent = grandTotalHT.toFixed(2) + ' €';
+    document.getElementById('grand-total-ttc').textContent = grandTotalTTC.toFixed(2) + ' €';
+    document.getElementById('grand-total-tva').textContent = grandTotalTVA.toFixed(2) + ' €';
+    document.getElementById('grand-total-achats').textContent = grandTotalAchats.toFixed(2) + ' €';
+}
+
+function addNewRow() {
+    const tbody = document.getElementById('excel-tbody');
+    const newRow = tbody.querySelector('.excel-row').cloneNode(true);
+
+    // Limpar valores e atualizar índices
+    newRow.setAttribute('data-row-index', rowCounter);
+    newRow.querySelectorAll('input, select').forEach(field => {
+        if (field.name) {
+            field.name = field.name.replace(/-\d+-/, `-${rowCounter}-`);
+            field.id = field.id ? field.id.replace(/-\d+-/, `-${rowCounter}-`) : '';
+        }
+        if (!field.readOnly) {
+            field.value = '';
+        }
+    });
+
+    // Atualizar search input
+    const searchInput = newRow.querySelector('.product-search');
+    searchInput.dataset.row = rowCounter;
+    searchInput.addEventListener('input', function() {
+        searchProducts(this);
+    });
+
+    // Atualizar dropdown ID
+    const dropdown = newRow.querySelector('.product-dropdown');
+    dropdown.id = `dropdown-${rowCounter}`;
+
+    tbody.appendChild(newRow);
+
+    // Atualizar contador de formulários
+    const totalFormsInput = document.getElementById('id_itens-TOTAL_FORMS');
+    totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+
+    rowCounter++;
+}
+
+function removeRow(rowIndex) {
+    const row = document.querySelector(`tr[data-row-index="${rowIndex}"]`);
+    const deleteInput = row.querySelector('input[name$="-DELETE"]');
+
+    if (deleteInput) {
+        deleteInput.checked = true;
+        row.style.display = 'none';
+        row.setAttribute('data-deleted', 'true');
+    } else {
+        row.remove();
+    }
+
+    calculateGrandTotals();
+}
+
+function calculateAllTotals() {
+    document.querySelectorAll('.excel-row').forEach(row => {
+        calculateRowTotals(row);
+    });
+    calculateGrandTotals();
+}
+
+function previewDevis() {
+    // Implementar preview do devis
+    alert('Aperçu du devis - À implémenter');
+}
+
+// Fechar dropdowns quando clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-product')) {
+        document.querySelectorAll('.product-dropdown').forEach(dropdown => {
+            dropdown.style.display = 'none';
+        });
+    }
 });
 </script>
 {% endblock %}

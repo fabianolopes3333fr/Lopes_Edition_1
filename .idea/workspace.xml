@@ -1,7 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="" />
+    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/orcamentos/notification_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/notifications.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/produtos_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/contact_map.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/footer.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/header.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/logout.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-about.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-cta.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-faq.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-feature.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-hero.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-news.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-nos-projets.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-nos-services.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-process.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/components/section-testimonials.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/nova_solicitacao_admin.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_aceito_admin.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_enviado_cliente.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_recusado_admin.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/fornecedores/form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/fornecedores/lista.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/confirmar_exclusao.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/lista.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/LopesPeinture.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LopesPeinture.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -10,10 +57,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="33KXJ9AktkNAQLmDam6P7lzGOVn" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -22,12 +72,29 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/fabia/PycharmProjects/LopesPeinture/static/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture\static\img" />
+      <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture\templates" />
+      <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -44,10 +111,22 @@
       <option name="presentableId" value="Default" />
       <updated>1759066664150</updated>
       <workItem from="1759066665605" duration="6000" />
+      <workItem from="1759077153427" duration="11507000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

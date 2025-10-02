@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis accepté</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #059669; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .footer { background: #374151; color: white; padding: 15px; text-align: center; font-size: 12px; }
+        .btn { background: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }
+        .info-box { background: white; border-left: 4px solid #059669; padding: 15px; margin: 10px 0; }
+        .success-banner { background: #d1fae5; border: 2px solid #10b981; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 EXCELLENTE NOUVELLE !</h1>
+            <h2>Devis accepté par le client</h2>
+        </div>
+
+        <div class="content">
+            <div class="success-banner">
+                <h2 style="color: #059669; margin: 0;">Devis #{{ orcamento.numero }} ACCEPTÉ !</h2>
+                <p style="margin: 5px 0;">Le client a accepté votre proposition</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Informations du client :</h3>
+                <p><strong>Nom :</strong> {{ orcamento.solicitacao.nome_solicitante }}</p>
+                <p><strong>Email :</strong> {{ orcamento.solicitacao.email_solicitante }}</p>
+                <p><strong>Téléphone :</strong> {{ orcamento.solicitacao.telefone_solicitante }}</p>
+                <p><strong>Date d'acceptation :</strong> {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Détails du devis accepté :</h3>
+                <p><strong>Projet :</strong> {{ orcamento.titulo }}</p>
+                <p><strong>Montant HT :</strong> {{ orcamento.total }}€</p>
+                <p><strong>Montant TTC :</strong> {{ orcamento.total_ttc }}€</p>
+                <p><strong>Délai prévu :</strong> {{ orcamento.prazo_execucao }} jours</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Prochaines étapes :</h3>
+                <ul>
+                    <li>Contacter le client pour planifier les travaux</li>
+                    <li>Établir un planning de réalisation</li>
+                    <li>Préparer les matériaux nécessaires</li>
+                    <li>Mettre à jour le statut du projet</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ site_url }}/orcamentos/admin/orcamento/{{ orcamento.numero }}/" class="btn">Voir le devis</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>LOPES PEINTURE - Système de gestion des devis</p>
+            <p>Félicitations pour cette nouvelle commande !</p>
+        </div>
+    </div>
+</body>
+</html>
+

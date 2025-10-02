@@ -2,7 +2,8 @@ from django import forms
 from django.core.validators import EmailValidator
 from .models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento,
-    AnexoProjeto, TipoServico, UrgenciaProjeto, StatusProjeto
+    AnexoProjeto, StatusOrcamento, StatusProjeto, Produto, Fornecedor,
+    TipoUnidade, TipoAtividade, TipoTVA
 )
 from django.forms import inlineformset_factory
 
@@ -50,13 +51,13 @@ class SolicitacaoOrcamentoPublicoForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'Décrivez en détail les travaux souhaités...'
             }),
+            'urgencia': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
             'area_aproximada': forms.NumberInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'Surface en m²',
                 'step': '0.01'
-            }),
-            'urgencia': forms.Select(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'data_inicio_desejada': forms.DateInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -148,12 +149,41 @@ class SolicitacaoOrcamentoProjetoForm(forms.ModelForm):
 
     class Meta:
         model = SolicitacaoOrcamento
-        fields = ['observacoes']
+        fields = [
+            'tipo_servico', 'descricao_servico', 'area_aproximada',
+            'urgencia', 'data_inicio_desejada', 'orcamento_maximo',
+            'observacoes'
+        ]
         widgets = {
-            'observacoes': forms.Textarea(attrs={
+            'tipo_servico': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'descricao_servico': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'rows': 4,
-                'placeholder': 'Informações adicionais para este orçamento...'
+                'placeholder': 'Décrivez en détail les travaux souhaités...'
+            }),
+            'area_aproximada': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Surface en m²',
+                'step': '0.01'
+            }),
+            'urgencia': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'data_inicio_desejada': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'type': 'date'
+            }),
+            'orcamento_maximo': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Budget maximum en €',
+                'step': '0.01'
+            }),
+            'observacoes': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'rows': 3,
+                'placeholder': 'Observations particulières...'
             })
         }
 
@@ -164,95 +194,308 @@ class OrcamentoForm(forms.ModelForm):
         model = Orcamento
         fields = [
             'titulo', 'descricao', 'prazo_execucao', 'validade_orcamento',
-            'condicoes_pagamento', 'desconto', 'observacoes'
+            'desconto', 'condicoes_pagamento', 'observacoes'
         ]
+
+        labels = {
+            'titulo': 'Titre du devis',
+            'descricao': 'Description',
+            'prazo_execucao': 'Délai d\'exécution (jours)',
+            'validade_orcamento': 'Validité du devis',
+            'desconto': 'Remise globale (%)',
+            'condicoes_pagamento': 'Conditions de paiement',
+            'observacoes': 'Observations'
+        }
+
         widgets = {
             'titulo': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Titre du devis'
+                'class': 'form-input',
+                'placeholder': 'Saisissez le titre du devis...',
+                'id': 'titulo'
             }),
             'descricao': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'form-input form-textarea',
                 'rows': 4,
-                'placeholder': 'Description détaillée des travaux...'
+                'placeholder': 'Décrivez le projet ou les travaux à réaliser...',
+                'id': 'descricao'
             }),
             'prazo_execucao': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Nombre de jours'
+                'class': 'form-input',
+                'min': 1,
+                'max': 365,
+                'placeholder': '30',
+                'id': 'prazo'
             }),
             'validade_orcamento': forms.DateInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'type': 'date'
-            }),
-            'condicoes_pagamento': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'rows': 3,
-                'placeholder': 'Conditions de paiement...'
+                'class': 'form-input',
+                'type': 'date',
+                'id': 'validade'
             }),
             'desconto': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Pourcentage de remise',
+                'class': 'form-input',
                 'step': '0.01',
-                'min': '0',
-                'max': '100'
+                'min': 0,
+                'max': 100,
+                'placeholder': '0.00',
+                'id': 'desconto-global'
+            }),
+            'condicoes_pagamento': forms.Textarea(attrs={
+                'class': 'form-input form-textarea',
+                'rows': 4,
+                'placeholder': 'Spécifiez les conditions et modalités de paiement...',
+                'id': 'condicoes'
             }),
             'observacoes': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'rows': 3,
-                'placeholder': 'Observations...'
+                'class': 'form-input form-textarea',
+                'rows': 4,
+                'placeholder': 'Ajoutez des observations, notes ou conditions particulières...',
+                'id': 'observacoes'
             })
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Definir valores padrão
+        if not self.instance.pk:  # Apenas para novos orçamentos
+            from datetime import date, timedelta
+            self.fields['prazo_execucao'].initial = 30
+            self.fields['validade_orcamento'].initial = date.today() + timedelta(days=30)
+            self.fields['desconto'].initial = 0.00
+
+        # Tornar todos os campos obrigatórios exceto observações
+        for field_name, field in self.fields.items():
+            if field_name != 'observacoes':
+                field.required = True
+
+            # Adicionar classe de erro se o campo tem erros
+            if field_name in self.errors:
+                current_classes = field.widget.attrs.get('class', '')
+                field.widget.attrs['class'] = f"{current_classes} border-red-500 focus:border-red-500 focus:ring-red-500"
 
 class ItemOrcamentoForm(forms.ModelForm):
     """Formulário para itens do orçamento"""
 
     class Meta:
         model = ItemOrcamento
-        fields = ['descricao', 'quantidade', 'unidade', 'preco_unitario']
+        fields = [
+            'produto', 'referencia', 'descricao', 'unidade', 'atividade',
+            'quantidade', 'preco_unitario_ht', 'remise_percentual', 'taxa_tva'
+        ]
+
         widgets = {
+            'produto': forms.HiddenInput(),
+            'referencia': forms.TextInput(attrs={
+                'class': 'excel-input referencia',
+                'readonly': True
+            }),
             'descricao': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Description de l\'item'
+                'class': 'excel-input descricao',
+                'placeholder': 'Description...'
+            }),
+            'unidade': forms.Select(attrs={
+                'class': 'excel-select unidade'
+            }),
+            'atividade': forms.Select(attrs={
+                'class': 'excel-select atividade'
             }),
             'quantidade': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'excel-input quantidade',
                 'step': '0.01',
-                'min': '0'
+                'min': 0,
+                'value': 1
             }),
-            'unidade': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'm², ml, unité...'
-            }),
-            'preco_unitario': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'preco_unitario_ht': forms.NumberInput(attrs={
+                'class': 'excel-input preco-ht',
                 'step': '0.01',
-                'min': '0'
+                'min': 0,
+                'value': 0
+            }),
+            'remise_percentual': forms.NumberInput(attrs={
+                'class': 'excel-input remise',
+                'step': '0.01',
+                'min': 0,
+                'max': 100,
+                'value': 0
+            }),
+            'taxa_tva': forms.Select(attrs={
+                'class': 'excel-select taxa-tva'
             })
         }
 
-# Formset para itens do orçamento
+# Formset para múltiplos itens do orçamento
 ItemOrcamentoFormSet = inlineformset_factory(
     Orcamento,
     ItemOrcamento,
     form=ItemOrcamentoForm,
     extra=1,
-    can_delete=True,
-    can_order=True
+    min_num=1,
+    validate_min=True,
+    can_delete=True
 )
 
+class ProdutoForm(forms.ModelForm):
+    """Formulário para cadastro/edição de produtos"""
+
+    class Meta:
+        model = Produto
+        fields = [
+            'referencia', 'descricao', 'unidade', 'atividade',
+            'preco_compra', 'margem_percentual', 'margem_ht',
+            'preco_venda_ht', 'taxa_tva', 'preco_venda_ttc',
+            'fornecedor', 'foto', 'ativo'
+        ]
+
+        labels = {
+            'referencia': 'Référence',
+            'descricao': 'Description',
+            'unidade': 'Unité',
+            'atividade': 'Activité',
+            'preco_compra': 'Prix d\'achat',
+            'margem_percentual': 'Marge %',
+            'margem_ht': 'Marge HT',
+            'preco_venda_ht': 'Prix de vente HT',
+            'taxa_tva': 'Taux TVA',
+            'preco_venda_ttc': 'Prix de vente TTC',
+            'fornecedor': 'Fournisseur',
+            'foto': 'Photo',
+            'ativo': 'Actif'
+        }
+
+        widgets = {
+            'referencia': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Référence du produit'
+            }),
+            'descricao': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'rows': 3,
+                'placeholder': 'Description détaillée du produit'
+            }),
+            'unidade': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'atividade': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'preco_compra': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'step': '0.01',
+                'min': 0,
+                'placeholder': '0.00',
+                'id': 'id_preco_compra'
+            }),
+            'margem_percentual': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'step': '0.01',
+                'min': 0,
+                'placeholder': '0.00',
+                'id': 'id_margem_percentual'
+            }),
+            'margem_ht': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100',
+                'step': '0.01',
+                'min': 0,
+                'placeholder': '0.00',
+                'readonly': True,
+                'id': 'id_margem_ht'
+            }),
+            'preco_venda_ht': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100',
+                'step': '0.01',
+                'min': 0,
+                'placeholder': '0.00',
+                'readonly': True,
+                'id': 'id_preco_venda_ht'
+            }),
+            'taxa_tva': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'id': 'id_taxa_tva'
+            }),
+            'preco_venda_ttc': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100',
+                'step': '0.01',
+                'min': 0,
+                'placeholder': '0.00',
+                'readonly': True,
+                'id': 'id_preco_venda_ttc'
+            }),
+            'fornecedor': forms.Select(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'foto': forms.ClearableFileInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'accept': 'image/*',
+                'id': 'id_foto'
+            }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500'
+            })
+        }
+
+class FornecedorForm(forms.ModelForm):
+    """Formulário para cadastro/edição de fornecedores"""
+
+    class Meta:
+        model = Fornecedor
+        fields = [
+            'nome', 'endereco', 'cidade', 'cep',
+            'telefone', 'email', 'ativo'
+        ]
+
+        labels = {
+            'nome': 'Nom du fournisseur',
+            'endereco': 'Adresse',
+            'cidade': 'Ville',
+            'cep': 'Code postal',
+            'telefone': 'Téléphone',
+            'email': 'Email',
+            'ativo': 'Actif'
+        }
+
+        widgets = {
+            'nome': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Nom de l\'entreprise'
+            }),
+            'endereco': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Adresse complète'
+            }),
+            'cidade': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Ville'
+            }),
+            'cep': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Code postal'
+            }),
+            'telefone': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': '+33 1 23 45 67 89'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'email@exemple.fr'
+            }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
+            })
+        }
+
 class AnexoProjetoForm(forms.ModelForm):
-    """Formulário para upload de anexos dos projetos"""
+    """Formulário para upload de anexos de projetos"""
 
     class Meta:
         model = AnexoProjeto
         fields = ['arquivo', 'descricao']
+
         widgets = {
             'arquivo': forms.FileInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'accept': 'image/*,.pdf,.doc,.docx'
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'descricao': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': 'Description de ce fichier...'
+                'placeholder': 'Description du fichier'
             })
         }

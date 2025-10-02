@@ -1,0 +1,528 @@
+<!-- Hero Section -->
+<section class=" relative min-h-screen flex items-center justify-center overflow-hidden">
+  <div class="hero-overlay">
+    <!-- Background Video/Image -->
+    <div class="absolute inset-0 z-0 animate-fade-in">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/80 to-purple-900/90 z-10"></div>
+      <div class="w-full h-full bg-cover bg-center bg-fixed"
+        style="background-image: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%)"></div>
+    </div>
+
+    <!-- Floating Elements -->
+    <div class="absolute inset-0 z-5">
+      <div class="floating-element absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl animate-float animate-fade-in-scale" style="animation-delay: 1s">
+      </div>
+      <div class="floating-element absolute top-40 right-20 w-32 h-32 bg-blue-400/20 rounded-full blur-2xl animate-float-delayed animate-fade-in-scale" style="animation-delay: 1.5s">
+      </div>
+      <div class="floating-element absolute bottom-32 left-1/4 w-16 h-16 bg-purple-400/20 rounded-full blur-xl animate-float-slow animate-fade-in-scale" style="animation-delay: 2s">
+      </div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="animate-fade-in-up">
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
+          <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+            <span class="animate-fade-in-up" style="animation-delay: 0.3s">LOPES</span>
+            <span class="hero-gradient-text animate-fade-in-up" style="animation-delay: 0.6s">
+              PEINTURE
+            </span>
+          </div>
+        </h1>
+
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in-up"
+          style="animation-delay: 0.9s">
+          Votre spécialiste en peinture et décoration haut de gamme.
+          <span class="block mt-2">Transformons vos espaces en œuvres d'art.</span>
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12 animate-fade-in-up"
+          style="animation-delay: 1.2s">
+          <a href="{% url 'orcamentos:solicitar_publico' %}"
+            class="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
+            <span class="relative z-10">Devis Gratuit</span>
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-700 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+          </a>
+
+          <button @click="#scrollToServices" onclick="scrollToSection('scrollToServices')"
+            class="group px-8 py-4 border-2 border-white/30 text-white font-bold rounded-full text-lg backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+            <span class="flex items-center gap-2">
+              Découvrir nos services
+              <i class="fas fa-arrow-down group-hover:translate-y-1 transition-transform duration-300"></i>
+            </span>
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div class="hero-stat-item text-center animate-fade-in-up" style="animation-delay: 1.5s">
+            <div class="hero-stat-number text-3xl md:text-4xl font-bold text-white mb-2">10+</div>
+            <div class="hero-stat-label text-blue-200 text-sm md:text-base">Années d'expérience</div>
+          </div>
+          <div class="hero-stat-item text-center animate-fade-in-up" style="animation-delay: 1.7s">
+            <div class="hero-stat-number text-3xl md:text-4xl font-bold text-white mb-2">500+</div>
+            <div class="hero-stat-label text-blue-200 text-sm md:text-base">Projets réalisés</div>
+          </div>
+          <div class="hero-stat-item text-center animate-fade-in-up" style="animation-delay: 1.9s">
+            <div class="hero-stat-number text-3xl md:text-4xl font-bold text-white mb-2">100%</div>
+            <div class="hero-stat-label text-blue-200 text-sm md:text-base">Clients satisfaits</div>
+          </div>
+          <div class="hero-stat-item text-center animate-fade-in-up" style="animation-delay: 2.1s">
+            <div class="hero-stat-number text-3xl md:text-4xl font-bold text-white mb-2">48h</div>
+            <div class="hero-stat-label text-blue-200 text-sm md:text-base">Réponse garantie</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="hero-scroll-indicator absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-fade-in-up" style="animation-delay: 2.5s">
+      <div class="animate-bounce">
+        <i class="fas fa-chevron-down text-white text-2xl opacity-70"></i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+   /* Hero Section Styles */
+  
+
+  /* Gradient Text Fix */
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+    display: inline-block;
+    position: relative;
+  }
+
+  /* Fallback for browsers that don't support background-clip: text */
+  @supports not (-webkit-background-clip: text) {
+    .hero-gradient-text {
+      color: #a855f7;
+      background: none;
+      -webkit-text-fill-color: initial;
+    }
+  }
+
+  /* Button Styles */
+  .hero-btn-primary {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  }
+
+  .hero-btn-secondary {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .hero-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* Stats Styles */
+  .hero-stats {
+    margin-top: 3rem;
+  }
+
+  .hero-stat-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .hero-stat-item:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .hero-stat-number {
+    transition: all 0.3s ease;
+  }
+
+  .hero-stat-item:hover .hero-stat-number {
+    transform: scale(1.1);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+
+  .hero-stat-label {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* Scroll Indicator */
+  .hero-scroll-indicator {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .hero-scroll-indicator:hover {
+    transform: translate(-50%, -4px);
+  }
+
+  /* Floating Elements */
+  .floating-element {
+    pointer-events: none;
+  }
+
+  /* Animation Keyframes */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Floating Animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes floatDelayed {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+    @keyframes floatSlow {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Animation Classes */
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-scale {
+    animation: fadeInScale 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 1s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: floatDelayed 8s ease-in-out infinite;
+    animation-delay: 2s;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 10s ease-in-out infinite;
+    animation-delay: 4s;
+  }
+
+  /* Bounce Animation */
+  .animate-bounce {
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0,0,0);
+    }
+    40%, 43% {
+      transform: translate3d(0, -15px, 0);
+    }
+    70% {
+      transform: translate3d(0, -7px, 0);
+    }
+    90% {
+      transform: translate3d(0, -2px, 0);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .hero-gradient-text {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+
+    .hero-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .hero-stat-item {
+      padding: 0.75rem;
+    }
+
+    .hero-stat-number {
+      font-size: 1.5rem;
+    }
+
+    .hero-stat-label {
+      font-size: 0.75rem;
+    }
+
+    .hero-btn-primary,
+    .hero-btn-secondary {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    .floating-element {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-gradient-text {
+      font-size: 2rem;
+    }
+
+    .hero-stats {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .hero-stat-item {
+      padding: 0.5rem;
+    }
+
+    .hero-stat-number {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .hero-gradient-text {
+      background: none;
+      color: #ffffff;
+      -webkit-text-fill-color: initial;
+    }
+
+    .hero-stat-item {
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-fade-in-up,
+    .animate-fade-in-scale,
+    .animate-slide-in-left,
+    .animate-float,
+    .animate-float-delayed,
+    .animate-float-slow,
+    .animate-bounce {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .hero-gradient-text {
+      animation: none;
+    }
+
+    .floating-element {
+      display: none;
+    }
+
+    .hero-btn-primary:hover,
+    .hero-btn-secondary:hover,
+    .hero-stat-item:hover {
+      transform: none;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .floating-element,
+    .hero-scroll-indicator {
+      display: none;
+    }
+
+    .hero-gradient-text {
+      background: none;
+      color: #000000;
+      -webkit-text-fill-color: initial;
+    }
+  }
+
+  /* Focus styles for accessibility */
+  .hero-btn-primary:focus,
+  .hero-btn-secondary:focus {
+    outline: 3px solid #60a5fa;
+    outline-offset: 2px;
+  }
+
+  .hero-scroll-indicator:focus {
+    outline: 2px solid #ffffff;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  /* Loading state */
+  .hero-loading {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hero-loaded {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  /* Performance optimizations */
+  .floating-element {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  .hero-gradient-text {
+    will-change: background-position;
+    transform: translateZ(0);
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary,
+  .hero-stat-item {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+</style>
+
+<script>
+  // Função para scroll suave até uma seção
+function scrollToSection(sectionId) {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    // Calcular offset para header fixo (se houver)
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    const elementPosition = element.offsetTop - headerHeight - 20; // 20px de margem extra
+    
+    window.scrollTo({
+      top: elementPosition,
+      behavior: 'smooth'
+    });
+  }
+}
+
+
+  // Add loading class management
+  document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.querySelector('.hero-overlay');
+    if (heroSection) {
+      heroSection.classList.add('hero-loaded');
+    }
+  });
+
+  // Intersection Observer for performance
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in-view');
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+
+    document.querySelectorAll('.hero-stat-item').forEach(item => {
+      observer.observe(item);
+    });
+  }
+</script>

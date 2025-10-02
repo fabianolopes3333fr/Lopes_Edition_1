@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento, AnexoProjeto,
-    StatusOrcamento, StatusProjeto
+    StatusOrcamento, StatusProjeto, Produto, Fornecedor, Notificacao
 )
 
 class AnexoProjetoInline(admin.TabularInline):
@@ -58,8 +58,8 @@ class ProjetoAdmin(admin.ModelAdmin):
 class ItemOrcamentoInline(admin.TabularInline):
     model = ItemOrcamento
     extra = 1
-    fields = ['descricao', 'quantidade', 'unidade', 'preco_unitario', 'total_item']
-    readonly_fields = ['total_item']
+    fields = ['referencia', 'descricao', 'quantidade', 'unidade', 'preco_unitario_ht', 'total_ht']
+    readonly_fields = ['total_ht']
 
 @admin.register(SolicitacaoOrcamento)
 class SolicitacaoOrcamentoAdmin(admin.ModelAdmin):
@@ -237,11 +237,10 @@ class OrcamentoAdmin(admin.ModelAdmin):
 @admin.register(ItemOrcamento)
 class ItemOrcamentoAdmin(admin.ModelAdmin):
     list_display = [
-        'orcamento', 'descricao', 'quantidade', 'unidade',
-        'preco_unitario', 'total_item', 'ordem'
+        'orcamento', 'referencia', 'descricao', 'quantidade', 'preco_unitario_ht', 'total_ht'
     ]
-    list_filter = ['orcamento__status', 'unidade']
-    search_fields = ['descricao', 'orcamento__numero']
+    list_filter = ['unidade', 'atividade', 'taxa_tva']
+    search_fields = ['referencia', 'descricao', 'orcamento__numero']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('orcamento')
@@ -255,6 +254,138 @@ class AnexoProjetoAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('projeto')
+
+# Administração para Produtos e Fornecedores
+@admin.register(Fornecedor)
+class FornecedorAdmin(admin.ModelAdmin):
+    list_display = [
+        'nome', 'email', 'telefone', 'cidade', 'ativo',
+        'produtos_count', 'created_at'
+    ]
+    list_filter = ['ativo', 'cidade', 'created_at']
+    search_fields = ['nome', 'email', 'telefone', 'endereco', 'cidade']
+    readonly_fields = ['created_at', 'updated_at']
+
+    fieldsets = (
+        ('Informações Básicas', {
+            'fields': ('nome', 'email', 'telefone', 'ativo')
+        }),
+        ('Endereço', {
+            'fields': ('endereco', 'cidade', 'cep')
+        }),
+        ('Sistema', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def produtos_count(self, obj):
+        count = obj.produtos.count()
+        if count > 0:
+            return format_html(
+                '<a href="{}?fornecedor__id__exact={}">{} produto(s)</a>',
+                reverse('admin:orcamentos_produto_changelist'),
+                obj.id,
+                count
+            )
+        return "0 produtos"
+    produtos_count.short_description = 'Produtos'
+
+@admin.register(Produto)
+class ProdutoAdmin(admin.ModelAdmin):
+    list_display = [
+        'referencia', 'descricao', 'unidade', 'atividade', 'fornecedor',
+        'preco_compra', 'preco_venda_ht', 'preco_venda_ttc', 'margem_percentual',
+        'ativo', 'created_at'
+    ]
+    list_filter = [
+        'ativo', 'unidade', 'atividade', 'taxa_tva', 'fornecedor', 'created_at'
+    ]
+    search_fields = ['referencia', 'descricao', 'fornecedor__nome']
+    readonly_fields = [
+        'preco_venda_ht', 'preco_venda_ttc', 'margem_ht',
+        'created_at', 'updated_at'
+    ]
+
+    fieldsets = (
+        ('Informações Básicas', {
+            'fields': ('referencia', 'descricao', 'unidade', 'atividade', 'ativo')
+        }),
+        ('Fornecedor', {
+            'fields': ('fornecedor',)
+        }),
+        ('Preços e Margens', {
+            'fields': (
+                'preco_compra', 'margem_percentual', 'margem_ht',
+                'preco_venda_ht', 'taxa_tva', 'preco_venda_ttc'
+            )
+        }),
+        ('Foto', {
+            'fields': ('foto',)
+        }),
+        ('Sistema', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def save_model(self, request, obj, form, change):
+        """Override para garantir que os cálculos sejam feitos"""
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('fornecedor')
+
+@admin.register(Notificacao)
+class NotificacaoAdmin(admin.ModelAdmin):
+    list_display = [
+        'usuario', 'tipo', 'titulo', 'lida', 'created_at'
+    ]
+    list_filter = ['lida', 'tipo', 'created_at']
+    search_fields = ['titulo', 'mensagem', 'usuario__email']
+    readonly_fields = ['created_at', 'read_at']
+
+    fieldsets = (
+        ('Notificação', {
+            'fields': ('usuario', 'tipo', 'titulo', 'mensagem', 'url_acao')
+        }),
+        ('Status', {
+            'fields': ('lida', 'created_at', 'read_at')
+        }),
+        ('Relacionamentos', {
+            'fields': ('solicitacao', 'orcamento', 'projeto'),
+            'classes': ('collapse',)
+        })
+    )
+
+    actions = ['marcar_como_lida', 'marcar_como_nao_lida']
+
+    def marcar_como_lida(self, request, queryset):
+        updated = queryset.filter(lida=False).update(
+            lida=True,
+            read_at=timezone.now()
+        )
+        self.message_user(
+            request,
+            f'{updated} notificação(ões) marcada(s) como lida(s).',
+            messages.SUCCESS
+        )
+    marcar_como_lida.short_description = "Marcar como lidas"
+
+    def marcar_como_nao_lida(self, request, queryset):
+        updated = queryset.filter(lida=True).update(
+            lida=False,
+            read_at=None
+        )
+        self.message_user(
+            request,
+            f'{updated} notificação(ões) marcada(s) como não lidas.',
+            messages.SUCCESS
+        )
+    marcar_como_nao_lida.short_description = "Marcar como não lidas"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('usuario')
 
 # Customização do Admin Site
 admin.site.site_header = "LOPES PEINTURE - Administration"

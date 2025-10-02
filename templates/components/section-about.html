@@ -1,0 +1,514 @@
+{% load static %}
+<!-- About Section -->
+<section class="about-preview relative py-20 lg:py-32 overflow-hidden">
+  <!-- Background Elements -->
+  <div class="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50"></div>
+  <div class="absolute top-0 right-0 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+  <div class="absolute bottom-0 left-0 w-80 h-80 bg-purple-100/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+
+  <div class="container relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="about-grid grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      
+      <!-- About Image -->
+      <div class="about-image relative group">
+        <div class="relative overflow-hidden rounded-2xl shadow-2xl">
+          <!-- Main Image -->
+          <div class="aspect-[4/5] bg-gradient-to-br from-blue-600 to-purple-700 relative">
+            <img 
+              src="{% static "/img/logo-500x500-branco.svg" %}" 
+              alt="Équipe Lopes Peinture au travail" 
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+            <!-- Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+          </div>
+          
+          <!-- Floating Stats Card -->
+          <div class="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-6 border border-gray-100 animate-fade-in-up" style="animation-delay: 0.8s">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-blue-600 mb-1">10+</div>
+              <div class="text-sm text-gray-600 font-medium">Années d'expérience</div>
+            </div>
+          </div>
+          
+          <!-- Decorative Elements -->
+          <div class="absolute -top-4 -left-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl"></div>
+          <div class="absolute top-1/2 -right-8 w-16 h-16 bg-purple-500/10 rounded-full blur-lg"></div>
+        </div>
+        
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 -z-10">
+          <div class="absolute top-8 left-8 w-full h-full border-2 border-blue-200 rounded-2xl transform rotate-3"></div>
+        </div>
+      </div>
+
+      <!-- About Content -->
+      <div class="about-content space-y-8">
+        <!-- Section Header -->
+        <div class="space-y-4">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full text-sm font-medium animate-fade-in-up">
+            <i class="fas fa-users text-blue-500"></i>
+            À propos de nous
+          </div>
+          
+          <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight animate-fade-in-up" style="animation-delay: 0.2s">
+            Votre partenaire de confiance en 
+            <span class="text-gradient bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              peinture et décoration
+            </span>
+          </h2>
+        </div>
+
+        <!-- Story Content -->
+        <div class="space-y-6 animate-fade-in-up" style="animation-delay: 0.4s">
+          <p class="text-lg text-gray-600 leading-relaxed">
+            Fondée en 2019, <strong class="text-gray-900">Lopes Peinture</strong> est née de la passion de Fabiano Lopes 
+            pour la peinture et la décoration d'intérieur. Après plus de 10 ans d'expérience dans le 
+            domaine, Fabiano a décidé de créer sa propre entreprise avec une vision claire : offrir des 
+            services de peinture de haute qualité avec une attention particulière aux détails et à la 
+            satisfaction client.
+          </p>
+          
+          <p class="text-lg text-gray-600 leading-relaxed">
+            Aujourd'hui, nous sommes fiers de compter parmi nos clients des particuliers, des 
+            entreprises et des institutions qui nous font confiance pour transformer leurs espaces 
+            en véritables œuvres d'art.
+          </p>
+        </div>
+
+        <!-- Key Features -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 0.6s">
+          <div class="feature-item flex items-start gap-4 p-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-award text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-1">Expertise Reconnue</h4>
+              <p class="text-sm text-gray-600">Plus de 500 projets réalisés avec excellence</p>
+            </div>
+          </div>
+          
+          <div class="feature-item flex items-start gap-4 p-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-leaf text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-1">Éco-responsable</h4>
+              <p class="text-sm text-gray-600">Peintures écologiques et respectueuses</p>
+            </div>
+          </div>
+          
+          <div class="feature-item flex items-start gap-4 p-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-handshake text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-1">Satisfaction Garantie</h4>
+              <p class="text-sm text-gray-600">100% de clients satisfaits depuis 2005</p>
+            </div>
+          </div>
+          
+          <div class="feature-item flex items-start gap-4 p-4 rounded-xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div class="flex-shrink-0 w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-clock text-orange-600 text-xl"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-1">Respect des Délais</h4>
+              <p class="text-sm text-gray-600">Livraison dans les temps convenus</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="animate-fade-in-up" style="animation-delay: 0.8s">
+          <a href="{% url "home:about" %}" class="about-btn group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
+            <span>En savoir plus sur nous</span>
+            <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform duration-300"></i>
+          </a>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="flex flex-wrap items-center gap-6 pt-6 border-t border-gray-200 animate-fade-in-up" style="animation-delay: 1s">
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <i class="fas fa-shield-alt text-green-500"></i>
+            <span>Assurance décennale</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <i class="fas fa-certificate text-blue-500"></i>
+            <span>Artisan qualifié</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <i class="fas fa-star text-yellow-500"></i>
+            <span>5/5 étoiles clients</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* About Section Styles */
+  .about-preview {
+    position: relative;
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Feature Items Hover Effects */
+  .feature-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .feature-item:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+
+  /* About Button */
+  .about-btn {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  }
+
+  .about-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .about-btn:hover::before {
+    left: 100%;
+  }
+
+  /* Image Hover Effects */
+  .about-image img {
+    transition: all 0.7s ease;
+  }
+
+  .about-image:hover img {
+    transform: scale(1.05);
+  }
+
+    /* Animation Classes */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .about-grid {
+      gap: 3rem;
+    }
+    
+    .about-image {
+      order: -1;
+    }
+    
+    .about-content h2 {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .about-preview {
+      padding: 4rem 0;
+    }
+    
+    .about-content h2 {
+      font-size: 2rem;
+    }
+    
+    .about-content p {
+      font-size: 1rem;
+    }
+    
+    .feature-item {
+      padding: 1rem;
+    }
+    
+    .feature-item h4 {
+      font-size: 0.9rem;
+    }
+    
+    .feature-item p {
+      font-size: 0.8rem;
+    }
+    
+    .about-btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+    }
+    
+    /* Hide floating stats on mobile */
+    .about-image .absolute.-bottom-6 {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .about-grid {
+      gap: 2rem;
+    }
+    
+    .about-content h2 {
+      font-size: 1.75rem;
+    }
+    
+    .grid.grid-cols-1.sm\\:grid-cols-2 {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .trust-indicators {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .text-gradient {
+      background: none;
+      color: #1e40af;
+      background-clip: initial;
+      -webkit-background-clip: initial;
+      -webkit-text-fill-color: initial;
+    }
+    
+    .feature-item {
+      border: 2px solid #374151;
+      background: #ffffff;
+    }
+    
+    .about-btn {
+      background: #1e40af;
+      border: 2px solid #1e40af;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    
+    .text-gradient {
+      animation: none;
+    }
+    
+    .about-image img,
+    .feature-item,
+    .about-btn {
+      transition: none;
+    }
+    
+    .about-image:hover img {
+      transform: none;
+    }
+    
+    .feature-item:hover {
+      transform: none;
+    }
+    
+    .about-btn:hover {
+      transform: none;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .about-preview {
+      background: white;
+      color: black;
+    }
+    
+    .text-gradient {
+      background: none;
+      color: black;
+      -webkit-text-fill-color: initial;
+    }
+    
+    .about-btn {
+      display: none;
+    }
+    
+    .absolute {
+      display: none;
+    }
+  }
+
+  /* Focus styles for accessibility */
+  .about-btn:focus {
+    outline: 3px solid #60a5fa;
+    outline-offset: 2px;
+  }
+
+  .feature-item:focus {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+  }
+
+  /* Loading states */
+  .about-image img {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  .about-image img[src] {
+    background: none;
+    animation: none;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Performance optimizations */
+  .about-image,
+  .feature-item,
+  .about-btn {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  .text-gradient {
+    will-change: background-position;
+    transform: translateZ(0);
+  }
+
+  /* Intersection Observer classes */
+  .about-preview.in-view .animate-fade-in-up {
+    animation-play-state: running;
+  }
+
+  .about-preview:not(.in-view) .animate-fade-in-up {
+    animation-play-state: paused;
+  }
+</style>
+
+<script>
+  // Intersection Observer for performance
+  document.addEventListener('DOMContentLoaded', function() {
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            // Trigger counter animation if needed
+            animateCounters(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      const aboutSection = document.querySelector('.about-preview');
+      if (aboutSection) {
+        observer.observe(aboutSection);
+      }
+    }
+
+    // Lazy load images
+    const images = document.querySelectorAll('.about-image img[data-src]');
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          imageObserver.unobserve(img);
+        }
+      });
+    });
+
+    images.forEach(img => imageObserver.observe(img));
+  });
+
+  // Counter animation function
+  function animateCounters(section) {
+    const counters = section.querySelectorAll('[data-counter]');
+    counters.forEach(counter => {
+      const target = parseInt(counter.dataset.counter);
+      const duration = 2000; // 2 seconds
+      const step = target / (duration / 16); // 60fps
+      let current = 0;
+
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        counter.textContent = Math.floor(current) + '+';
+      }, 16);
+    });
+  }
+
+  // Error handling for images
+  document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.about-image img');
+    images.forEach(img => {
+      img.addEventListener('error', function() {
+        this.src = '/static/images/placeholder-about.jpg';
+        this.alt = 'Image non disponible';
+      });
+    });
+  });
+
+  // Smooth scroll for internal links
+  document.addEventListener('click', function(e) {
+    if (e.target.matches('a[href^="#"]')) {
+      e.preventDefault();
+      const target = document.querySelector(e.target.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }
+  });
+</script>

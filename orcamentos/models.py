@@ -37,6 +37,35 @@ class UrgenciaProjeto(models.TextChoices):
     ALTA = "alta", "Urgent"
     CRITICA = "critica", "Très urgent"
 
+# Classes para gestão de produtos e serviços - MOVIDAS PARA CIMA
+class TipoUnidade(models.TextChoices):
+    UNITE = "unite", "Unité"
+    PIECE = "piece", "Pièce"
+    M2 = "m2", "M²"
+    ML = "ml", "ML"
+    LONGUEUR = "longueur", "Longueur"
+    KG = "kg", "Kg"
+    HEURE = "heure", "Heure"
+    FORFAIT = "forfait", "Forfait"
+
+class TipoAtividade(models.TextChoices):
+    MARCHANDISE = "marchandise", "Marchandise"
+    SERVICE = "service", "Service"
+
+class TipoTVA(models.TextChoices):
+    TVA_20 = "20", "TVA 20%"
+    TVA_10 = "10", "TVA 10%"
+    TVA_5_5 = "5.5", "TVA 5,5%"
+    EXONEREE = "0", "Exonérée"
+
+class TipoNotificacao(models.TextChoices):
+    NOVA_SOLICITACAO = "nova_solicitacao", "Nouvelle demande de devis"
+    ORCAMENTO_ELABORADO = "orcamento_elaborado", "Devis élaboré"
+    ORCAMENTO_ENVIADO = "orcamento_enviado", "Devis envoyé"
+    ORCAMENTO_ACEITO = "orcamento_aceito", "Devis accepté"
+    ORCAMENTO_RECUSADO = "orcamento_recusado", "Devis refusé"
+    PROJETO_CRIADO = "projeto_criado", "Nouveau projet créé"
+
 # Model para projetos criados por clientes logados
 class Projeto(models.Model):
     # Identificação
@@ -330,37 +359,57 @@ class Orcamento(models.Model):
                 return numero
 
     def calcular_totais(self):
-        """Calcula os totais do orçamento"""
-        # Recalcular subtotal baseado nos itens
-        self.subtotal = sum(item.total_item for item in self.itens.all())
+        """Calcula os totais do orçamento com base nos itens"""
+        # Somar todos os valores dos itens
+        total_ht_itens = Decimal('0.00')
+        total_ttc_itens = Decimal('0.00')
+
+        for item in self.itens.all():
+            total_ht_itens += item.total_ht
+            total_ttc_itens += item.total_ttc
+
+        # Calcular subtotal (HT)
+        self.subtotal = total_ht_itens
+
+        # Aplicar desconto global sobre HT
         self.valor_desconto = (self.subtotal * self.desconto) / 100
-        self.total = self.subtotal - self.valor_desconto
+        total_ht_com_desconto = self.subtotal - self.valor_desconto
+
+        # O total final deve ser HT com desconto
+        self.total = total_ht_com_desconto
+
         self.save(update_fields=['subtotal', 'valor_desconto', 'total'])
 
     @property
     def total_ttc(self):
-        """Retorna o total TTC (com TVA 20%)"""
-        # Garante que sempre tenha um valor válido para cálculo
-        total_ht = self.total if self.total is not None else Decimal('0.00')
-        tva_rate = Decimal('1.20')  # 20% de TVA
-        return total_ht * tva_rate
+        """Retorna o total TTC calculado baseado nos itens com desconto aplicado"""
+        # Somar TTC de todos os itens
+        total_ttc_itens = sum(item.total_ttc for item in self.itens.all())
+
+        # Aplicar desconto proporcional no TTC também
+        if self.desconto > 0 and total_ttc_itens > 0:
+            valor_desconto_ttc = (total_ttc_itens * self.desconto) / 100
+            return total_ttc_itens - valor_desconto_ttc
+
+        return total_ttc_itens
 
     @property
     def valor_tva(self):
-        """Retorna o valor da TVA (20%)"""
-        total_ht = self.total if self.total is not None else Decimal('0.00')
-        tva_rate = Decimal('0.20')  # 20% de TVA
-        return total_ht * tva_rate
+        """Retorna o valor total da TVA com desconto aplicado"""
+        return self.total_ttc - self.total
 
     @property
-    def tem_itens(self):
-        """Verifica se o orçamento tem itens"""
-        return self.itens.exists()
+    def total_compras(self):
+        """Retorna o total de compras (custo dos produtos)"""
+        total = Decimal('0.00')
+        for item in self.itens.all():
+            total += item.quantidade * item.preco_compra_unitario
+        return total
 
     def __str__(self):
         return f"Devis {self.numero}"
 
-# Model para itens do orçamento
+# Model para itens do orçamento - VERSÃO MELHORADA
 class ItemOrcamento(models.Model):
     orcamento = models.ForeignKey(
         Orcamento,
@@ -368,48 +417,126 @@ class ItemOrcamento(models.Model):
         related_name='itens'
     )
 
+    # Referência ao produto (opcional)
+    produto = models.ForeignKey(
+        'Produto',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Produto de referência"
+    )
+
     # Dados do item
-    descricao = models.CharField(max_length=255, verbose_name="Description")
+    referencia = models.CharField(max_length=50, blank=True, verbose_name="Référence")
+    descricao = models.CharField(max_length=255, verbose_name="Désignation")
+    unidade = models.CharField(
+        max_length=20,
+        choices=TipoUnidade.choices,
+        default=TipoUnidade.UNITE,
+        verbose_name="Unité"
+    )
+    atividade = models.CharField(
+        max_length=20,
+        choices=TipoAtividade.choices,
+        default=TipoAtividade.MARCHANDISE,
+        verbose_name="Activité"
+    )
+
+    # Quantidades e preços
     quantidade = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name="Quantité"
     )
-    unidade = models.CharField(
-        max_length=20,
-        default="m²",
-        verbose_name="Unité"
-    )
-    preco_unitario = models.DecimalField(
+    preco_unitario_ht = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        verbose_name="Prix unitaire"
+        default=Decimal('0.00'),  # Adicionando default
+        verbose_name="P.U HT"
     )
-    total_item = models.DecimalField(
+    preco_unitario_ttc = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=Decimal('0.00'),
-        verbose_name="Total"
+        verbose_name="P.U TTC"
+    )
+
+    # Remise e totais
+    remise_percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Remise (%)"
+    )
+    total_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Total HT"
+    )
+    total_ttc = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Total TTC"
+    )
+
+    # Taxa e custos
+    taxa_tva = models.CharField(
+        max_length=5,
+        choices=TipoTVA.choices,
+        default=TipoTVA.TVA_20,
+        verbose_name="Taxe TVA"
+    )
+    preco_compra_unitario = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Prix d'achat unitaire"
     )
 
     # Metadados
     ordem = models.PositiveIntegerField(default=0)
 
     class Meta:
-        verbose_name = "Item do devis"
-        verbose_name_plural = "Itens do devis"
+        verbose_name = "Item du devis"
+        verbose_name_plural = "Itens du devis"
         ordering = ['ordem', 'id']
 
     def save(self, *args, **kwargs):
-        self.total_item = self.quantidade * self.preco_unitario
+        # Calcular preço unitário TTC
+        taxa_decimal = Decimal(self.taxa_tva) / 100
+        self.preco_unitario_ttc = self.preco_unitario_ht * (1 + taxa_decimal)
+
+        # Calcular total bruto
+        total_bruto_ht = self.quantidade * self.preco_unitario_ht
+
+        # Aplicar remise
+        valor_remise = (total_bruto_ht * self.remise_percentual) / 100
+        self.total_ht = total_bruto_ht - valor_remise
+
+        # Calcular total TTC
+        valor_tva = self.total_ht * taxa_decimal
+        self.total_ttc = self.total_ht + valor_tva
+
         super().save(*args, **kwargs)
 
         # Recalcular total do orçamento
-        self.orcamento.subtotal = sum(item.total_item for item in self.orcamento.itens.all())
-        self.orcamento.calcular_totais()
+        if hasattr(self, 'orcamento'):
+            self.orcamento.calcular_totais()
+
+    @property
+    def valor_tva(self):
+        """Retorna o valor da TVA para este item"""
+        return self.total_ttc - self.total_ht
+
+    @property
+    def total_compra(self):
+        """Retorna o total de compra para este item"""
+        return self.quantidade * self.preco_compra_unitario
 
     def __str__(self):
-        return f"{self.descricao} - {self.quantidade} {self.unidade}"
+        return f"{self.referencia} - {self.descricao}"
 
 # Model para fotos/anexos dos projetos
 class AnexoProjeto(models.Model):
@@ -438,3 +565,191 @@ class AnexoProjeto(models.Model):
 
     def __str__(self):
         return f"Anexo - {self.projeto.titulo}"
+
+
+# Model para notificações do sistema
+class Notificacao(models.Model):
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notificacoes'
+    )
+    tipo = models.CharField(
+        max_length=30,
+        choices=TipoNotificacao.choices
+    )
+    titulo = models.CharField(max_length=200)
+    mensagem = models.TextField()
+    lida = models.BooleanField(default=False)
+    url_acao = models.URLField(blank=True, null=True)
+
+    # Relacionamentos opcionais para contexto
+    solicitacao = models.ForeignKey(
+        SolicitacaoOrcamento,
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    orcamento = models.ForeignKey(
+        Orcamento,
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    projeto = models.ForeignKey(
+        Projeto,
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Notification"
+        verbose_name_plural = "Notifications"
+        ordering = ['-created_at']
+
+    def marcar_como_lida(self):
+        if not self.lida:
+            self.lida = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['lida', 'read_at'])
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.email}"
+
+# Model para gestão de produtos e serviços
+class Fornecedor(models.Model):
+    nome = models.CharField(max_length=200, verbose_name="Nom du fournisseur")
+    email = models.EmailField(blank=True, verbose_name="Email")
+    telefone = models.CharField(
+        max_length=20,
+        blank=True,
+        validators=[RegexValidator(r'^[\+]?[0-9\s\-\(\)]+$')],
+        verbose_name="Téléphone"
+    )
+    endereco = models.CharField(max_length=255, blank=True, verbose_name="Adresse")
+    cidade = models.CharField(max_length=100, blank=True, verbose_name="Ville")
+    cep = models.CharField(max_length=10, blank=True, verbose_name="Code postal")
+
+    ativo = models.BooleanField(default=True, verbose_name="Actif")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Fournisseur"
+        verbose_name_plural = "Fournisseurs"
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+class Produto(models.Model):
+    # Campos principais
+    referencia = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Référence"
+    )
+    descricao = models.CharField(max_length=255, verbose_name="Désignation")
+
+    # Tipo de unidade e atividade
+    unidade = models.CharField(
+        max_length=20,
+        choices=TipoUnidade.choices,
+        default=TipoUnidade.UNITE,
+        verbose_name="Type d'unité"
+    )
+    atividade = models.CharField(
+        max_length=20,
+        choices=TipoAtividade.choices,
+        default=TipoAtividade.MARCHANDISE,
+        verbose_name="Activité"
+    )
+
+    # Fornecedor
+    fornecedor = models.ForeignKey(
+        Fornecedor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='produtos',
+        verbose_name="Fournisseur"
+    )
+
+    # Preços e margens
+    preco_compra = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Prix d'achat"
+    )
+    margem_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Marge HT"
+    )
+    margem_percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Marge HT em %"
+    )
+    preco_venda_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="P.Vente HT"
+    )
+
+    # Taxa e preço final
+    taxa_tva = models.CharField(
+        max_length=5,
+        choices=TipoTVA.choices,
+        default=TipoTVA.TVA_20,
+        verbose_name="Taxe TVA"
+    )
+    preco_venda_ttc = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="P.Vente TTC"
+    )
+
+    # Foto do produto
+    foto = models.ImageField(
+        upload_to='produtos/%Y/%m/',
+        blank=True,
+        null=True,
+        verbose_name="Photo"
+    )
+
+    # Controles
+    ativo = models.BooleanField(default=True, verbose_name="Actif")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Produit"
+        verbose_name_plural = "Produits"
+        ordering = ['referencia']
+
+    def save(self, *args, **kwargs):
+        # Calcular preço de venda HT baseado na margem
+        if self.margem_percentual > 0:
+            self.margem_ht = (self.preco_compra * self.margem_percentual) / 100
+
+        self.preco_venda_ht = self.preco_compra + self.margem_ht
+
+        # Calcular preço TTC
+        taxa_decimal = Decimal(self.taxa_tva) / 100
+        self.preco_venda_ttc = self.preco_venda_ht * (1 + taxa_decimal)
+
+        # Recalcular margem percentual se necessário
+        if self.preco_compra > 0 and self.margem_percentual == 0:
+            self.margem_percentual = (self.margem_ht / self.preco_compra) * 100
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.referencia} - {self.descricao}"

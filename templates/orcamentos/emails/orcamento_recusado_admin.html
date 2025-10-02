@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis refusé</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc2626; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .footer { background: #374151; color: white; padding: 15px; text-align: center; font-size: 12px; }
+        .btn { background: #dc2626; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }
+        .info-box { background: white; border-left: 4px solid #dc2626; padding: 15px; margin: 10px 0; }
+        .warning-banner { background: #fee2e2; border: 2px solid #dc2626; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 DEVIS REFUSÉ</h1>
+            <h2>Information importante</h2>
+        </div>
+
+        <div class="content">
+            <div class="warning-banner">
+                <h2 style="color: #dc2626; margin: 0;">Devis #{{ orcamento.numero }} refusé</h2>
+                <p style="margin: 5px 0;">Le client a décliné votre proposition</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Informations du client :</h3>
+                <p><strong>Nom :</strong> {{ orcamento.solicitacao.nome_solicitante }}</p>
+                <p><strong>Email :</strong> {{ orcamento.solicitacao.email_solicitante }}</p>
+                <p><strong>Téléphone :</strong> {{ orcamento.solicitacao.telefone_solicitante }}</p>
+                <p><strong>Date de refus :</strong> {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Détails du devis refusé :</h3>
+                <p><strong>Projet :</strong> {{ orcamento.titulo }}</p>
+                <p><strong>Montant proposé :</strong> {{ orcamento.total_ttc }}€ TTC</p>
+                <p><strong>Type de service :</strong> {{ orcamento.solicitacao.get_tipo_servico_display }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Actions possibles :</h3>
+                <ul>
+                    <li>Contacter le client pour comprendre les raisons du refus</li>
+                    <li>Proposer une révision du devis si approprié</li>
+                    <li>Archiver la demande dans le système</li>
+                    <li>Utiliser ce retour pour améliorer les futurs devis</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ site_url }}/orcamentos/admin/orcamento/{{ orcamento.numero }}/" class="btn">Voir le devis</a>
+            </div>
+
+            <p><em>Ne perdez pas espoir - chaque refus est une opportunité d'amélioration pour les prochains projets !</em></p>
+        </div>
+
+        <div class="footer">
+            <p>LOPES PEINTURE - Système de gestion des devis</p>
+        </div>
+    </div>
+</body>
+</html>
+

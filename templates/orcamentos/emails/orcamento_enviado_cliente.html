@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre devis est prêt</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #10b981; color: white; padding: 20px; text-align: center; }
+        .content { background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; }
+        .footer { background: #374151; color: white; padding: 15px; text-align: center; font-size: 12px; }
+        .btn { background: #10b981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 5px; }
+        .btn-secondary { background: #6b7280; }
+        .info-box { background: white; border-left: 4px solid #10b981; padding: 15px; margin: 10px 0; }
+        .highlight { background: #ecfdf5; border: 1px solid #10b981; padding: 10px; border-radius: 5px; text-align: center; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LOPES PEINTURE</h1>
+            <h2>Votre devis est prêt !</h2>
+        </div>
+
+        <div class="content">
+            <p>Bonjour {{ orcamento.solicitacao.nome_solicitante }},</p>
+
+            <p>Nous avons le plaisir de vous informer que votre devis <strong>#{{ orcamento.numero }}</strong> est maintenant disponible.</p>
+
+            <div class="highlight">
+                <h3 style="margin: 0; color: #10b981;">Devis #{{ orcamento.numero }}</h3>
+                <p style="margin: 5px 0; font-size: 24px; font-weight: bold;">{{ orcamento.total_ttc }}€ TTC</p>
+                <p style="margin: 0; color: #6b7280;">Valide jusqu'au {{ orcamento.validade_orcamento|date:"d/m/Y" }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Résumé du projet :</h3>
+                <p><strong>{{ orcamento.titulo }}</strong></p>
+                <p>{{ orcamento.descricao|truncatewords:30 }}</p>
+                <p><strong>Délai d'exécution :</strong> {{ orcamento.prazo_execucao }} jours</p>
+            </div>
+
+            {% if cliente %}
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="{{ site_url }}/orcamentos/devis/{{ orcamento.numero }}/" class="btn">Consulter le devis</a>
+                <a href="{{ site_url }}/orcamentos/devis/{{ orcamento.numero }}/pdf/" class="btn btn-secondary">Télécharger PDF</a>
+            </div>
+            {% endif %}
+
+            <div class="info-box">
+                <h4>Pour accepter ou refuser ce devis :</h4>
+                <ol>
+                    <li>Cliquez sur "Consulter le devis" ci-dessus</li>
+                    <li>Connectez-vous à votre compte (si nécessaire)</li>
+                    <li>Utilisez les boutons "Accepter" ou "Refuser"</li>
+                </ol>
+                <p><small>Vous pouvez également télécharger une version PDF pour vos archives.</small></p>
+            </div>
+
+            <hr>
+            <p><strong>Des questions ?</strong> N'hésitez pas à nous contacter :</p>
+            <p>📧 Email: contact@lopes-peinture.fr<br>
+               📞 Téléphone: +33 1 23 45 67 89</p>
+        </div>
+
+        <div class="footer">
+            <p>LOPES PEINTURE - Artisan peintre professionnel</p>
+            <p>Merci de votre confiance !</p>
+        </div>
+    </div>
+</body>
+</html>
+

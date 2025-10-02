@@ -1,0 +1,843 @@
+{% load static %}
+<header class="bg-white shadow-lg sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16 lg:h-20">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="{% url 'home:home' %}" class="flex items-center space-x-3">
+          <div class="logo-container">
+            <!-- Logo responsivo -->
+            <img
+              src="{% static 'img/logo-220x80-preto.svg' %}"
+              alt="Logo LOPES PEINTURE"
+              class="logo-image"
+            />
+          </div>
+        </a>
+      </div>
+
+      <!-- Navigation Desktop -->
+      <nav class="hidden lg:flex items-center space-x-8">
+        <a href="{% url 'home:home' %}" class="nav-link"> Accueil </a>
+        <a href="{% url 'home:nuancier' %}" class="nav-link">Nuancier</a>
+        <a href="{% url 'home:services' %}" class="nav-link"> Services </a>
+        <a href="{% url 'home:about' %}" class="nav-link"> À propos </a>
+        <a href="{% url 'home:contact' %}" class="nav-link"> Contact </a>
+        <a href="{% url 'blog:blog_list' %}" class="nav-link"> Conseils et Inspiration </a>
+      </nav>
+
+      <!-- Actions Desktop -->
+      <div class="hidden lg:flex items-center space-x-4">
+        {% if not user.is_authenticated %}
+        <!-- Phone -->
+        <a
+          href="tel:+33769273776"
+          class="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          <i class="fas fa-phone mr-2"></i>
+          <span class="font-medium">07 69 27 37 76</span>
+        </a>
+
+        <!-- Devis Button -->
+        <a href="{% url 'orcamentos:solicitar_publico' %}" class="btn-primary">
+          <i class="fas fa-calculator mr-2"></i>
+          Devis Gratuit
+        </a>
+        {% endif %}
+
+        <!-- Member Area -->
+        <div class="relative group">
+          {% if user.is_authenticated %}
+          <button
+            class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
+          >
+            <div
+              class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium"
+            >
+              {{ user.first_name|first|default:user.username|first|upper }}
+            </div>
+            <span class="font-medium">{{ user.first_name|default:user.username }}</span>
+            <i class="fas fa-chevron-down text-xs"></i>
+          </button>
+
+          <!-- Dropdown Menu - Authenticated -->
+          <div
+            class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+          >
+            <div class="py-2">
+              <div class="px-4 py-2 border-b">
+                <p class="text-sm font-medium text-gray-900">
+                  {{ user.first_name }} {{ user.last_name }}
+                </p>
+                <p class="text-xs text-gray-500">{{ user.email }}</p>
+              </div>
+              <a
+                href="{% url 'accounts:dashboard' %}"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <i class="fas fa-user mr-2"></i>
+                 Tableau de bord
+              </a>
+              <a
+                href="{% url 'orcamentos:cliente_orcamentos' %}"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <i class="fas fa-file-invoice mr-2"></i>
+                Mes devis
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-history mr-2"></i>
+                Historique
+              </a>
+              <hr class="my-1" />
+              <a href="{% url 'accounts:settings' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-cog mr-2"></i>
+                Paramètres
+              </a>
+            </div>
+          </div>
+          {% else %}
+          <button
+            class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
+          >
+            <i class="fas fa-user-circle text-xl"></i>
+            <i class="fas fa-chevron-down text-xs"></i>
+          </button>
+
+          <!-- Dropdown Menu - Not Authenticated -->
+          <div
+            class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+          >
+            <div class="py-2">
+              <a
+                href="{% url 'accounts:login' %}"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <i class="fas fa-sign-in-alt mr-2"></i>
+                Se connecter
+              </a>
+              <a
+                href="{% url 'accounts:register' %}"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <i class="fas fa-user-plus mr-2"></i>
+                S'inscrire
+              </a>
+              <hr class="my-1" />
+              {% comment %} <a href="{% url 'accounts:mes_devis' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-file-invoice mr-2"></i>
+                Mes devis
+              </a>  {% endcomment %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobileMenuBtn"
+        class="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        aria-label="Ouvrir le menu"
+      >
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <!-- Mobile Sidebar -->
+  <div id="mobileSidebar" class="mobile-sidebar">
+    <!-- Sidebar Header -->
+    <div class="flex items-center justify-between p-6 border-b">
+      <div class="flex items-center space-x-3">
+        <div class="logo-container">
+          <img
+            src="{% static 'img/logo-80-45-black.svg' %}"
+            alt="Logo LOPES PEINTURE"
+            class="logo-image"
+          />
+        </div>
+      </div>
+      <button
+        id="closeSidebarBtn"
+        class="w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex items-center justify-center transition-colors"
+        aria-label="Fermer le menu"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- User Info Section (Mobile) -->
+    {% if user.is_authenticated %}
+    <div class="px-6 py-4 bg-blue-50 border-b">
+      <div class="flex items-center space-x-3">
+        <div
+          class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-medium"
+        >
+          {{ user.first_name|first|default:user.username|first|upper }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">
+            {{ user.first_name }} {{ user.last_name }}
+          </p>
+          <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+          <div class="flex items-center mt-1">
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+            >
+              <i class="fas fa-circle text-green-400 mr-1" style="font-size: 6px"></i>
+              Connecté
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Sidebar Content -->
+    <div class="flex flex-col h-full">
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-6 py-6 space-y-2">
+        <a href="{% url 'home:home' %}" class="mobile-nav-link">
+          <i class="fas fa-home"></i>
+          <span>Accueil</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+        <a href="{% url 'home:nuancier' %}" class="mobile-nav-link">
+          <i class="fas fa-palette"></i>
+          <span>Nuancier</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+        <a href="{% url 'home:services' %}" class="mobile-nav-link">
+          <i class="fas fa-paint-roller"></i>
+          <span>Services</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+        <a href="{% url 'home:about' %}" class="mobile-nav-link">
+          <i class="fas fa-info-circle"></i>
+          <span>À propos</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+        <a href="{% url 'home:contact' %}" class="mobile-nav-link">
+          <i class="fas fa-envelope"></i>
+          <span>Contact</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+        <a href="{% url 'blog:blog_list' %}" class="mobile-nav-link">
+          <i class="fas fa-images"></i>
+          <span>Conseils et Inspiration</span>
+          <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+        </a>
+      </nav>
+
+      <!-- Contact Info -->
+      <div class="px-6 py-4 bg-gray-50 border-t">
+        <div class="space-y-3">
+          <a href="tel:+33769273776" class="flex items-center text-blue-600 hover:text-blue-700">
+            <i class="fas fa-phone mr-3"></i>
+            <span class="font-medium">07 69 27 37 76</span>
+          </a>
+          <a
+            href="mailto:contact@lopespeinture.fr"
+            class="flex items-center text-gray-600 hover:text-gray-700"
+          >
+            <i class="fas fa-envelope mr-3"></i>
+            <span>contact@lopespeinture.fr</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Member Area Mobile -->
+      <div class="px-6 py-4 border-t">
+        {% if user.is_authenticated %}
+        <div class="space-y-2">
+          <a href="{% url 'accounts:dashboard' %}" class="mobile-auth-link">
+            <i class="fas fa-user"></i>
+            <span> Tableau de bord</span>
+          </a>
+          <a href="" class="mobile-auth-link">
+            <i class="fas fa-file-invoice"></i>
+            <span>Mes devis</span>
+          </a>
+          <a href="#" class="mobile-auth-link">
+            <i class="fas fa-history"></i>
+            <span>Historique</span>
+          </a>
+          <a href="#" class="mobile-auth-link">
+            <i class="fas fa-cog"></i>
+            <span>Paramètres</span>
+          </a>
+          <a href="{% url 'accounts:logout' %}" class="mobile-auth-link text-red-600">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Se déconnecter</span>
+          </a>
+        </div>
+        {% else %}
+        <div class="space-y-2">
+          <a href="#" class="mobile-auth-link">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Se connecter</span>
+          </a>
+          <a href="#" class="mobile-auth-link">
+            <i class="fas fa-user-plus"></i>
+            <span>S'inscrire</span>
+          </a>
+          <a href="#" class="mobile-auth-link">
+            <i class="fas fa-file-invoice"></i>
+            <span>Mes devis</span>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- CTA Button -->
+      <div class="px-6 py-6 border-t">
+        <a href="{% url 'home:contact' %}" class="btn-primary w-full justify-center">
+          <i class="fas fa-calculator mr-2"></i>
+          Demander un Devis
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Logo Styles */
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-image {
+    height: 32px;
+    width: auto;
+    max-width: 120px;
+  }
+
+  /* Tablet */
+  @media (min-width: 640px) {
+    .logo-image {
+      height: 40px;
+      max-width: 150px;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 1024px) {
+    .logo-image {
+      height: 48px;
+      max-width: 180px;
+    }
+  }
+
+  /* Navigation Links */
+  .nav-link {
+    display: flex;
+    align-items: center;
+    color: #374151;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .nav-link:hover {
+    color: #2563eb;
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn-primary.w-full {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* User Avatar Styles */
+  .user-avatar {
+    width: 2rem;
+    height: 2rem;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mobile Sidebar Overlay */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Mobile Sidebar */
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 320px;
+    max-width: 90vw;
+    background-color: white;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow-y: auto;
+
+    /* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+
+  /* Hide scrollbar for webkit browsers */
+  .mobile-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Sidebar Active States */
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-sidebar.active {
+    transform: translateX(0);
+  }
+
+  /* Mobile Navigation Links */
+  .mobile-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #374151;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+  }
+
+  .mobile-nav-link:hover {
+    background-color: #f3f4f6;
+    color: #2563eb;
+  }
+
+  .mobile-nav-link i:first-child {
+    width: 1.25rem;
+    text-align: center;
+  }
+
+  /* Mobile Auth Links */
+  .mobile-auth-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+  }
+
+  .mobile-auth-link:hover {
+    background-color: #f9fafb;
+    color: #374151;
+  }
+
+  .mobile-auth-link.text-red-600 {
+    color: #dc2626;
+  }
+
+  .mobile-auth-link.text-red-600:hover {
+    background-color: #fef2f2;
+    color: #b91c1c;
+  }
+
+  .mobile-auth-link i {
+    width: 1rem;
+    text-align: center;
+  }
+
+  /* User Info Section Styles */
+  .user-info-section {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .user-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .user-status-indicator {
+    width: 6px;
+    height: 6px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    margin-right: 0.25rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .mobile-sidebar {
+      width: 280px;
+    }
+  }
+
+  /* Prevent body scroll when sidebar is open */
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  /* Dropdown menu improvements */
+  .dropdown-menu {
+    min-width: 200px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    font-size: 0.875rem;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f9fafb;
+    color: #111827;
+  }
+
+  .dropdown-item.danger {
+    color: #dc2626;
+  }
+
+  .dropdown-item.danger:hover {
+    background-color: #fef2f2;
+    color: #b91c1c;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 0.25rem 0;
+  }
+
+  .dropdown-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+  }
+
+  .dropdown-header p {
+    margin: 0;
+  }
+
+  .dropdown-header .user-name {
+    font-weight: 500;
+    color: #111827;
+    font-size: 0.875rem;
+  }
+
+  .dropdown-header .user-email {
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const body = document.body;
+
+    // Function to open sidebar
+    function openSidebar() {
+      sidebarOverlay.classList.add('active');
+      mobileSidebar.classList.add('active');
+      body.classList.add('sidebar-open');
+    }
+
+    // Function to close sidebar
+    function closeSidebar() {
+      sidebarOverlay.classList.remove('active');
+      mobileSidebar.classList.remove('active');
+      body.classList.remove('sidebar-open');
+    }
+
+    // Event listeners
+    mobileMenuBtn.addEventListener('click', openSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // Close sidebar on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileSidebar.classList.contains('active')) {
+        closeSidebar();
+      }
+    });
+
+    // Close sidebar when clicking on navigation links (mobile)
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener('click', closeSidebar);
+    });
+
+    // Prevent sidebar from closing when clicking inside it
+    mobileSidebar.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 1024) {
+        closeSidebar();
+      }
+    });
+
+    // Track user interactions for analytics
+    const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+    phoneLinks.forEach((link) => {
+      link.addEventListener('click', function () {
+        // Track phone clicks
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'phone_call', {
+            event_category: 'contact',
+            event_label: 'header_phone',
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Track devis button clicks
+    const devisButtons = document.querySelectorAll('a[href*="contact"]');
+    devisButtons.forEach((button) => {
+      if (button.textContent.includes('Devis')) {
+        button.addEventListener('click', function () {
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'devis_request', {
+              event_category: 'conversion',
+              event_label: 'header_devis_button',
+              value: 1,
+            });
+          }
+        });
+      }
+    });
+
+    // Track navigation clicks
+    const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+    navLinks.forEach((link) => {
+      link.addEventListener('click', function () {
+        const linkText = this.textContent.trim();
+
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'navigation_click', {
+            event_category: 'navigation',
+            event_label: linkText,
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Track user menu interactions
+    const userMenuItems = document.querySelectorAll('.dropdown-item, .mobile-auth-link');
+    userMenuItems.forEach((item) => {
+      item.addEventListener('click', function () {
+        const itemText = this.textContent.trim();
+
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'user_menu_click', {
+            event_category: 'user_interaction',
+            event_label: itemText,
+            value: 1,
+          });
+        }
+      });
+    });
+
+    // Enhanced dropdown behavior for desktop
+    const userDropdown = document.querySelector('.group');
+    if (userDropdown) {
+      let dropdownTimeout;
+
+      userDropdown.addEventListener('mouseenter', function () {
+        clearTimeout(dropdownTimeout);
+      });
+
+      userDropdown.addEventListener('mouseleave', function () {
+        dropdownTimeout = setTimeout(() => {
+          // Additional cleanup if needed
+        }, 150);
+      });
+    }
+
+    // Add loading states for auth actions
+    const authLinks = document.querySelectorAll(
+      'a[href*="login"], a[href*="logout"], a[href*="register"]'
+    );
+    authLinks.forEach((link) => {
+      link.addEventListener('click', function (e) {
+        // Add loading state
+        const icon = this.querySelector('i');
+        if (icon) {
+          icon.className = 'fas fa-spinner fa-spin mr-2';
+        }
+
+        // Show loading text
+        const span = this.querySelector('span');
+        if (span) {
+          span.textContent = 'Chargement...';
+        }
+      });
+    });
+
+    // Initialize tooltips for user avatar (if using a tooltip library)
+    const userAvatar = document.querySelector('.user-avatar');
+    if (userAvatar && typeof bootstrap !== 'undefined') {
+      new bootstrap.Tooltip(userAvatar, {
+        title: 'Menu utilisateur',
+        placement: 'bottom',
+      });
+    }
+
+    // Keyboard navigation for dropdown menus
+    document.addEventListener('keydown', function (e) {
+      const activeDropdown = document.querySelector('.group:hover .absolute');
+      if (activeDropdown && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault();
+        const items = activeDropdown.querySelectorAll('a');
+        const currentIndex = Array.from(items).findIndex((item) => item === document.activeElement);
+
+        if (e.key === 'ArrowDown') {
+          const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+          items[nextIndex].focus();
+        } else {
+          const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+          items[prevIndex].focus();
+        }
+      }
+    });
+
+    // Auto-hide mobile sidebar after inactivity
+    let sidebarInactivityTimer;
+
+    function resetSidebarTimer() {
+      clearTimeout(sidebarInactivityTimer);
+      sidebarInactivityTimer = setTimeout(() => {
+        if (mobileSidebar.classList.contains('active')) {
+          closeSidebar();
+        }
+      }, 30000); // 30 seconds of inactivity
+    }
+
+    mobileSidebar.addEventListener('click', resetSidebarTimer);
+    mobileSidebar.addEventListener('touchstart', resetSidebarTimer);
+
+    // Initialize timer when sidebar opens
+    mobileMenuBtn.addEventListener('click', resetSidebarTimer);
+
+    // Smooth scroll for anchor links
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    anchorLinks.forEach((link) => {
+      link.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+
+        if (targetElement) {
+          e.preventDefault();
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+
+          // Close mobile sidebar if open
+          if (mobileSidebar.classList.contains('active')) {
+            closeSidebar();
+          }
+        }
+      });
+    });
+
+    // Add visual feedback for touch devices
+    if ('ontouchstart' in window) {
+      const touchElements = document.querySelectorAll(
+        '.mobile-nav-link, .mobile-auth-link, .btn-primary'
+      );
+
+      touchElements.forEach((element) => {
+        element.addEventListener('touchstart', function () {
+          this.style.transform = 'scale(0.98)';
+          this.style.transition = 'transform 0.1s ease';
+        });
+
+        element.addEventListener('touchend', function () {
+          setTimeout(() => {
+            this.style.transform = '';
+          }, 100);
+        });
+      });
+    }
+
+    // Performance optimization: Lazy load user avatar if using external images
+    const avatarImages = document.querySelectorAll('.user-avatar img');
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.classList.remove('lazy');
+            observer.unobserve(img);
+          }
+        });
+      });
+
+      avatarImages.forEach((img) => imageObserver.observe(img));
+    }
+  });
+</script>

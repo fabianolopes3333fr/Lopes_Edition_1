@@ -1,0 +1,59 @@
+<!-- Modal de Logout -->
+<div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-sign-out-alt text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Confirmer la déconnexion</h3>
+            </div>
+
+            <p class="text-gray-600 mb-6">
+                Êtes-vous sûr de vouloir vous déconnecter de votre session ?
+            </p>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    onclick="closeLogoutModal()"
+                    class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+                >
+                    Annuler
+                </button>
+                <form method="post" action="{% url 'account_logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    >
+                        Déconnecter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openLogoutModal() {
+        document.getElementById('logoutModal').classList.remove('hidden');
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').classList.add('hidden');
+    }
+
+    // Fechar modal ao clicar fora dele
+    document.getElementById('logoutModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLogoutModal();
+        }
+    });
+
+    // Fechar modal com tecla ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLogoutModal();
+        }
+    });
+</script>

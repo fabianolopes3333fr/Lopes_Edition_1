@@ -23,21 +23,21 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Apps principais
-    #path('', include('home.urls')),
-    path('accounts/', include('accounts.urls')),
-    #path('profiles/', include('profiles.urls')),
+    path('', include('home.urls')),
+    path('comptes/', include('accounts.urls')),
+    path('profiles/', include('profiles.urls')),
 
     # Sistema de orçamentos e projetos
-    #path('orcamentos/', include('orcamentos.urls')),
+    path('devis/', include('orcamentos.urls')),
+    path('clients/', include('clientes.urls')),  # URL da app de clientes
 
     # Outros apps
-    path('contato/', include('contato.urls')),
-    path('blog/', include('blog.urls')),
-    #path('projetos/', include('projetos.urls')),
-
+    path('contact/', include('contato.urls')),
+    path('conseil-et-inspiration/', include('blog.urls')),
+    path('projects/', include('projetos.urls')),
 
     # Allauth URLs
-    path('accounts/', include('allauth.urls')),
+    path('auth/', include('allauth.urls')),
 ]
 
 # Servir arquivos de media em desenvolvimento
