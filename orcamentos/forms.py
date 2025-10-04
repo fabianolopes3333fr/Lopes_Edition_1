@@ -3,7 +3,7 @@ from django.core.validators import EmailValidator
 from .models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento,
     AnexoProjeto, StatusOrcamento, StatusProjeto, Produto, Fornecedor,
-    TipoUnidade, TipoAtividade, TipoTVA
+    TipoUnidade, TipoAtividade, TipoTVA, Facture, ItemFacture
 )
 from django.forms import inlineformset_factory
 
@@ -194,7 +194,7 @@ class OrcamentoForm(forms.ModelForm):
         model = Orcamento
         fields = [
             'titulo', 'descricao', 'prazo_execucao', 'validade_orcamento',
-            'desconto', 'condicoes_pagamento', 'observacoes'
+            'desconto', 'condicoes_pagamento', 'tipo_pagamento', 'observacoes'
         ]
 
         labels = {
@@ -204,6 +204,7 @@ class OrcamentoForm(forms.ModelForm):
             'validade_orcamento': 'Validité du devis',
             'desconto': 'Remise globale (%)',
             'condicoes_pagamento': 'Conditions de paiement',
+            'tipo_pagamento': 'Type de paiement',
             'observacoes': 'Observations'
         }
 
@@ -239,11 +240,13 @@ class OrcamentoForm(forms.ModelForm):
                 'placeholder': '0.00',
                 'id': 'desconto-global'
             }),
-            'condicoes_pagamento': forms.Textarea(attrs={
-                'class': 'form-input form-textarea',
-                'rows': 4,
-                'placeholder': 'Spécifiez les conditions et modalités de paiement...',
+            'condicoes_pagamento': forms.Select(attrs={
+                'class': 'form-input',
                 'id': 'condicoes'
+            }),
+            'tipo_pagamento': forms.Select(attrs={
+                'class': 'form-input',
+                'id': 'tipo_pagamento'
             }),
             'observacoes': forms.Textarea(attrs={
                 'class': 'form-input form-textarea',
@@ -499,3 +502,184 @@ class AnexoProjetoForm(forms.ModelForm):
                 'placeholder': 'Description du fichier'
             })
         }
+
+class FactureForm(forms.ModelForm):
+    """Formulário para elaboração de faturas pelos administradores"""
+
+    # Campo personalizado para busca de cliente
+    cliente_search = forms.CharField(
+        label='Client',
+        widget=forms.TextInput(attrs={
+            'class': 'form-input',
+            'id': 'cliente-search',
+            'placeholder': 'Tapez le nom ou email du client...',
+            'autocomplete': 'off'
+        }),
+        required=True,
+        help_text='Recherchez un client par nom ou email'
+    )
+
+    # Campo hidden para armazenar o ID do cliente selecionado
+    cliente = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.HiddenInput(),
+        required=True
+    )
+
+    class Meta:
+        model = Facture
+        fields = [
+            'cliente', 'titulo', 'descricao', 'data_emissao', 'data_vencimento',
+            'desconto', 'condicoes_pagamento', 'tipo_pagamento', 'observacoes'
+        ]
+
+        labels = {
+            'titulo': 'Titre de la facture',
+            'descricao': 'Description',
+            'data_emissao': 'Date d\'émission',
+            'data_vencimento': 'Date d\'échéance',
+            'desconto': 'Remise globale (%)',
+            'condicoes_pagamento': 'Conditions de paiement',
+            'tipo_pagamento': 'Type de paiement',
+            'observacoes': 'Observations'
+        }
+
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Saisissez le titre de la facture...',
+                'id': 'titulo'
+            }),
+            'descricao': forms.Textarea(attrs={
+                'class': 'form-input form-textarea',
+                'rows': 4,
+                'placeholder': 'Décrivez les services facturés...',
+                'id': 'descricao'
+            }),
+            'data_emissao': forms.DateInput(attrs={
+                'class': 'form-input',
+                'type': 'date',
+                'id': 'data_emissao'
+            }),
+            'data_vencimento': forms.DateInput(attrs={
+                'class': 'form-input',
+                'type': 'date',
+                'id': 'data_vencimento'
+            }),
+            'desconto': forms.NumberInput(attrs={
+                'class': 'form-input',
+                'step': '0.01',
+                'min': 0,
+                'max': 100,
+                'placeholder': '0.00',
+                'id': 'desconto-global'
+            }),
+            'condicoes_pagamento': forms.Select(attrs={
+                'class': 'form-input',
+                'id': 'condicoes'
+            }),
+            'tipo_pagamento': forms.Select(attrs={
+                'class': 'form-input',
+                'id': 'tipo_pagamento'
+            }),
+            'observacoes': forms.Textarea(attrs={
+                'class': 'form-input form-textarea',
+                'rows': 4,
+                'placeholder': 'Ajoutez des observations, notes ou conditions particulières...',
+                'id': 'observacoes'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Configurar queryset para o campo cliente
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.fields['cliente'].queryset = User.objects.filter(is_active=True, is_staff=False)
+
+        # Se estamos editando uma fatura existente, preencher o campo de busca
+        if self.instance.pk and self.instance.cliente:
+            cliente = self.instance.cliente
+            nome_completo = f"{cliente.first_name} {cliente.last_name}".strip()
+            if not nome_completo:
+                nome_completo = cliente.username
+            self.fields['cliente_search'].initial = f"{nome_completo} ({cliente.email})"
+
+        # Definir valores padrão
+        if not self.instance.pk:  # Apenas para novas faturas
+            from datetime import date, timedelta
+            self.fields['data_emissao'].initial = date.today()
+            self.fields['data_vencimento'].initial = date.today() + timedelta(days=30)
+            self.fields['desconto'].initial = 0.00
+
+        # Tornar todos os campos obrigatórios exceto observações
+        for field_name, field in self.fields.items():
+            if field_name not in ['observacoes', 'cliente_search']:
+                field.required = True
+
+            # Adicionar classe de erro se o campo tem erros
+            if field_name in self.errors:
+                current_classes = field.widget.attrs.get('class', '')
+                field.widget.attrs['class'] = f"{current_classes} border-red-500 focus:border-red-500 focus:ring-red-500"
+
+class ItemFactureForm(forms.ModelForm):
+    """Formulário para itens da fatura"""
+
+    class Meta:
+        model = ItemFacture
+        fields = [
+            'produto', 'referencia', 'descricao', 'unidade', 'atividade',
+            'quantidade', 'preco_unitario_ht', 'remise_percentual', 'taxa_tva'
+        ]
+
+        widgets = {
+            'produto': forms.HiddenInput(),
+            'referencia': forms.TextInput(attrs={
+                'class': 'excel-input referencia',
+                'readonly': True
+            }),
+            'descricao': forms.TextInput(attrs={
+                'class': 'excel-input descricao',
+                'placeholder': 'Description...'
+            }),
+            'unidade': forms.Select(attrs={
+                'class': 'excel-select unidade'
+            }),
+            'atividade': forms.Select(attrs={
+                'class': 'excel-select atividade'
+            }),
+            'quantidade': forms.NumberInput(attrs={
+                'class': 'excel-input quantidade',
+                'step': '0.01',
+                'min': 0,
+                'value': 1
+            }),
+            'preco_unitario_ht': forms.NumberInput(attrs={
+                'class': 'excel-input preco-ht',
+                'step': '0.01',
+                'min': 0,
+                'value': 0
+            }),
+            'remise_percentual': forms.NumberInput(attrs={
+                'class': 'excel-input remise',
+                'step': '0.01',
+                'min': 0,
+                'max': 100,
+                'value': 0
+            }),
+            'taxa_tva': forms.Select(attrs={
+                'class': 'excel-select taxa-tva'
+            })
+        }
+
+# Formset para múltiplos itens da fatura
+ItemFactureFormSet = inlineformset_factory(
+    Facture,
+    ItemFacture,
+    form=ItemFactureForm,
+    extra=1,
+    min_num=1,
+    validate_min=True,
+    can_delete=True
+)

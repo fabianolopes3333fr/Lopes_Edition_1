@@ -4,20 +4,20 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
+from datetime import timedelta
 import json
 
 from .models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento,
-    AnexoProjeto, StatusOrcamento, StatusProjeto
+    AnexoProjeto, StatusOrcamento, StatusProjeto, Facture, ItemFacture
 )
 from .forms import (
     ProjetoForm, SolicitacaoOrcamentoPublicoForm, SolicitacaoOrcamentoProjetoForm,
-    OrcamentoForm, ItemOrcamentoFormSet, ProdutoForm, FornecedorForm, AnexoProjetoForm
+    OrcamentoForm, AnexoProjetoForm, FactureForm
 )
 from .services import NotificationService
 
@@ -179,38 +179,70 @@ def cliente_solicitar_orcamento_projeto(request, uuid):
     if request.method == 'POST':
         form = SolicitacaoOrcamentoProjetoForm(request.POST)
         if form.is_valid():
-            solicitacao = form.save(commit=False)
+            try:
+                solicitacao = form.save(commit=False)
 
-            # Preencher dados do usuário e projeto
-            solicitacao.cliente = request.user
-            solicitacao.projeto = projeto
-            solicitacao.nome_solicitante = f"{request.user.first_name} {request.user.last_name}"
-            solicitacao.email_solicitante = request.user.email
-            solicitacao.telefone_solicitante = getattr(request.user, 'telefone', '')
+                # Preencher dados do usuário e projeto
+                solicitacao.cliente = request.user
+                solicitacao.projeto = projeto
+                solicitacao.nome_solicitante = f"{request.user.first_name} {request.user.last_name}"
+                solicitacao.email_solicitante = request.user.email
+                # Corrigir: usar valor padrão se telefone não existir
+                solicitacao.telefone_solicitante = getattr(request.user, 'telefone', '11999999999')
 
-            # Copiar dados do projeto
-            solicitacao.endereco = projeto.endereco_projeto
-            solicitacao.cidade = projeto.cidade_projeto
-            solicitacao.cep = projeto.cep_projeto
-            solicitacao.tipo_servico = projeto.tipo_servico
-            solicitacao.descricao_servico = projeto.descricao
-            solicitacao.area_aproximada = projeto.area_aproximada
-            solicitacao.urgencia = projeto.urgencia
-            solicitacao.data_inicio_desejada = projeto.data_inicio_desejada
-            solicitacao.orcamento_maximo = projeto.orcamento_estimado
+                # Copiar dados do projeto
+                solicitacao.endereco = projeto.endereco_projeto
+                solicitacao.cidade = projeto.cidade_projeto
+                solicitacao.cep = projeto.cep_projeto
+                solicitacao.tipo_servico = projeto.tipo_servico
+                solicitacao.descricao_servico = projeto.descricao
+                solicitacao.area_aproximada = projeto.area_aproximada
+                solicitacao.urgencia = projeto.urgencia
+                solicitacao.data_inicio_desejada = projeto.data_inicio_desejada
+                solicitacao.orcamento_maximo = projeto.orcamento_estimado
 
-            solicitacao.save()
+                solicitacao.save()
 
-            # Enviar notificações para admins
-            NotificationService.enviar_email_nova_solicitacao(solicitacao)
+                # Enviar notificações para admins
+                try:
+                    # Comentar temporariamente para testes
+                    # NotificationService.enviar_email_nova_solicitacao(solicitacao)
+                    print(f"DEBUG: Solicitação {solicitacao.numero} criada com sucesso")
+                except Exception as e:
+                    print(f"Erro ao enviar notificações: {e}")
+                    # Continua mesmo se o email falhar
 
-            messages.success(
+                messages.success(
+                    request,
+                    f'Demande de devis #{solicitacao.numero} envoyée avec succès!'
+                )
+                return redirect('orcamentos:cliente_projeto_detail', uuid=projeto.uuid)
+
+            except Exception as e:
+                messages.error(
+                    request,
+                    'Une erreur est survenue lors de l\'envoi de votre demande. Veuillez réessayer.'
+                )
+                print(f"Erro ao criar solicitação: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            messages.error(
                 request,
-                f'Demande de devis #{solicitacao.numero} envoyée avec succès!'
+                'Veuillez corriger les erreurs dans le formulaire.'
             )
-            return redirect('orcamentos:cliente_projeto_detail', uuid=projeto.uuid)
+            print(f"DEBUG: Erros no formulário: {form.errors}")
     else:
-        form = SolicitacaoOrcamentoProjetoForm()
+        # Pré-preencher o formulário com dados do projeto
+        initial_data = {
+            'tipo_servico': projeto.tipo_servico,
+            'descricao_servico': projeto.descricao,
+            'area_aproximada': projeto.area_aproximada,
+            'urgencia': projeto.urgencia,
+            'data_inicio_desejada': projeto.data_inicio_desejada,
+            'orcamento_maximo': projeto.orcamento_estimado,
+        }
+        form = SolicitacaoOrcamentoProjetoForm(initial=initial_data)
 
     context = {
         'form': form,
@@ -286,8 +318,16 @@ def cliente_devis_accepter(request, numero):
         orcamento.solicitacao.status = StatusOrcamento.ACEITO
         orcamento.solicitacao.save()
 
+        # Atualizar status do projeto para EM_ANDAMENTO se houver projeto
+        if orcamento.solicitacao.projeto:
+            orcamento.solicitacao.projeto.status = StatusProjeto.EM_ANDAMENTO
+            orcamento.solicitacao.projeto.save()
+
         # Enviar notificações para admins
-        NotificationService.enviar_email_orcamento_aceito(orcamento)
+        try:
+            NotificationService.enviar_email_orcamento_aceito(orcamento)
+        except Exception as e:
+            print(f"Erro ao enviar notificação: {e}")
 
         return JsonResponse({
             'success': True,
@@ -529,6 +569,38 @@ def get_admin_stats():
     }
     return stats
 
+@staff_member_required
+def admin_dashboard(request):
+    """Dashboard administrativo"""
+    # Estatísticas gerais
+    total_solicitacoes = SolicitacaoOrcamento.objects.count()
+    solicitacoes_pendentes = SolicitacaoOrcamento.objects.filter(status=StatusOrcamento.PENDENTE).count()
+    orcamentos_enviados = Orcamento.objects.filter(status=StatusOrcamento.ENVIADO).count()
+    orcamentos_aceitos = Orcamento.objects.filter(status=StatusOrcamento.ACEITO).count()
+
+    # Solicitações recentes
+    solicitacoes_recentes = SolicitacaoOrcamento.objects.order_by('-created_at')[:5]
+
+    # Orçamentos recentes
+    orcamentos_recentes = Orcamento.objects.order_by('-data_elaboracao')[:5]
+
+    # Receita do mês
+    receita_mes = Orcamento.objects.filter(
+        status=StatusOrcamento.ACEITO,
+        data_resposta_cliente__month=timezone.now().month
+    ).aggregate(Sum('total'))['total__sum'] or 0
+
+    context = {
+        'total_solicitacoes': total_solicitacoes,
+        'solicitacoes_pendentes': solicitacoes_pendentes,
+        'orcamentos_enviados': orcamentos_enviados,
+        'orcamentos_aceitos': orcamentos_aceitos,
+        'solicitacoes_recentes': solicitacoes_recentes,
+        'orcamentos_recentes': orcamentos_recentes,
+        'receita_mes': receita_mes,
+        'page_title': 'Dashboard Admin'
+    }
+    return render(request, 'orcamentos/admin_dashboard.html', context)
 
 # ============ VIEWS ADMINISTRATIVAS ============
 
@@ -955,3 +1027,400 @@ def admin_criar_orcamento_cliente(request, cliente_id):
     }
 
     return render(request, 'orcamentos/admin_elaborar_orcamento.html', context)
+
+# ============ VIEWS DE FATURAS (ADMIN) ============
+
+@staff_member_required
+def admin_faturas_list(request):
+    """Lista todas as faturas para administradores"""
+    faturas = Facture.objects.all().select_related('cliente', 'orcamento', 'elaborado_por')
+
+    # Filtros
+    status = request.GET.get('status')
+    if status:
+        faturas = faturas.filter(status=status)
+
+    cliente_id = request.GET.get('cliente')
+    if cliente_id:
+        faturas = faturas.filter(cliente_id=cliente_id)
+
+    search = request.GET.get('search')
+    if search:
+        faturas = faturas.filter(
+            Q(numero__icontains=search) |
+            Q(titulo__icontains=search) |
+            Q(cliente__first_name__icontains=search) |
+            Q(cliente__last_name__icontains=search) |
+            Q(cliente__email__icontains=search)
+        )
+
+    # Ordenação
+    ordenar = request.GET.get('ordenar', '-data_criacao')
+    faturas = faturas.order_by(ordenar)
+
+    # Paginação
+    paginator = Paginator(faturas, 20)
+    page_number = request.GET.get('page')
+    faturas_page = paginator.get_page(page_number)
+
+    # Estatísticas
+    stats = {
+        'total': Facture.objects.count(),
+        'brouillon': Facture.objects.filter(status='brouillon').count(),
+        'envoyee': Facture.objects.filter(status='envoyee').count(),
+        'payee': Facture.objects.filter(status='payee').count(),
+        'en_retard': Facture.objects.filter(status='en_retard').count(),
+        'total_a_payer': Facture.objects.filter(status='envoyee').aggregate(Sum('total'))['total__sum'] or 0,
+        'total_paye': Facture.objects.filter(status='payee').aggregate(Sum('total'))['total__sum'] or 0,
+    }
+
+    # Lista de clientes para filtro
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    clientes = User.objects.filter(faturas_cliente__isnull=False).distinct()
+
+    context = {
+        'faturas': faturas_page,
+        'stats': stats,
+        'clientes': clientes,
+        'page_title': 'Gestion des Factures',
+    }
+    return render(request, 'orcamentos/admin_faturas_list.html', context)
+
+@staff_member_required
+def admin_fatura_detail(request, numero):
+    """Detalhes de uma fatura específica"""
+    fatura = get_object_or_404(Facture.objects.select_related('cliente', 'orcamento', 'elaborado_por'), numero=numero)
+
+    context = {
+        'fatura': fatura,
+        'page_title': f'Facture #{numero}',
+    }
+    return render(request, 'orcamentos/admin_fatura_detail.html', context)
+
+@staff_member_required
+def admin_criar_fatura(request):
+    """Criar uma nova fatura do zero (sem devis)"""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    if request.method == 'POST':
+        form = FactureForm(request.POST)
+        if form.is_valid():
+            fatura = form.save(commit=False)
+            fatura.elaborado_por = request.user
+            fatura.save()
+
+            # Processar itens
+            itens_data = request.POST.get('itens_json', '[]')
+            try:
+                itens = json.loads(itens_data)
+                for item_data in itens:
+                    if item_data.get('descricao'):
+                        ItemFacture.objects.create(
+                            facture=fatura,
+                            produto_id=item_data.get('produto_id') if item_data.get('produto_id') else None,
+                            referencia=item_data.get('referencia', ''),
+                            descricao=item_data.get('descricao'),
+                            unidade=item_data.get('unidade', 'unite'),
+                            atividade=item_data.get('atividade', 'marchandise'),
+                            quantidade=Decimal(str(item_data.get('quantidade', 1))),
+                            preco_unitario_ht=Decimal(str(item_data.get('preco_unitario_ht', 0))),
+                            remise_percentual=Decimal(str(item_data.get('remise_percentual', 0))),
+                            taxa_tva=item_data.get('taxa_tva', '20'),
+                        )
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                messages.warning(request, f'Erro ao processar itens: {str(e)}')
+
+            # Recalcular totais
+            fatura.calcular_totais()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                fatura.status = 'envoyee'
+                fatura.data_envio = timezone.now()
+                fatura.save()
+                messages.success(request, f'Facture {fatura.numero} créée et envoyée avec succès!')
+            else:
+                messages.success(request, f'Facture {fatura.numero} créée en tant que brouillon.')
+
+            return redirect('orcamentos:admin_fatura_detail', numero=fatura.numero)
+    else:
+        form = FactureForm()
+
+    # Lista de clientes para o formulário
+    clientes = User.objects.filter(is_active=True).exclude(is_staff=True).order_by('first_name', 'last_name')
+
+    from .models import Produto
+    produtos = Produto.objects.filter(ativo=True).order_by('referencia')
+
+    context = {
+        'form': form,
+        'clientes': clientes,
+        'produtos': produtos,
+        'page_title': 'Créer une Facture',
+    }
+    return render(request, 'orcamentos/admin_elaborar_facture.html', context)
+
+@staff_member_required
+def admin_criar_fatura_from_orcamento(request, orcamento_numero):
+    """Criar fatura a partir de um devis (orçamento)"""
+    orcamento = get_object_or_404(Orcamento.objects.select_related('solicitacao'), numero=orcamento_numero)
+
+    # Verificar se o orçamento foi aceito
+    if orcamento.status != StatusOrcamento.ACEITO:
+        messages.warning(request, 'Attention: le devis n\'a pas encore été accepté par le client.')
+
+    # Buscar cliente
+    cliente = None
+    if orcamento.solicitacao.cliente:
+        cliente = orcamento.solicitacao.cliente
+    else:
+        # Se não tem cliente cadastrado, não pode criar fatura
+        messages.error(request, 'Impossible de créer une facture: le devis n\'a pas de client associé.')
+        return redirect('orcamentos:admin_orcamento_detail', numero=orcamento_numero)
+
+    if request.method == 'POST':
+        form = FactureForm(request.POST)
+        if form.is_valid():
+            fatura = form.save(commit=False)
+            fatura.orcamento = orcamento
+            fatura.cliente = cliente
+            fatura.elaborado_por = request.user
+            fatura.save()
+
+            # Copiar itens do orçamento
+            for item_orcamento in orcamento.itens.all():
+                ItemFacture.objects.create(
+                    facture=fatura,
+                    produto=item_orcamento.produto,
+                    referencia=item_orcamento.referencia,
+                    descricao=item_orcamento.descricao,
+                    unidade=item_orcamento.unidade,
+                    atividade=item_orcamento.atividade,
+                    quantidade=item_orcamento.quantidade,
+                    preco_unitario_ht=item_orcamento.preco_unitario_ht,
+                    remise_percentual=item_orcamento.remise_percentual,
+                    taxa_tva=item_orcamento.taxa_tva,
+                )
+
+            # Recalcular totais
+            fatura.calcular_totais()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                fatura.status = 'envoyee'
+                fatura.data_envio = timezone.now()
+                fatura.save()
+                messages.success(request, f'Facture {fatura.numero} créée et envoyée avec succès!')
+            else:
+                messages.success(request, f'Facture {fatura.numero} créée à partir du devis {orcamento_numero}.')
+
+            return redirect('orcamentos:admin_fatura_detail', numero=fatura.numero)
+    else:
+        # Pré-preencher o formulário com dados do orçamento
+        initial_data = {
+            'titulo': orcamento.titulo,
+            'descricao': orcamento.descricao,
+            'cliente': cliente,
+            'condicoes_pagamento': orcamento.condicoes_pagamento,
+            'tipo_pagamento': orcamento.tipo_pagamento,
+            'desconto': orcamento.desconto,
+            'data_vencimento': timezone.now().date() + timezone.timedelta(days=30),
+            'observacoes': orcamento.observacoes,
+        }
+        form = FactureForm(initial=initial_data)
+
+    from .models import Produto
+    produtos = Produto.objects.filter(ativo=True).order_by('referencia')
+
+    context = {
+        'form': form,
+        'orcamento': orcamento,
+        'cliente': cliente,
+        'produtos': produtos,
+        'itens_orcamento': orcamento.itens.all(),
+        'page_title': f'Créer Facture depuis Devis #{orcamento_numero}',
+    }
+    return render(request, 'orcamentos/admin_elaborar_facture.html', context)
+
+@staff_member_required
+def admin_editar_fatura(request, numero):
+    """Editar uma fatura existente"""
+    fatura = get_object_or_404(Facture, numero=numero)
+
+    if request.method == 'POST':
+        form = FactureForm(request.POST, instance=fatura)
+        if form.is_valid():
+            fatura = form.save()
+
+            # Processar itens atualizados
+            itens_data = request.POST.get('itens_json', '[]')
+            try:
+                # Remover itens existentes
+                fatura.itens.all().delete()
+
+                # Criar novos itens
+                itens = json.loads(itens_data)
+                for item_data in itens:
+                    if item_data.get('descricao'):
+                        ItemFacture.objects.create(
+                            facture=fatura,
+                            produto_id=item_data.get('produto_id') if item_data.get('produto_id') else None,
+                            referencia=item_data.get('referencia', ''),
+                            descricao=item_data.get('descricao'),
+                            unidade=item_data.get('unidade', 'unite'),
+                            atividade=item_data.get('atividade', 'marchandise'),
+                            quantidade=Decimal(str(item_data.get('quantidade', 1))),
+                            preco_unitario_ht=Decimal(str(item_data.get('preco_unitario_ht', 0))),
+                            remise_percentual=Decimal(str(item_data.get('remise_percentual', 0))),
+                            taxa_tva=item_data.get('taxa_tva', '20'),
+                        )
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                messages.warning(request, f'Erro ao processar itens: {str(e)}')
+
+            # Recalcular totais
+            fatura.calcular_totais()
+
+            action = request.POST.get('action', 'draft')
+            if action == 'send':
+                fatura.status = 'envoyee'
+                fatura.data_envio = timezone.now()
+                fatura.save()
+                messages.success(request, f'Facture {fatura.numero} mise à jour et envoyée!')
+            else:
+                messages.success(request, f'Facture {fatura.numero} mise à jour.')
+
+            return redirect('orcamentos:admin_fatura_detail', numero=fatura.numero)
+    else:
+        form = FactureForm(instance=fatura)
+
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    clientes = User.objects.filter(is_active=True).exclude(is_staff=True).order_by('first_name', 'last_name')
+
+    from .models import Produto
+    produtos = Produto.objects.filter(ativo=True).order_by('referencia')
+
+    context = {
+        'form': form,
+        'fatura': fatura,
+        'clientes': clientes,
+        'produtos': produtos,
+        'page_title': f'Éditer Facture #{numero}',
+    }
+    return render(request, 'orcamentos/admin_editar_facture.html', context)
+
+@staff_member_required
+def admin_deletar_fatura(request, numero):
+    """Deletar uma fatura"""
+    fatura = get_object_or_404(Facture, numero=numero)
+
+    if request.method == 'POST':
+        numero_fatura = fatura.numero
+        fatura.delete()
+        messages.success(request, f'Facture {numero_fatura} supprimée avec succès!')
+        return redirect('orcamentos:admin_faturas_list')
+
+    context = {
+        'fatura': fatura,
+        'page_title': f'Supprimer Facture #{numero}',
+    }
+    return render(request, 'orcamentos/admin_deletar_fatura.html', context)
+
+@staff_member_required
+def admin_marcar_fatura_paga(request, numero):
+    """Marcar fatura como paga"""
+    fatura = get_object_or_404(Facture, numero=numero)
+
+    if request.method == 'POST':
+        data_pagamento = request.POST.get('data_pagamento')
+        if data_pagamento:
+            fatura.marcar_como_paga(data_pagamento)
+        else:
+            fatura.marcar_como_paga()
+
+        messages.success(request, f'Facture {fatura.numero} marquée comme payée!')
+        return redirect('orcamentos:admin_fatura_detail', numero=numero)
+
+    return redirect('orcamentos:admin_fatura_detail', numero=numero)
+
+@login_required
+@staff_member_required
+def buscar_clientes_ajax(request):
+    """Busca clientes via AJAX para uso nas faturas"""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    query = request.GET.get('q', '')
+
+    if len(query) < 2:
+        return JsonResponse({'clientes': []})
+
+    clientes = User.objects.filter(
+        is_active=True,
+        is_staff=False
+    ).filter(
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query) |
+        Q(email__icontains=query) |
+        Q(username__icontains=query)
+    )[:10]
+
+    clientes_data = []
+    for cliente in clientes:
+        nome_completo = f"{cliente.first_name} {cliente.last_name}".strip()
+        if not nome_completo:
+            nome_completo = cliente.username
+
+        clientes_data.append({
+            'id': cliente.id,
+            'nome_completo': nome_completo,
+            'email': cliente.email,
+            'username': cliente.username,
+            'first_name': cliente.first_name,
+            'last_name': cliente.last_name
+        })
+
+    return JsonResponse({'clientes': clientes_data})
+
+@login_required
+@staff_member_required
+def buscar_produtos_ajax(request):
+    """Busca produtos via AJAX para uso nos orçamentos"""
+    query = request.GET.get('q', '')
+
+    if len(query) < 2:
+        return JsonResponse({'produtos': []})
+
+    try:
+        from .models import Produto
+        produtos = Produto.objects.filter(
+            ativo=True
+        ).filter(
+            Q(referencia__icontains=query) |
+            Q(descricao__icontains=query)
+        )[:10]
+
+        produtos_data = []
+        for produto in produtos:
+            produtos_data.append({
+                'id': produto.id,
+                'referencia': produto.referencia,
+                'nome': produto.descricao,  # Usando descricao como nome
+                'descricao': produto.descricao,
+                'preco_venda': float(produto.preco_venda_ht),  # Mudando para preco_venda que o JS espera
+                'preco_venda_ht': float(produto.preco_venda_ht),
+                'preco_compra_ht': float(produto.preco_compra),  # Campo correto é preco_compra
+                'unidade': produto.unidade,
+                'categoria': '',  # Removendo categoria por enquanto
+                'fornecedor': produto.fornecedor.nome if produto.fornecedor else ''
+            })
+
+        return JsonResponse({'produtos': produtos_data})
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro na busca de produtos: {str(e)}")
+        return JsonResponse({'produtos': [], 'error': str(e)})

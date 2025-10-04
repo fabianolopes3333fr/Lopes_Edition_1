@@ -5,54 +5,65 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/orcamentos/notification_views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/notifications.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/produtos_views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/contact_map.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/footer.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/header.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/logout.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-about.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-cta.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-faq.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-feature.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-hero.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-news.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-nos-projets.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-nos-services.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-process.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/components/section-testimonials.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/nova_solicitacao_admin.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_aceito_admin.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_enviado_cliente.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_recusado_admin.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/fornecedores/form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/fornecedores/lista.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/confirmar_exclusao.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/produtos/lista.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/LopesPeinture.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LopesPeinture.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DOCUMENTACAO_TESTES_AUDITORIA.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/auditoria.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/config_auditoria.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/middleware.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/migrations/0002_add_auditoria.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/monitor_auditoria.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_auditoria.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_basico.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_orcamentos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run_orcamentos_tests.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_dashboard.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_deletar_fatura.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_facture.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_enviar_orcamento.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_fatura_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_faturas_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orcamentos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orcamentos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orcamentos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/detalhe_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/detalhe_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/editar_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/editar_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/form_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/form_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento_old.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento_old.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail_fixed.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail_fixed.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_criar_projeto.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_criar_projeto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_editar_projeto.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_editar_projeto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projetos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projetos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_solicitar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_solicitar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -68,38 +79,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/fabia/PycharmProjects/LopesPeinture/static/img",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.admin_editar_facture.html.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/fabia/PycharmProjects/LopesPeinture/static/img&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\fabia\\AppData\\Roaming\\JetBrains\\PyCharm2025.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture\static\img" />
       <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture\templates" />
       <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\fabia\PycharmProjects\LopesPeinture\orcamentos\templatetags" />
+    </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-PY-252.26199.168" />
-        <option value="bundled-python-sdk-b3d66beaba9a-c6efb3732140-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26199.168" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
+        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
       </set>
     </attachedChunks>
   </component>
@@ -111,7 +127,9 @@
       <option name="presentableId" value="Default" />
       <updated>1759066664150</updated>
       <workItem from="1759066665605" duration="6000" />
-      <workItem from="1759077153427" duration="11507000" />
+      <workItem from="1759077153427" duration="85004000" />
+      <workItem from="1759514994385" duration="10441000" />
+      <workItem from="1759574709010" duration="22293000" />
     </task>
     <servers />
   </component>
@@ -128,5 +146,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/orcamentos/urls.py</url>
+          <line>1</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

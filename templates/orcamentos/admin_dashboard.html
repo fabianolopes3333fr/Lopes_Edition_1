@@ -1,0 +1,170 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Dashboard Admin - Orçamentos{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">Dashboard Administrativo - Orçamentos</h1>
+
+            <!-- Estatísticas Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Solicitações</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_solicitacoes }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pendentes</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ solicitacoes_pendentes }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Orçamentos Enviados</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orcamentos_enviados }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-paper-plane fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Receita do Mês</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ receita_mes|floatformat:2 }}€</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-euro-sign fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabelas de dados recentes -->
+            <div class="row">
+                <!-- Solicitações Recentes -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Solicitações Recentes</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if solicitacoes_recentes %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Número</th>
+                                                <th>Cliente</th>
+                                                <th>Status</th>
+                                                <th>Data</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for solicitacao in solicitacoes_recentes %}
+                                            <tr>
+                                                <td>{{ solicitacao.numero }}</td>
+                                                <td>{{ solicitacao.nome_solicitante }}</td>
+                                                <td>
+                                                    <span class="badge badge-{{ solicitacao.status|yesno:'warning,success,danger' }}">
+                                                        {{ solicitacao.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ solicitacao.created_at|date:"d/m/Y" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Nenhuma solicitação recente.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orçamentos Recentes -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Orçamentos Recentes</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if orcamentos_recentes %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Número</th>
+                                                <th>Cliente</th>
+                                                <th>Valor</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for orcamento in orcamentos_recentes %}
+                                            <tr>
+                                                <td>{{ orcamento.numero }}</td>
+                                                <td>{{ orcamento.solicitacao.nome_solicitante }}</td>
+                                                <td>{{ orcamento.total|floatformat:2 }}€</td>
+                                                <td>
+                                                    <span class="badge badge-{{ orcamento.status|yesno:'warning,success,danger' }}">
+                                                        {{ orcamento.get_status_display }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Nenhum orçamento recente.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

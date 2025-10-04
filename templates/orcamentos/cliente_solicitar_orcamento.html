@@ -5,7 +5,7 @@ min-height: 120px;
 {% block title %}Demander un Devis: {{ projeto.titulo }} - LOPES PEINTURE{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="max-w-4xl mx-auto space-y-8 p-6 mb-10">
     <!-- Header avec navigation -->
     <div class="flex items-center gap-4 mb-8">
         <a href="{% url 'orcamentos:cliente_projeto_detail' projeto.uuid %}"
@@ -186,20 +186,91 @@ min-height: 120px;
                 </div>
             </div>
 
-            <!-- Informations complémentaires -->
-            <div class="space-y-4">
-                <label class="block text-sm font-semibold text-gray-700">
-                    Informations complémentaires pour ce devis
-                </label>
-                <div class="mb-3">
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Précisez des détails spécifiques pour cette demande de devis (matériaux souhaités, délais particuliers, questions spéciales, etc.)
-                    </p>
+            <!-- Campos do formulário -->
+            <div class="space-y-6">
+                <!-- Tipo de serviço -->
+                <div class="space-y-2">
+                    <label for="{{ form.tipo_servico.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                        {{ form.tipo_servico.label }}
+                    </label>
+                    {{ form.tipo_servico }}
+                    {% if form.tipo_servico.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.tipo_servico.errors.0 }}</p>
+                    {% endif %}
                 </div>
-                {{ form.observacoes }}
-                {% if form.observacoes.errors %}
-                    <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
-                {% endif %}
+
+                <!-- Descrição do serviço -->
+                <div class="space-y-2">
+                    <label for="{{ form.descricao_servico.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                        {{ form.descricao_servico.label }}
+                    </label>
+                    {{ form.descricao_servico }}
+                    {% if form.descricao_servico.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.descricao_servico.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Área aproximada e Orçamento máximo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="{{ form.area_aproximada.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                            {{ form.area_aproximada.label }}
+                        </label>
+                        {{ form.area_aproximada }}
+                        {% if form.area_aproximada.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.area_aproximada.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="{{ form.orcamento_maximo.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                            {{ form.orcamento_maximo.label }}
+                        </label>
+                        {{ form.orcamento_maximo }}
+                        {% if form.orcamento_maximo.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.orcamento_maximo.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Urgência e Data de início -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="{{ form.urgencia.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                            {{ form.urgencia.label }}
+                        </label>
+                        {{ form.urgencia }}
+                        {% if form.urgencia.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.urgencia.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="{{ form.data_inicio_desejada.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                            {{ form.data_inicio_desejada.label }}
+                        </label>
+                        {{ form.data_inicio_desejada }}
+                        {% if form.data_inicio_desejada.errors %}
+                            <p class="text-red-600 text-sm mt-1">{{ form.data_inicio_desejada.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="space-y-2">
+                    <label for="{{ form.observacoes.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                        Informations complémentaires pour ce devis
+                    </label>
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Précisez des détails spécifiques pour cette demande de devis (matériaux souhaités, délais particuliers, questions spéciales, etc.)
+                        </p>
+                    </div>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ form.observacoes.errors.0 }}</p>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Options supplémentaires -->

@@ -1,0 +1,29 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Enviar Orçamento{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">Enviar Orçamento</h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5>Orçamento #{{ orcamento.numero }}</h5>
+                    <p><strong>Cliente:</strong> {{ orcamento.solicitacao.nome_solicitante }}</p>
+                    <p><strong>Email:</strong> {{ orcamento.solicitacao.email_solicitante }}</p>
+                    <p><strong>Valor Total:</strong> {{ orcamento.total|floatformat:2 }}€</p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Confirmar Envio</button>
+                        <a href="{% url 'orcamentos:admin_orcamento_detail' orcamento.numero %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

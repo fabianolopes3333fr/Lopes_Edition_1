@@ -1,243 +1,219 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}Demandes de Devis - Admin{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <i class="fas fa-clipboard-list text-blue-600"></i>
-                Demandes de Devis
-            </h1>
-            <p class="text-gray-600 mt-1">Gérez toutes les demandes de devis reçues</p>
-        </div>
-
-        <div class="flex gap-4">
-            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center min-w-[100px]">
-                <div class="text-2xl font-bold text-blue-600">{{ page_obj.paginator.count }}</div>
-                <div class="text-xs text-gray-500 font-medium">Total</div>
+<div class="container-fluid  mb-10">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header moderno -->
+            <div class="text-center lg:text-left mb-8">
+                <h1 class="text-4xl font-bold text-red-900 mb-4 flex items-center justify-center lg:justify-start gap-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-file-invoice text-white text-2xl"></i>
+                    </div>
+                    Demandes de Devis
+                </h1>
+                <p class="text-xl text-gray-600">Gestion administrative des demandes de devis clients - Suivi et traitement des solicitations.</p>
             </div>
-            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200 text-center min-w-[100px]">
-                <div class="text-2xl font-bold text-green-600">{{ page_obj.object_list|length }}</div>
-                <div class="text-xs text-gray-500 font-medium">Cette page</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Filtros -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <form method="get" class="flex gap-4 items-center flex-wrap">
-            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]">
-                <option value="">Tous les statuts</option>
-                {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
-                        {{ label }}
-                    </option>
-                {% endfor %}
-            </select>
-
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                <i class="fas fa-filter"></i>
-                Filtrer
-            </button>
-
-            {% if current_status %}
-                <a href="{% url 'orcamentos:admin_solicitacoes' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                    <i class="fas fa-times"></i>
-                    Réinitialiser
-                </a>
-            {% endif %}
-        </form>
-    </div>
-
-    <!-- Lista de Cards -->
-    {% if page_obj.object_list %}
-        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-            {% for solicitacao in page_obj.object_list %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <!-- Header do Card -->
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-hashtag text-blue-600"></i>
-                            <span class="font-bold text-blue-800">{{ solicitacao.numero }}</span>
+            <!-- Filtros -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-filter text-blue-600"></i>
+                        Filtres et Recherche
+                    </h3>
+                    <form method="get" class="space-y-4 md:space-y-0 md:flex md:items-end md:gap-4">
+                        <div class="flex-1">
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Statut:</label>
+                            <select name="status" id="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                <option value="">Tous les statuts</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-
-                        {% if solicitacao.status == 'pendente' %}
-                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% elif solicitacao.status == 'em_elaboracao' %}
-                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% elif solicitacao.status == 'enviado' %}
-                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% elif solicitacao.status == 'aceito' %}
-                            <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% elif solicitacao.status == 'recusado' %}
-                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% else %}
-                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-bold">
-                                {{ solicitacao.get_status_display }}
-                            </span>
-                        {% endif %}
-                    </div>
-
-                    <!-- Conteúdo do Card -->
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                            <i class="fas fa-user text-gray-400"></i>
-                            {{ solicitacao.nome_solicitante }}
-                        </h3>
-
-                        <div class="space-y-3 mb-4">
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-envelope w-4"></i>
-                                <span>{{ solicitacao.email_solicitante }}</span>
-                            </div>
-
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-phone w-4"></i>
-                                <span>{{ solicitacao.telefone_solicitante }}</span>
-                            </div>
-
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt w-4"></i>
-                                <span>{{ solicitacao.cidade }}, {{ solicitacao.cep }}</span>
-                            </div>
-
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-paint-brush w-4"></i>
-                                <span>{{ solicitacao.get_tipo_servico_display }}</span>
-                            </div>
-
-                            {% if solicitacao.area_aproximada %}
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-ruler-combined w-4"></i>
-                                <span>{{ solicitacao.area_aproximada }} m²</span>
-                            </div>
-                            {% endif %}
-
-                            {% if solicitacao.orcamento_maximo %}
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-euro-sign w-4"></i>
-                                <span>Budget max: {{ solicitacao.orcamento_maximo }}€</span>
-                            </div>
-                            {% endif %}
-
-                            <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <i class="fas fa-clock w-4"></i>
-                                <span>{{ solicitacao.created_at|date:"d/m/Y H:i" }}</span>
-                            </div>
+                        <div class="flex-1">
+                            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Rechercher:</label>
+                            <input type="text" name="search" id="search" value="{{ request.GET.search }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                   placeholder="Nom, email ou numéro...">
                         </div>
-
-                        <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-gray-700 line-clamp-3">{{ solicitacao.descricao_servico|truncatewords:20 }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Footer do Card -->
-                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex gap-2 flex-wrap">
-                        <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
-                           class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                            <i class="fas fa-eye"></i>
-                            Détails
-                        </a>
-
-                        {% if solicitacao.status == 'pendente' %}
-                            <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
-                               class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                                <i class="fas fa-plus"></i>
-                                Créer devis
+                        <div class="flex gap-2">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <i class="fas fa-search"></i>
+                                Filtrer
+                            </button>
+                            <a href="{% url 'orcamentos:admin_solicitacoes' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                                <i class="fas fa-times"></i>
+                                Reset
                             </a>
-                        {% endif %}
-
-                        {% if solicitacao.orcamento %}
-                            <a href="{% url 'orcamentos:admin_orcamento_detail' solicitacao.orcamento.numero %}"
-                               class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                                <i class="fas fa-file-invoice"></i>
-                                Voir devis
-                            </a>
-                        {% endif %}
-                    </div>
+                        </div>
+                    </form>
                 </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <div class="text-gray-400 mb-4">
-                <i class="fas fa-inbox text-6xl"></i>
-            </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune demande trouvée</h3>
-            <p class="text-gray-600">
-                {% if current_status %}
-                    Aucune demande avec le statut "{{ current_status }}" n'a été trouvée.
-                    <br><br>
-                    <a href="{% url 'orcamentos:admin_solicitacoes' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
-                        Voir toutes les demandes
-                    </a>
-                {% else %}
-                    Il n'y a actuellement aucune demande de devis dans le système.
-                {% endif %}
-            </p>
-        </div>
-    {% endif %}
-
-    <!-- Paginação -->
-    {% if page_obj.has_other_pages %}
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex justify-between items-center">
-            <div class="text-sm text-gray-600">
-                Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }}
-                sur {{ page_obj.paginator.count }} demandes
             </div>
 
-            <div class="flex gap-2">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}"
-                       class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-angle-double-left"></i>
-                    </a>
-                    <a href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}"
-                       class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                {% endif %}
+            <!-- Lista de Solicitações -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-list text-blue-600"></i>
+                            Demandes de Devis
+                        </h3>
+                        {% if page_obj %}
+                        <span class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-lg">
+                            {{ page_obj.paginator.count }} demande{{ page_obj.paginator.count|pluralize }}
+                        </span>
+                        {% endif %}
+                    </div>
 
-                <span class="px-3 py-2 bg-blue-600 text-white rounded-lg">{{ page_obj.number }}</span>
+                    {% if page_obj %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Numéro</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Client</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Service</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Statut</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    {% for solicitacao in page_obj %}
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="py-4 px-4">
+                                            <span class="font-mono text-sm text-blue-600 font-medium">{{ solicitacao.numero }}</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ solicitacao.nome_solicitante }}</div>
+                                                <div class="text-sm text-gray-500">{{ solicitacao.email_solicitante }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                {{ solicitacao.get_tipo_servico_display }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            {% if solicitacao.status == 'pendente' %}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                {{ solicitacao.get_status_display }}
+                                            </span>
+                                            {% elif solicitacao.status == 'processando' %}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-cog fa-spin mr-1"></i>
+                                                {{ solicitacao.get_status_display }}
+                                            </span>
+                                            {% elif solicitacao.status == 'concluida' %}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <i class="fas fa-check mr-1"></i>
+                                                {{ solicitacao.get_status_display }}
+                                            </span>
+                                            {% else %}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ solicitacao.get_status_display }}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="py-4 px-4 text-sm text-gray-600">
+                                            {{ solicitacao.created_at|date:"d/m/Y à H:i" }}
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center gap-2">
+                                                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                                                   class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
+                                                    <i class="fas fa-eye"></i>
+                                                    Voir
+                                                </a>
+                                                {% if solicitacao.status == 'pendente' %}
+                                                <a href="{% url 'orcamentos:admin_elaborar_orcamento' solicitacao.numero %}"
+                                                   class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
+                                                    <i class="fas fa-plus"></i>
+                                                    Élaborer
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}"
-                       class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}"
-                       class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                {% endif %}
+                        <!-- Paginação -->
+                        {% if page_obj.has_other_pages %}
+                        <div class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3 sm:px-6 mt-6">
+                            <div class="flex flex-1 justify-between sm:hidden">
+                                {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Précédent
+                                </a>
+                                {% endif %}
+                                {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="relative ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Suivant
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700">
+                                        Affichage de
+                                        <span class="font-medium">{{ page_obj.start_index }}</span>
+                                        à
+                                        <span class="font-medium">{{ page_obj.end_index }}</span>
+                                        sur
+                                        <span class="font-medium">{{ page_obj.paginator.count }}</span>
+                                        résultats
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        {% if page_obj.has_previous %}
+                                        <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        {% endif %}
+
+                                        {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+                                            {{ num }}
+                                        </span>
+                                        {% else %}
+                                        <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                            {{ num }}
+                                        </a>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                        <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                        {% endif %}
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune demande trouvée</h3>
+                            <p class="text-gray-500">Il n'y a actuellement aucune demande de devis correspondant à vos critères.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    {% endif %}
+    </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit form quando mudar o select
-    const statusSelect = document.querySelector('select[name="status"]');
-    if (statusSelect) {
-        statusSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
-});
-</script>
 {% endblock %}

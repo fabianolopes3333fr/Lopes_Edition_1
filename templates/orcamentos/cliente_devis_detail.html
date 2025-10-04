@@ -4,7 +4,7 @@
 {% block title %}Devis {{ orcamento.numero }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-gray-50 p-6 mb-10">
     <!-- Header -->
     <div class="mb-6">
         <div class="mb-4">
@@ -351,7 +351,7 @@
 <script>
 function acceptDevis() {
     if (confirm('Voulez-vous vraiment accepter ce devis? Cette action est définitive.')) {
-        fetch(`{% url 'orcamentos:cliente_devis_accepter' orcamento.numero %}`, {
+        fetch(`{% url 'orcamentos:cliente_aceitar_orcamento' orcamento.numero %}`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
@@ -376,7 +376,7 @@ function acceptDevis() {
 
 function refuseDevis() {
     if (confirm('Voulez-vous vraiment refuser ce devis?')) {
-        fetch(`{% url 'orcamentos:cliente_devis_refuser' orcamento.numero %}`, {
+        fetch(`{% url 'orcamentos:cliente_recusar_orcamento' orcamento.numero %}`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',

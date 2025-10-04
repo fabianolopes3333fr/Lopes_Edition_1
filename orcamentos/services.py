@@ -41,7 +41,7 @@ class NotificationService:
                 tipo=TipoNotificacao.NOVA_SOLICITACAO,
                 titulo=f"Nouvelle demande de devis #{solicitacao.numero}",
                 mensagem=f"Une nouvelle demande de devis a été reçue de {solicitacao.nome_solicitante}",
-                url_acao=f"/orcamentos/admin/solicitacao/{solicitacao.numero}/",
+                url_acao=f"/orcamentos/admin/demandes/{solicitacao.numero}/",
                 solicitacao=solicitacao
             )
 

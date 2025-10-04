@@ -4,7 +4,8 @@
 {% block title %}Mes Devis{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 p-6">
+{% csrf_token %}
+<div class="min-h-screen bg-gray-50 p-6 mb-10">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
@@ -231,16 +232,17 @@
 <script>
 function acceptDevis(numero) {
     if (confirm('Voulez-vous vraiment accepter ce devis?')) {
-        fetch(`/orcamentos/devis/${numero}/accepter/`, {
+        fetch(`/devis/devis/${numero}/accepter/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}',
                 'Content-Type': 'application/json',
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                alert('Devis accepté avec succès!');
                 location.reload();
             } else {
                 alert('Erreur: ' + data.error);
@@ -255,16 +257,17 @@ function acceptDevis(numero) {
 
 function refuseDevis(numero) {
     if (confirm('Voulez-vous vraiment refuser ce devis?')) {
-        fetch(`/orcamentos/devis/${numero}/refuser/`, {
+        fetch(`/devis/devis/${numero}/refuser/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}',
                 'Content-Type': 'application/json',
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                alert('Devis refusé');
                 location.reload();
             } else {
                 alert('Erreur: ' + data.error);

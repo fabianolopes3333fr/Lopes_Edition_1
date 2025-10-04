@@ -4,7 +4,7 @@
 {% block title %}Devis - {{ orcamento.numero }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50 p-6">
+<div class="min-h-screen bg-gray-50 p-6 mb-10">
     <!-- Header -->
     <div class="mb-6">
         <div class="mb-4">
@@ -262,130 +262,58 @@
         </div>
 
         <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
+        <div class="space-y-6">
             <!-- Actions -->
             <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-bolt text-blue-500"></i>
+                    <i class="fas fa-tools text-blue-600"></i>
                     Actions
                 </h3>
 
                 <div class="space-y-3">
-                    <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
-                       class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
-                        <i class="fas fa-edit"></i>
-                        Éditer le devis
-                    </a>
-
                     {% if orcamento.status == 'em_elaboracao' %}
-                    <form method="POST" action="{% url 'orcamentos:admin_enviar_orcamento' orcamento.numero %}" class="w-full">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
-                            <i class="fas fa-paper-plane"></i>
+                        <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                           class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Éditer le devis
+                        </a>
+
+                        <a href="{% url 'orcamentos:admin_enviar_orcamento' orcamento.numero %}"
+                           class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                            <i class="fas fa-paper-plane mr-2"></i>
                             Envoyer au client
-                        </button>
-                    </form>
+                        </a>
+                    {% endif %}
+
+                    {% if orcamento.status == 'aceito' %}
+                        {% if not orcamento.faturas.exists %}
+                            <a href="{% url 'orcamentos:admin_criar_fatura_from_orcamento' orcamento.numero %}"
+                               class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                                <i class="fas fa-file-invoice-dollar mr-2"></i>
+                                Créer Facture
+                            </a>
+                        {% else %}
+                            <a href="{% url 'orcamentos:admin_fatura_detail' orcamento.faturas.first.numero %}"
+                               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                                <i class="fas fa-file-invoice mr-2"></i>
+                                Voir Facture
+                            </a>
+                        {% endif %}
                     {% endif %}
 
                     <a href="{% url 'orcamentos:admin_orcamento_pdf' orcamento.numero %}" target="_blank"
-                       class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
-                        <i class="fas fa-file-pdf"></i>
+                       class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i>
                         Télécharger PDF
                     </a>
 
-                    <button onclick="window.print()"
-                            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
-                        <i class="fas fa-print"></i>
-                        Imprimer
-                    </button>
-
-                    <a href="mailto:{{ orcamento.solicitacao.email_solicitante }}?subject=Devis {{ orcamento.numero }}"
-                       class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
-                        <i class="fas fa-envelope"></i>
-                        Contacter client
-                    </a>
-                </div>
-            </div>
-
-            <!-- Informações Técnicas -->
-            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-cog text-blue-500"></i>
-                    Informations
-                </h3>
-
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Numéro</span>
-                        <span class="font-mono text-sm text-gray-900">{{ orcamento.numero }}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Demande</span>
-                        <a href="{% url 'orcamentos:admin_solicitacao_detail' orcamento.solicitacao.numero %}"
-                           class="font-mono text-sm text-blue-600 hover:text-blue-800">{{ orcamento.solicitacao.numero }}</a>
-                    </div>
-
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Subtotal HT</span>
-                        <span class="font-mono text-sm text-gray-900">{{ orcamento.subtotal|floatformat:2 }}€</span>
-                    </div>
-
-                    {% if orcamento.valor_desconto %}
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Remise</span>
-                        <span class="font-mono text-sm text-red-600">-{{ orcamento.valor_desconto|floatformat:2 }}€</span>
-                    </div>
+                    {% if orcamento.status == 'enviado' %}
+                        <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                           class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Modifier le devis
+                        </a>
                     {% endif %}
-
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">TVA</span>
-                        <span class="font-mono text-sm text-blue-600">{{ orcamento.valor_tva|floatformat:2 }}€</span>
-                    </div>
-
-                    <div class="flex justify-between items-center pb-2 border-b border-blue-200">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Total HT</span>
-                        <span class="font-mono text-lg font-bold text-green-600">{{ orcamento.total|floatformat:2 }}€</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-semibold text-blue-700 uppercase">Total TTC</span>
-                        <span class="font-mono text-xl font-bold text-green-600">{{ orcamento.total_ttc|floatformat:2 }}€</span>
-                    </div>
-
-                    {% if orcamento.total_compras %}
-                    <div class="flex justify-between items-center pt-2 border-t border-blue-200">
-                        <span class="text-xs font-semibold text-gray-500 uppercase">Coût d'achat</span>
-                        <span class="font-mono text-sm text-gray-600">{{ orcamento.total_compras|floatformat:2 }}€</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Demande Associée -->
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-orange-200 rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-orange-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-link"></i>
-                    Demande associée
-                </h3>
-
-                <div class="space-y-3">
-                    <div>
-                        <div class="text-sm font-medium text-orange-700">{{ orcamento.solicitacao.numero }}</div>
-                        <div class="text-lg font-bold text-orange-600">{{ orcamento.solicitacao.get_tipo_servico_display }}</div>
-                    </div>
-
-                    <div class="text-sm text-orange-600">
-                        <div>Créée le {{ orcamento.solicitacao.created_at|date:"d/m/Y" }}</div>
-                        <div>Statut: {{ orcamento.solicitacao.get_status_display }}</div>
-                    </div>
-
-                    <a href="{% url 'orcamentos:admin_solicitacao_detail' orcamento.solicitacao.numero %}"
-                       class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors text-sm">
-                        <i class="fas fa-eye"></i>
-                        Voir la demande
-                    </a>
                 </div>
             </div>
         </div>

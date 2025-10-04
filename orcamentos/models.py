@@ -58,6 +58,27 @@ class TipoTVA(models.TextChoices):
     TVA_5_5 = "5.5", "TVA 5,5%"
     EXONEREE = "0", "Exonérée"
 
+class TipoPagamento(models.TextChoices):
+    VIREMENT = "virement", "Virement bancaire"
+    CHEQUE = "cheque", "Chèque"
+    ESPECE = "espece", "Espèce"
+    CARTE_BANCAIRE = "carte_bancaire", "Carte bancaire"
+
+class CondicoesPagamento(models.TextChoices):
+    COMPTANT = "comptant", "Comptant"
+    ACOMPTE_30 = "acompte_30", "30% d'acompte, solde à la fin"
+    ACOMPTE_50 = "acompte_50", "50% d'acompte, solde à la fin"
+    ECHEANCE_30 = "echeance_30", "Paiement à 30 jours"
+    ECHEANCE_60 = "echeance_60", "Paiement à 60 jours"
+    PERSONNALISE = "personnalise", "Conditions personnalisées"
+
+class StatusFacture(models.TextChoices):
+    BROUILLON = "brouillon", "Brouillon"
+    ENVOYEE = "envoyee", "Envoyée"
+    PAYEE = "payee", "Payée"
+    ANNULEE = "annulee", "Annulée"
+    EN_RETARD = "en_retard", "En retard"
+
 class TipoNotificacao(models.TextChoices):
     NOVA_SOLICITACAO = "nova_solicitacao", "Nouvelle demande de devis"
     ORCAMENTO_ELABORADO = "orcamento_elaborado", "Devis élaboré"
@@ -320,7 +341,10 @@ class Orcamento(models.Model):
     )
 
     # Condições
-    condicoes_pagamento = models.TextField(
+    condicoes_pagamento = models.CharField(
+        max_length=20,
+        choices=CondicoesPagamento.choices,
+        default=CondicoesPagamento.COMPTANT,
         verbose_name="Conditions de paiement"
     )
     observacoes = models.TextField(
@@ -334,6 +358,14 @@ class Orcamento(models.Model):
         choices=StatusOrcamento.choices,
         default=StatusOrcamento.EM_ELABORACAO,
         verbose_name="Statut"
+    )
+
+    # Tipo de pagamento
+    tipo_pagamento = models.CharField(
+        max_length=20,
+        choices=TipoPagamento.choices,
+        default=TipoPagamento.VIREMENT,
+        verbose_name="Type de paiement"
     )
 
     # Metadados
@@ -409,7 +441,7 @@ class Orcamento(models.Model):
     def __str__(self):
         return f"Devis {self.numero}"
 
-# Model para itens do orçamento - VERSÃO MELHORADA
+# Model para itens do orçamento
 class ItemOrcamento(models.Model):
     orcamento = models.ForeignKey(
         Orcamento,
@@ -451,7 +483,7 @@ class ItemOrcamento(models.Model):
     preco_unitario_ht = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=Decimal('0.00'),  # Adicionando default
+        default=Decimal('0.00'),
         verbose_name="P.U HT"
     )
     preco_unitario_ttc = models.DecimalField(
@@ -459,6 +491,12 @@ class ItemOrcamento(models.Model):
         decimal_places=2,
         default=Decimal('0.00'),
         verbose_name="P.U TTC"
+    )
+    preco_compra_unitario = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Prix d'achat unitaire"
     )
 
     # Remise e totais
@@ -481,18 +519,12 @@ class ItemOrcamento(models.Model):
         verbose_name="Total TTC"
     )
 
-    # Taxa e custos
+    # Taxa
     taxa_tva = models.CharField(
         max_length=5,
         choices=TipoTVA.choices,
         default=TipoTVA.TVA_20,
         verbose_name="Taxe TVA"
-    )
-    preco_compra_unitario = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=Decimal('0.00'),
-        verbose_name="Prix d'achat unitaire"
     )
 
     # Metadados
@@ -530,10 +562,290 @@ class ItemOrcamento(models.Model):
         """Retorna o valor da TVA para este item"""
         return self.total_ttc - self.total_ht
 
+    def __str__(self):
+        return f"{self.referencia} - {self.descricao}"
+
+# Model para faturas elaboradas pelos admins
+class Facture(models.Model):
+    # Identificação
+    numero = models.CharField(max_length=20, unique=True, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+    # Relacionamentos
+    orcamento = models.ForeignKey(
+        Orcamento,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='faturas',
+        verbose_name="Devis de référence"
+    )
+    cliente = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='faturas_cliente',
+        verbose_name="Client"
+    )
+    elaborado_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='faturas_elaboradas'
+    )
+
+    # Dados da fatura
+    titulo = models.CharField(max_length=200, verbose_name="Titre de la facture")
+    descricao = models.TextField(verbose_name="Description")
+
+    # Valores
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Sous-total"
+    )
+    desconto = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Remise (%)"
+    )
+    valor_desconto = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Montant de la remise"
+    )
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Total"
+    )
+
+    # Datas importantes
+    data_emissao = models.DateField(
+        default=timezone.now,
+        verbose_name="Date d'émission"
+    )
+    data_vencimento = models.DateField(
+        verbose_name="Date d'échéance"
+    )
+    data_pagamento = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Date de paiement"
+    )
+
+    # Condições de pagamento
+    condicoes_pagamento = models.CharField(
+        max_length=20,
+        choices=CondicoesPagamento.choices,
+        default=CondicoesPagamento.COMPTANT,
+        verbose_name="Conditions de paiement"
+    )
+    tipo_pagamento = models.CharField(
+        max_length=20,
+        choices=TipoPagamento.choices,
+        default=TipoPagamento.VIREMENT,
+        verbose_name="Type de paiement"
+    )
+
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=StatusFacture.choices,
+        default=StatusFacture.BROUILLON,
+        verbose_name="Statut"
+    )
+
+    # Observações
+    observacoes = models.TextField(
+        blank=True,
+        verbose_name="Observations"
+    )
+
+    # Metadados
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_envio = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Facture"
+        verbose_name_plural = "Factures"
+        ordering = ['-data_criacao']
+
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            self.numero = self.gerar_numero()
+        super().save(*args, **kwargs)
+
+    def gerar_numero(self):
+        import random
+        while True:
+            numero = f"FA{timezone.now().year}{random.randint(10000, 99999)}"
+            if not Facture.objects.filter(numero=numero).exists():
+                return numero
+
+    def calcular_totais(self):
+        """Calcula os totais da fatura com base nos itens"""
+        total_ht_itens = Decimal('0.00')
+        total_ttc_itens = Decimal('0.00')
+
+        for item in self.itens.all():
+            total_ht_itens += item.total_ht
+            total_ttc_itens += item.total_ttc
+
+        self.subtotal = total_ht_itens
+        self.valor_desconto = (self.subtotal * self.desconto) / 100
+        total_ht_com_desconto = self.subtotal - self.valor_desconto
+        self.total = total_ht_com_desconto
+
+        self.save(update_fields=['subtotal', 'valor_desconto', 'total'])
+
     @property
-    def total_compra(self):
-        """Retorna o total de compra para este item"""
-        return self.quantidade * self.preco_compra_unitario
+    def total_ttc(self):
+        """Retorna o total TTC calculado baseado nos itens com desconto aplicado"""
+        total_ttc_itens = sum(item.total_ttc for item in self.itens.all())
+        if self.desconto > 0 and total_ttc_itens > 0:
+            valor_desconto_ttc = (total_ttc_itens * self.desconto) / 100
+            return total_ttc_itens - valor_desconto_ttc
+        return total_ttc_itens
+
+    @property
+    def valor_tva(self):
+        """Retorna o valor total da TVA com desconto aplicado"""
+        return self.total_ttc - self.total
+
+    @property
+    def is_em_atraso(self):
+        """Verifica se a fatura está em atraso"""
+        if self.status == StatusFacture.ENVOYEE and self.data_vencimento < timezone.now().date():
+            return True
+        return False
+
+    def marcar_como_paga(self, data_pagamento=None):
+        """Marca a fatura como paga"""
+        self.status = StatusFacture.PAYEE
+        self.data_pagamento = data_pagamento or timezone.now().date()
+        self.save()
+
+    def __str__(self):
+        return f"Facture {self.numero}"
+
+# Model para itens da fatura
+class ItemFacture(models.Model):
+    facture = models.ForeignKey(
+        Facture,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+
+    # Referência ao produto (opcional)
+    produto = models.ForeignKey(
+        'Produto',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Produto de referência"
+    )
+
+    # Dados do item
+    referencia = models.CharField(max_length=50, blank=True, verbose_name="Référence")
+    descricao = models.CharField(max_length=255, verbose_name="Désignation")
+    unidade = models.CharField(
+        max_length=20,
+        choices=TipoUnidade.choices,
+        default=TipoUnidade.UNITE,
+        verbose_name="Unité"
+    )
+    atividade = models.CharField(
+        max_length=20,
+        choices=TipoAtividade.choices,
+        default=TipoAtividade.MARCHANDISE,
+        verbose_name="Activité"
+    )
+
+    # Quantidades e preços
+    quantidade = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Quantité"
+    )
+    preco_unitario_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="P.U HT"
+    )
+    preco_unitario_ttc = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="P.U TTC"
+    )
+
+    # Remise e totais
+    remise_percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Remise (%)"
+    )
+    total_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Total HT"
+    )
+    total_ttc = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Total TTC"
+    )
+
+    # Taxa
+    taxa_tva = models.CharField(
+        max_length=5,
+        choices=TipoTVA.choices,
+        default=TipoTVA.TVA_20,
+        verbose_name="Taxe TVA"
+    )
+
+    # Metadados
+    ordem = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Item de la facture"
+        verbose_name_plural = "Itens de la facture"
+        ordering = ['ordem', 'id']
+
+    def save(self, *args, **kwargs):
+        # Calcular preço unitário TTC
+        taxa_decimal = Decimal(self.taxa_tva) / 100
+        self.preco_unitario_ttc = self.preco_unitario_ht * (1 + taxa_decimal)
+
+        # Calcular total bruto
+        total_bruto_ht = self.quantidade * self.preco_unitario_ht
+
+        # Aplicar remise
+        valor_remise = (total_bruto_ht * self.remise_percentual) / 100
+        self.total_ht = total_bruto_ht - valor_remise
+
+        # Calcular total TTC
+        valor_tva = self.total_ht * taxa_decimal
+        self.total_ttc = self.total_ht + valor_tva
+
+        super().save(*args, **kwargs)
+
+        # Recalcular total da fatura
+        if hasattr(self, 'facture'):
+            self.facture.calcular_totais()
+
+    @property
+    def valor_tva(self):
+        """Retorna o valor da TVA para este item"""
+        return self.total_ttc - self.total_ht
 
     def __str__(self):
         return f"{self.referencia} - {self.descricao}"
