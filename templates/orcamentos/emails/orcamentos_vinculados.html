@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue chez LOPES PEINTURE</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .welcome-message {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        .found-quotes {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .found-quotes h3 {
+            color: #2e7d32;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .quote-count {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin: 10px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .company-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Bienvenue chez LOPES PEINTURE!</h1>
+            <p>Votre compte a été créé avec succès</p>
+        </div>
+
+        <div class="welcome-message">
+            <h2>Bonjour {{ usuario.first_name|default:usuario.username }}! 👋</h2>
+            <p>Nous sommes ravis de vous accueillir dans notre communauté de clients satisfaits. Votre compte a été créé avec succès et vous avez maintenant accès à votre espace personnel.</p>
+        </div>
+
+        <div class="found-quotes">
+            <h3>🎉 Excellente nouvelle!</h3>
+            <p>Nous avons retrouvé vos demandes précédentes:</p>
+            <div class="quote-count">{{ quantidade }}</div>
+            <p><strong>demande{{ quantidade|pluralize:",:s" }} de devis</strong> déjà associée{{ quantidade|pluralize:",:s" }} à votre compte!</p>
+            <p>{{ quantidade|pluralize:"Elle est,Elles sont" }} maintenant disponible{{ quantidade|pluralize:",:s" }} dans votre tableau de bord personnel.</p>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ site_url }}/devis/mes-devis/" class="btn">
+                📋 Voir mes demandes de devis
+            </a>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h4>Tableau de bord</h4>
+                <p>Suivez l'état de vos demandes en temps réel</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📄</div>
+                <h4>Devis personnalisés</h4>
+                <p>Recevez des devis détaillés et professionnels</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💬</div>
+                <h4>Communication directe</h4>
+                <p>Échangez facilement avec notre équipe</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <h4>Notifications</h4>
+                <p>Soyez informé de chaque étape de votre projet</p>
+            </div>
+        </div>
+
+        <div class="company-info">
+            <h4>🏢 À propos de LOPES PEINTURE</h4>
+            <p>Nous sommes une entreprise spécialisée dans les travaux de peinture et de rénovation, avec plusieurs années d'expérience. Notre équipe qualifiée vous accompagne dans tous vos projets, de la simple retouche à la rénovation complète.</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <h3>Que souhaitez-vous faire maintenant?</h3>
+            <a href="{{ site_url }}/devis/mes-devis/" class="btn">Voir mes devis</a>
+            <a href="{{ site_url }}/projets/nouveau/" class="btn" style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);">Créer un nouveau projet</a>
+        </div>
+
+        <div class="footer">
+            <p><strong>LOPES PEINTURE</strong></p>
+            <p>📧 contact@lopes-peinture.fr | 📞 +33 1 23 45 67 89</p>
+            <p>🏠 123 Rue de la Peinture, 75001 Paris, France</p>
+            <hr style="margin: 20px 0;">
+            <p>Si vous avez des questions, n'hésitez pas à nous contacter. Notre équipe est là pour vous aider!</p>
+            <p style="font-size: 12px; color: #999;">
+                Vous recevez cet email car vous avez créé un compte sur notre plateforme.
+                <br>Si vous pensez que c'est une erreur, veuillez nous contacter.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

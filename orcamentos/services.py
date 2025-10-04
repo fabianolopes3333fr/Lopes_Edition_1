@@ -179,3 +179,67 @@ class NotificationService:
                 url_acao=f"/orcamentos/admin/projetos/{projeto.uuid}/",
                 projeto=projeto
             )
+
+    @staticmethod
+    def notificar_orcamentos_vinculados(usuario, quantidade):
+        """Notificar usuário sobre orçamentos vinculados após cadastro"""
+        try:
+            NotificationService.criar_notificacao(
+                usuario=usuario,
+                tipo=TipoNotificacao.NOVA_SOLICITACAO,  # Reutilizando tipo existente
+                titulo=f"Demandes retrouvées!",
+                mensagem=f"Nous avons trouvé {quantidade} demande{'s' if quantidade > 1 else ''} de devis associée{'s' if quantidade > 1 else ''} à votre email. {'Elles sont' if quantidade > 1 else 'Elle est'} maintenant disponible{'s' if quantidade > 1 else ''} dans votre tableau de bord.",
+                url_acao="/devis/mes-devis/"
+            )
+
+            # Enviar email de boas-vindas com informações sobre os orçamentos
+            context = {
+                'usuario': usuario,
+                'quantidade': quantidade,
+                'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
+            }
+
+            html_content = render_to_string('orcamentos/emails/orcamentos_vinculados.html', context)
+            send_mail(
+                subject=f"Bienvenue chez LOPES PEINTURE - {quantidade} demande{'s' if quantidade > 1 else ''} retrouvée{'s' if quantidade > 1 else ''}!",
+                message=f"Bienvenue! Nous avons retrouvé {quantidade} demande{'s' if quantidade > 1 else ''} de devis associée{'s' if quantidade > 1 else ''} à votre compte.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[usuario.email],
+                html_message=html_content,
+                fail_silently=True
+            )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Erro ao notificar orçamentos vinculados para {usuario.email}: {e}")
+
+    @staticmethod
+    def verificar_e_processar_orcamentos_orfaos():
+        """
+        Função utilitária para processar orçamentos órfãos em lote.
+        Pode ser executada via comando de management.
+        """
+        from .models import SolicitacaoOrcamento
+
+        # Buscar todas as solicitações órfãs
+        solicitacoes_orfas = SolicitacaoOrcamento.objects.filter(cliente__isnull=True)
+
+        processadas = 0
+        for solicitacao in solicitacoes_orfas:
+            try:
+                # Tentar encontrar usuário com mesmo email
+                usuario = User.objects.get(email__iexact=solicitacao.email_solicitante)
+                solicitacao.cliente = usuario
+                solicitacao.save()
+                processadas += 1
+            except User.DoesNotExist:
+                continue
+            except User.MultipleObjectsReturned:
+                # Se houver múltiplos usuários com mesmo email, pegar o primeiro
+                usuario = User.objects.filter(email__iexact=solicitacao.email_solicitante).first()
+                if usuario:
+                    solicitacao.cliente = usuario
+                    solicitacao.save()
+                    processadas += 1
+
+        return processadas

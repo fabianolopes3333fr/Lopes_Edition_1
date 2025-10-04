@@ -5,53 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/DOCUMENTACAO_TESTES_AUDITORIA.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/auditoria.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/config_auditoria.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/middleware.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/migrations/0002_add_auditoria.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/monitor_auditoria.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_auditoria.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_basico.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_orcamentos.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_orcamentos_tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_dashboard.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_deletar_fatura.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_facture.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_enviar_orcamento.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_fatura_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_faturas_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/clientes/detalhe_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/detalhe_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/clientes/editar_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/editar_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/clientes/form_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/form_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento_old.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento_old.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail_fixed.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail_fixed.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacao_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_solicitacoes.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_criar_projeto.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_criar_projeto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_editar_projeto.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_editar_projeto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projetos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projetos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_solicitar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_solicitar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +83,7 @@
       <workItem from="1759066665605" duration="6000" />
       <workItem from="1759077153427" duration="85004000" />
       <workItem from="1759514994385" duration="10441000" />
-      <workItem from="1759574709010" duration="22293000" />
+      <workItem from="1759574709010" duration="24262000" />
     </task>
     <servers />
   </component>
