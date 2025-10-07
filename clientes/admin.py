@@ -17,13 +17,13 @@ class AdresseTransporteurInline(admin.TabularInline):
 class AdresseChantiersInline(admin.TabularInline):
     model = AdresseChantier
     extra = 1
-    fields = ['nom', 'adresse', 'code_postal', 'ville', 'pays', 'contact_nom']
+    fields = ['nom', 'adresse', 'code_postal', 'ville', 'pays', 'responsable_nom']
 
 
 class TarifTVAClientInline(admin.TabularInline):
     model = TarifTVAClient
     extra = 1
-    fields = ['description', 'taux_tva', 'par_defaut']
+    fields = ['description', 'taux_tva', 'actif']
 
 
 @admin.register(Cliente)
@@ -79,13 +79,13 @@ class AdresseTransporteurAdmin(admin.ModelAdmin):
 
 @admin.register(AdresseChantier)
 class AdresseChantiersAdmin(admin.ModelAdmin):
-    list_display = ['client', 'nom', 'ville', 'date_debut_prevue', 'date_fin_prevue']
-    list_filter = ['pays', 'date_debut_prevue']
+    list_display = ['client', 'nom', 'ville', 'date_creation']
+    list_filter = ['pays', 'date_creation']
     search_fields = ['client__nom', 'client__raison_sociale', 'nom', 'ville']
 
 
 @admin.register(TarifTVAClient)
 class TarifTVAClientAdmin(admin.ModelAdmin):
-    list_display = ['client', 'description', 'taux_tva', 'par_defaut']
-    list_filter = ['par_defaut', 'taux_tva']
+    list_display = ['client', 'description', 'taux_tva', 'actif']
+    list_filter = ['actif', 'taux_tva']
     search_fields = ['client__nom', 'client__raison_sociale', 'description']

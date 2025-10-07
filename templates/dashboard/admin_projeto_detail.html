@@ -1,0 +1,464 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ projeto.titulo }} - Détails du Projet{% endblock %}
+
+{% block content %}
+<div class="space-y-6 mb-10">
+    <!-- Header com Breadcrumb -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <nav class="text-sm text-gray-500 mb-2 flex items-center">
+                    <a href="{% url 'orcamentos:admin_projetos_list' %}" class="hover:text-blue-600 transition-colors">
+                        <i class="fas fa-project-diagram mr-1"></i>Gestion des Projets
+                    </a>
+                    <i class="fas fa-chevron-right mx-2 text-gray-400"></i>
+                    <span class="text-gray-900 font-medium">{{ projeto.titulo }}</span>
+                </nav>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                    <i class="fas fa-eye text-blue-600"></i>
+                    Détails du Projet
+                </h1>
+                <p class="text-gray-600 mt-1">Informations complètes et gestion du projet</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <!-- Botão de alterar status -->
+                <div class="relative">
+                    <button onclick="toggleStatusModal()"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md">
+                        <i class="fas fa-edit mr-2"></i>Changer Statut
+                    </button>
+                </div>
+
+                <a href="{% url 'orcamentos:admin_projetos_list' %}"
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status e Info Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Informações Principais -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                        Informations Principales
+                    </h2>
+                    <span class="px-4 py-2 text-sm font-medium rounded-full
+                               {% if projeto.status == 'planejando' %}bg-green-100 text-green-800 border border-green-200
+                               {% elif projeto.status == 'em_andamento' %}bg-yellow-100 text-yellow-800 border border-yellow-200
+                               {% elif projeto.status == 'concluido' %}bg-blue-100 text-blue-800 border border-blue-200
+                               {% elif projeto.status == 'pausado' %}bg-orange-100 text-orange-800 border border-orange-200
+                               {% else %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                        <i class="fas fa-circle mr-2 text-xs"></i>
+                        {{ projeto.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Titre du projet</label>
+                        <p class="text-lg font-semibold text-gray-900">{{ projeto.titulo }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Type de service</label>
+                        <p class="text-gray-900">
+                            {% if projeto.tipo_servico %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    {{ projeto.get_tipo_servico_display }}
+                                </span>
+                            {% else %}
+                                <span class="text-gray-400 italic">Non défini</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if projeto.cidade_projeto %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ville</label>
+                        <p class="text-gray-900 flex items-center">
+                            <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                            {{ projeto.cidade_projeto }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if projeto.endereco_projeto %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                        <p class="text-gray-900">{{ projeto.endereco_projeto }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if projeto.orcamento_estimado %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Budget estimé</label>
+                        <p class="text-xl font-bold text-green-600 flex items-center">
+                            <i class="fas fa-euro-sign mr-2"></i>
+                            {{ projeto.orcamento_estimado|floatformat:2 }} €
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date de création</label>
+                        <p class="text-gray-900 flex items-center">
+                            <i class="fas fa-calendar mr-2 text-gray-400"></i>
+                            {{ projeto.created_at|date:"d/m/Y à H:i" }}
+                        </p>
+                    </div>
+                </div>
+
+                {% if projeto.descricao %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Description</label>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-gray-700 leading-relaxed">{{ projeto.descricao|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Solicitações de Orçamento -->
+            {% if solicitacoes %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-file-invoice-dollar text-blue-600"></i>
+                    Demandes de Devis ({{ solicitacoes.count }})
+                </h3>
+                <div class="space-y-4">
+                    {% for solicitacao in solicitacoes %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-gray-900">Demande #{{ solicitacao.numero }}</span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                       {% if solicitacao.status == 'pendente' %}bg-yellow-100 text-yellow-800
+                                       {% elif solicitacao.status == 'enviado' %}bg-blue-100 text-blue-800
+                                       {% elif solicitacao.status == 'aceito' %}bg-green-100 text-green-800
+                                       {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ solicitacao.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p><i class="fas fa-calendar mr-1"></i>{{ solicitacao.created_at|date:"d/m/Y à H:i" }}</p>
+                            {% if solicitacao.descricao_servico %}
+                            <p class="mt-1"><i class="fas fa-align-left mr-1"></i>{{ solicitacao.descricao_servico|truncatechars:100 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                               class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Voir détails →
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Orçamentos -->
+            {% if orcamentos %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-file-contract text-green-600"></i>
+                    Devis Générés ({{ orcamentos.count }})
+                </h3>
+                <div class="space-y-4">
+                    {% for orcamento in orcamentos %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-gray-900">Devis #{{ orcamento.numero }}</span>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full
+                                       {% if orcamento.status == 'pendente' %}bg-gray-100 text-gray-800
+                                       {% elif orcamento.status == 'enviado' %}bg-blue-100 text-blue-800
+                                       {% elif orcamento.status == 'aceito' %}bg-green-100 text-green-800
+                                       {% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ orcamento.get_status_display }}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                            <p><i class="fas fa-calendar mr-1"></i>{{ orcamento.data_elaboracao|date:"d/m/Y" }}</p>
+                            <p><i class="fas fa-euro-sign mr-1"></i>{{ orcamento.total|floatformat:2 }} € HT</p>
+                            <p><i class="fas fa-eye mr-1"></i>{{ orcamento.total_ttc|floatformat:2 }} € TTC</p>
+                        </div>
+                        <div class="mt-3">
+                            <a href="{% url 'orcamentos:admin_orcamento_detail' orcamento.numero %}"
+                               class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                Voir devis →
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Anexos do Projeto -->
+            {% if anexos %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-paperclip text-purple-600"></i>
+                    Fichiers Annexes ({{ anexos.count }})
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for anexo in anexos %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    {% if anexo.arquivo.name|slice:"-4:" == ".pdf" %}
+                                        <i class="fas fa-file-pdf text-red-600"></i>
+                                    {% elif anexo.arquivo.name|slice:"-4:"|lower in ".jpg,.jpeg,.png,.gif" %}
+                                        <i class="fas fa-file-image text-green-600"></i>
+                                    {% elif anexo.arquivo.name|slice:"-4:"|lower in ".doc,.docx" %}
+                                        <i class="fas fa-file-word text-blue-600"></i>
+                                    {% else %}
+                                        <i class="fas fa-file text-gray-600"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-900 truncate">
+                                        {{ anexo.descricao|default:"Arquivo sem descrição" }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ anexo.arquivo.name|default:"arquivo" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-sm text-gray-600 mb-3">
+                            <span class="flex items-center">
+                                <i class="fas fa-calendar mr-1"></i>
+                                {{ anexo.created_at|date:"d/m/Y à H:i" }}
+                            </span>
+                            {% if anexo.arquivo.size %}
+                            <span class="flex items-center">
+                                <i class="fas fa-weight mr-1"></i>
+                                {{ anexo.arquivo.size|filesizeformat }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex gap-2">
+                            {% if anexo.arquivo %}
+                            <a href="{{ anexo.arquivo.url }}"
+                               target="_blank"
+                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center">
+                                <i class="fas fa-download mr-1"></i>Télécharger
+                            </a>
+                            <a href="{{ anexo.arquivo.url }}"
+                               target="_blank"
+                               class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors text-center">
+                                <i class="fas fa-eye mr-1"></i>Visualiser
+                            </a>
+                            {% else %}
+                            <div class="flex-1 bg-gray-300 text-gray-500 px-3 py-2 rounded-lg text-sm font-medium text-center">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Fichier indisponible
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Informações sobre os anexos -->
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                        <div class="text-sm text-gray-600">
+                            <p class="font-medium text-gray-700 mb-1">Informations sur les fichiers:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Total de {{ anexos.count }} fichier{{ anexos.count|pluralize }} joint{{ anexos.count|pluralize }} à ce projet</li>
+                                <li>Les fichiers sont téléchargés par le client propriétaire du projet</li>
+                                <li>Formats supportés: PDF, Images (JPG, PNG), Documents Word</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Message quando não há anexos -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-paperclip text-purple-600"></i>
+                    Fichiers Annexes
+                </h3>
+                <div class="text-center py-8">
+                    <i class="fas fa-folder-open text-gray-300 text-4xl mb-3"></i>
+                    <p class="text-gray-500 font-medium">Aucun fichier annexe pour ce projet</p>
+                    <p class="text-sm text-gray-400 mt-1">Le client peut joindre des fichiers depuis son espace personnel</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Informações do Cliente -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-user text-blue-600"></i>
+                    Client
+                </h3>
+
+                {% if projeto.cliente %}
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">{{ projeto.cliente.first_name }} {{ projeto.cliente.last_name }}</p>
+                            <p class="text-sm text-gray-600">{{ projeto.cliente.email }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-sm">
+                        <p class="text-gray-600">
+                            <span class="font-medium">Type de compte:</span>
+                            <span class="ml-2 px-2 py-1 bg-gray-100 rounded text-xs">{{ projeto.cliente.get_account_type_display }}</span>
+                        </p>
+                        <p class="text-gray-600">
+                            <span class="font-medium">Membre depuis:</span>
+                            <span class="ml-2">{{ projeto.cliente.date_joined|date:"d/m/Y" }}</span>
+                        </p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-6">
+                    <i class="fas fa-user-slash text-gray-300 text-3xl mb-2"></i>
+                    <p class="text-gray-500">Aucun client associé</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Dados Técnicos -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-cogs text-green-600"></i>
+                    Données Techniques
+                </h3>
+
+                <div class="space-y-4">
+                    {% if projeto.area_aproximada %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Surface approximative</label>
+                        <p class="text-gray-900 flex items-center">
+                            <i class="fas fa-ruler-combined text-gray-400 mr-2"></i>
+                            {{ projeto.area_aproximada }} m²
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if projeto.data_inicio_desejada %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date de début souhaitée</label>
+                        <p class="text-gray-900 flex items-center">
+                            <i class="fas fa-calendar-check text-gray-400 mr-2"></i>
+                            {{ projeto.data_inicio_desejada|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if projeto.urgencia %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Urgence</label>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm
+                                   {% if projeto.urgencia == 'baixa' %}bg-green-100 text-green-800
+                                   {% elif projeto.urgencia == 'media' %}bg-yellow-100 text-yellow-800
+                                   {% elif projeto.urgencia == 'alta' %}bg-orange-100 text-orange-800
+                                   {% else %}bg-red-100 text-red-800{% endif %}">
+                            <i class="fas fa-clock mr-2"></i>
+                            {{ projeto.get_urgencia_display }}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">UUID Système</label>
+                        <p class="text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded">{{ projeto.uuid }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações Rápidas -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-lightning-bolt text-yellow-600"></i>
+                    Actions Rapides
+                </h3>
+
+                <div class="space-y-3">
+                    {% if projeto.cliente %}
+                    <a href="{% url 'orcamentos:admin_criar_orcamento_cliente' projeto.cliente.id %}"
+                       class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>Créer Devis
+                    </a>
+                    {% endif %}
+
+                    <button onclick="toggleStatusModal()"
+                            class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center">
+                        <i class="fas fa-edit mr-2"></i>Changer Statut
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Alterar Status -->
+<div id="statusModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Changer le statut du projet</h3>
+
+            <form method="POST" action="{% url 'orcamentos:admin_projeto_change_status' projeto.uuid %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau statut</label>
+                    <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if projeto.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Confirmer
+                    </button>
+                    <button type="button" onclick="toggleStatusModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleStatusModal() {
+    const modal = document.getElementById('statusModal');
+    modal.classList.toggle('hidden');
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('statusModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        toggleStatusModal();
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.conf import settings
+from django.utils import timezone
 from decimal import Decimal
 from orcamentos.models import TipoTVA
 
@@ -173,6 +174,21 @@ class Cliente(models.Model):
         }
         return icons.get(self.origem, 'fas fa-user')
 
+    def save(self, *args, **kwargs):
+        """Override save para garantir código único"""
+        if not self.code:
+            last_client = Cliente.objects.order_by('id').last()
+            if last_client:
+                try:
+                    last_number = int(last_client.code.replace('CLI', ''))
+                    new_number = last_number + 1
+                except:
+                    new_number = 1
+            else:
+                new_number = 1
+            self.code = f'CLI{new_number:03d}'
+        super().save(*args, **kwargs)
+
     @classmethod
     def criar_de_usuario(cls, user):
         """Criar cliente automaticamente a partir de um usuário registrado"""
@@ -211,16 +227,16 @@ class Cliente(models.Model):
 
 class AdresseLivraison(models.Model):
     client = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='adresses_livraison')
-    nom = models.CharField(max_length=200, verbose_name="Nom de l'adresse")
+    nom = models.CharField(max_length=200, blank=True, verbose_name="Nom de l'adresse")  # Adicionado blank=True
 
     # Copie des données de l'adresse principale
     copier_adresse_principale = models.BooleanField(default=False, verbose_name="Copier l'adresse principale")
 
     # Adresse de livraison
-    adresse = models.TextField(verbose_name="Adresse")
-    code_postal = models.CharField(max_length=10, verbose_name="Code Postal")
-    ville = models.CharField(max_length=100, verbose_name="Ville")
-    pays = models.CharField(max_length=100, default="France", verbose_name="Pays")
+    adresse = models.TextField(blank=True, verbose_name="Adresse")  # Adicionado blank=True
+    code_postal = models.CharField(max_length=10, blank=True, verbose_name="Code Postal")  # Adicionado blank=True
+    ville = models.CharField(max_length=100, blank=True, verbose_name="Ville")  # Adicionado blank=True
+    pays = models.CharField(max_length=100, default="France", blank=True, verbose_name="Pays")
 
     # Contact spécifique
     contact_nom = models.CharField(max_length=100, blank=True, verbose_name="Nom du contact")
@@ -234,7 +250,7 @@ class AdresseLivraison(models.Model):
         verbose_name_plural = "Adresses de livraison"
 
     def __str__(self):
-        return f"{self.client.nom_complet} - {self.nom}"
+        return f"{self.client.nom_complet} - {self.nom or 'Adresse sans nom'}"
 
     def save(self, *args, **kwargs):
         if self.copier_adresse_principale and self.client:
@@ -246,29 +262,29 @@ class AdresseLivraison(models.Model):
 
 
 class AdresseTransporteur(models.Model):
+    """Endereços para transportadores"""
     client = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='adresses_transporteur')
-    nom = models.CharField(max_length=200, verbose_name="Nom du transporteur")
+    nom = models.CharField(max_length=200, blank=True, verbose_name="Nom de l'adresse")  # Adicionado blank=True
 
     # Copie des données de l'adresse principale
     copier_adresse_principale = models.BooleanField(default=False, verbose_name="Copier l'adresse principale")
 
-    # Adresse du transporteur
-    adresse = models.TextField(verbose_name="Adresse")
-    code_postal = models.CharField(max_length=10, verbose_name="Code Postal")
-    ville = models.CharField(max_length=100, verbose_name="Ville")
-    pays = models.CharField(max_length=100, default="France", verbose_name="Pays")
+    # Adresse de transporteur
+    adresse = models.TextField(blank=True, verbose_name="Adresse")  # Adicionado blank=True
+    code_postal = models.CharField(max_length=10, blank=True, verbose_name="Code Postal")  # Adicionado blank=True
+    ville = models.CharField(max_length=100, blank=True, verbose_name="Ville")  # Adicionado blank=True
+    pays = models.CharField(max_length=100, default="France", blank=True, verbose_name="Pays")
 
-    # Contact
+    # Contact transporteur
     contact_nom = models.CharField(max_length=100, blank=True, verbose_name="Nom du contact")
-    contact_telephone = models.CharField(max_length=20, blank=True, verbose_name="Téléphone")
-    contact_email = models.EmailField(blank=True, verbose_name="Email")
+    contact_telephone = models.CharField(max_length=20, blank=True, verbose_name="Téléphone du contact")
+    contact_email = models.EmailField(blank=True, verbose_name="Email du contact")
+
+    date_creation = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
 
     class Meta:
-        verbose_name = "Adresse transporteur"
-        verbose_name_plural = "Adresses transporteur"
-
-    def __str__(self):
-        return f"{self.client.nom_complet} - {self.nom}"
+        verbose_name = "Adresse Transporteur"
+        verbose_name_plural = "Adresses Transporteur"
 
     def save(self, *args, **kwargs):
         if self.copier_adresse_principale and self.client:
@@ -278,54 +294,66 @@ class AdresseTransporteur(models.Model):
             self.pays = self.client.pays
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.nom or 'Transporteur sans nom'} - {self.client.nom_complet}"
 
 class AdresseChantier(models.Model):
+    """Endereços de chantier/obra"""
     client = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='adresses_chantier')
-    nom = models.CharField(max_length=200, verbose_name="Nom du chantier")
+    nom = models.CharField(max_length=200, blank=True, verbose_name="Nom du chantier")  # Adicionado blank=True
 
-    # Adresse du chantier
-    adresse = models.TextField(verbose_name="Adresse")
-    code_postal = models.CharField(max_length=10, verbose_name="Code Postal")
-    ville = models.CharField(max_length=100, verbose_name="Ville")
-    pays = models.CharField(max_length=100, default="France", verbose_name="Pays")
+    # Copie des données de l'adresse principale
+    copier_adresse_principale = models.BooleanField(default=False, verbose_name="Copier l'adresse principale")
 
-    # Contact sur site
-    contact_nom = models.CharField(max_length=100, blank=True, verbose_name="Nom du contact sur site")
-    contact_telephone = models.CharField(max_length=20, blank=True, verbose_name="Téléphone")
+    # Adresse de chantier
+    adresse = models.TextField(blank=True, verbose_name="Adresse")  # Adicionado blank=True
+    code_postal = models.CharField(max_length=10, blank=True, verbose_name="Code Postal")  # Adicionado blank=True
+    ville = models.CharField(max_length=100, blank=True, verbose_name="Ville")  # Adicionado blank=True
+    pays = models.CharField(max_length=100, default="France", blank=True, verbose_name="Pays")
 
-    # Informations chantier
-    date_debut_prevue = models.DateField(blank=True, null=True, verbose_name="Date début prévue")
-    date_fin_prevue = models.DateField(blank=True, null=True, verbose_name="Date fin prévue")
-    instructions = models.TextField(blank=True, verbose_name="Instructions spéciales")
+    # Informations spécifiques au chantier
+    responsable_nom = models.CharField(max_length=100, blank=True, verbose_name="Responsable du chantier")
+    responsable_telephone = models.CharField(max_length=20, blank=True, verbose_name="Téléphone du responsable")
+    instructions_acces = models.TextField(blank=True, verbose_name="Instructions d'accès")
+
+    date_creation = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
 
     class Meta:
-        verbose_name = "Adresse de chantier"
-        verbose_name_plural = "Adresses de chantier"
+        verbose_name = "Adresse Chantier"
+        verbose_name_plural = "Adresses Chantier"
+
+    def save(self, *args, **kwargs):
+        if self.copier_adresse_principale and self.client:
+            self.adresse = self.client.adresse
+            self.code_postal = self.client.code_postal
+            self.ville = self.client.ville
+            self.pays = self.client.pays
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.client.nom_complet} - {self.nom}"
-
+        return f"{self.nom or 'Chantier sans nom'} - {self.client.nom_complet}"
 
 class TarifTVAClient(models.Model):
+    """Tarifs TVA spécifiques par client"""
     client = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='tarifs_tva')
-    description = models.CharField(max_length=200, verbose_name="Description")
     taux_tva = models.DecimalField(
         max_digits=5,
         decimal_places=2,
+        blank=True,  # Adicionado blank=True
+        null=True,   # Adicionado null=True
         verbose_name="Taux TVA (%)"
     )
-    par_defaut = models.BooleanField(default=False, verbose_name="Taux par défaut")
+    description = models.CharField(max_length=200, blank=True, verbose_name="Description")
+    actif = models.BooleanField(default=True, verbose_name="Actif")
+
+    date_creation = models.DateTimeField(default=timezone.now, verbose_name="Date de création")
 
     class Meta:
-        verbose_name = "Tarif TVA"
-        verbose_name_plural = "Tarifs TVA"
-        unique_together = ['client', 'description']
+        verbose_name = "Tarif TVA Client"
+        verbose_name_plural = "Tarifs TVA Client"
+        unique_together = ['client', 'taux_tva']
 
     def __str__(self):
-        return f"{self.client.nom_complet} - {self.description} ({self.taux_tva}%)"
-
-    def save(self, *args, **kwargs):
-        if self.par_defaut:
-            # S'assurer qu'il n'y a qu'un seul taux par défaut par client
-            TarifTVAClient.objects.filter(client=self.client, par_defaut=True).update(par_defaut=False)
-        super().save(*args, **kwargs)
+        if self.taux_tva:
+            return f"{self.client.nom_complet} - {self.taux_tva}%"
+        return f"{self.client.nom_complet} - TVA non définie"

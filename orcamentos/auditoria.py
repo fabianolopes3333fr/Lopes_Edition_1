@@ -17,6 +17,20 @@ class TipoAcao(models.TextChoices):
     APROVACAO = "aprovacao", "Approbation"
     REJEICAO = "rejeicao", "Rejet"
     CANCELAMENTO = "cancelamento", "Annulation"
+    DOWNLOAD = "download", "Téléchargement"
+    # NOVOS TIPOS PARA ORÇAMENTOS ÓRFÃOS
+    VINCULACAO_ORFAO = "vinculacao_orfao", "Liaison demande orpheline"
+    DETECCAO_ORFAO = "deteccao_orfao", "Détection demande orpheline"
+    PROCESSAMENTO_LOTE = "processamento_lote", "Traitement en lot"
+    NOTIFICACAO_VINCULACAO = "notificacao_vinculacao", "Notification de liaison"
+    # NOVOS TIPOS PARA FATURAS
+    CRIACAO_FATURA = "criacao_fatura", "Création de facture"
+    ENVIO_FATURA = "envio_fatura", "Envoi de facture"
+    PAGAMENTO_FATURA = "pagamento_fatura", "Paiement de facture"
+    VISUALIZACAO_FATURA = "visualizacao_fatura", "Consultation de facture"
+    DOWNLOAD_FATURA_PDF = "download_fatura_pdf", "Téléchargement PDF facture"
+    EDICAO_FATURA = "edicao_fatura", "Modification de facture"
+    ANULACAO_FATURA = "anulacao_fatura", "Annulation de facture"
 
 
 class LogAuditoria(models.Model):
@@ -37,7 +51,7 @@ class LogAuditoria(models.Model):
 
     # Ação realizada
     acao = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=TipoAcao.choices,
         verbose_name="Action"
     )
@@ -350,69 +364,416 @@ class AuditoriaManager:
 
         return estatisticas
 
+    # ============ MÉTODOS ESPECÍFICOS PARA ORÇAMENTOS ÓRFÃOS ============
 
-# Decorator para auditoria automática
-def auditar_acao(acao, descricao_func=None, modulo="orcamentos", funcionalidade=""):
-    """
-    Decorator para auditoria automática de views
+    @staticmethod
+    def registrar_vinculacao_orcamento_orfao(usuario, solicitacao, request=None, origem="manual"):
+        """Registra vinculação de orçamento órfão a um usuário"""
+        dados_anteriores = {'cliente': None, 'email_solicitante': solicitacao.email_solicitante}
+        dados_posteriores = {
+            'cliente': usuario.id if usuario else None,
+            'cliente_nome': usuario.get_full_name() if usuario else '',
+            'email_solicitante': solicitacao.email_solicitante
+        }
 
-    Usage:
-        @auditar_acao(TipoAcao.CRIACAO, "Criação de projeto")
-        def criar_projeto(request):
-            # ...
-    """
-    def decorator(view_func):
-        def wrapper(request, *args, **kwargs):
-            try:
-                # Executar a view
-                response = view_func(request, *args, **kwargs)
+        campos_alterados = {
+            'cliente': {
+                'anterior': None,
+                'novo': f"{usuario.get_full_name()} ({usuario.email})" if usuario else None
+            }
+        }
 
-                # Se a view foi bem-sucedida, registrar auditoria
-                if hasattr(response, 'status_code') and 200 <= response.status_code < 400:
-                    descricao = descricao_func(request, *args, **kwargs) if callable(descricao_func) else descricao_func
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.VINCULACAO_ORFAO,
+            objeto=solicitacao,
+            descricao=f"Liaison automatique de la demande orpheline {solicitacao.numero} à l'utilisateur {usuario.get_full_name() if usuario else 'Unknown'} - Origine: {origem}",
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Liaison demandes orphelines"
+        )
 
-                    # Tentar obter objeto do contexto ou kwargs
-                    objeto = None
-                    if hasattr(response, 'context_data') and response.context_data:
-                        for key in ['objeto', 'object', 'projeto', 'orcamento', 'solicitacao']:
-                            if key in response.context_data:
-                                objeto = response.context_data[key]
-                                break
+    @staticmethod
+    def registrar_deteccao_orcamento_orfao(usuario, email, quantidade_encontrada, request=None):
+        """Registra detecção de orçamentos órfãos"""
+        # Usar o usuário como objeto para este tipo de log
+        dados_deteccao = {
+            'email_verificado': email,
+            'quantidade_orfas_encontradas': quantidade_encontrada,
+            'data_deteccao': timezone.now().isoformat(),
+            'usuario_beneficiado': usuario.id if usuario else None
+        }
 
-                    if objeto:
-                        AuditoriaManager.registrar_acao(
-                            usuario=request.user if request.user.is_authenticated else None,
-                            acao=acao,
-                            objeto=objeto,
-                            descricao=descricao or f"Ação {acao} realizada",
-                            request=request,
-                            modulo=modulo,
-                            funcionalidade=funcionalidade
-                        )
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.DETECCAO_ORFAO,
+            objeto=usuario,
+            descricao=f"Détection de {quantidade_encontrada} demande{'s' if quantidade_encontrada > 1 else ''} orpheline{'s' if quantidade_encontrada > 1 else ''} pour l'email {email}",
+            request=request,
+            dados_posteriores=dados_deteccao,
+            funcionalidade="Détection automatique"
+        )
 
-                return response
+    @staticmethod
+    def registrar_processamento_lote_orfaos(usuario_comando, total_processadas, total_vinculadas, emails_processados, request=None):
+        """Registra processamento em lote de orçamentos órfãos via comando"""
+        dados_processamento = {
+            'total_orfas_encontradas': total_processadas,
+            'total_vinculadas': total_vinculadas,
+            'emails_processados': list(emails_processados),
+            'data_processamento': timezone.now().isoformat(),
+            'metodo': 'comando_gerenciamento'
+        }
 
-            except Exception as e:
-                # Registrar erro na auditoria
-                if request.user.is_authenticated:
-                    # Criar um objeto dummy para registrar o erro
-                    from django.contrib.contenttypes.models import ContentType
-                    ct = ContentType.objects.get_for_model(User)
+        # Usar o primeiro usuário como objeto ou criar um log genérico
+        objeto = usuario_comando if usuario_comando else User.objects.filter(is_staff=True).first()
 
-                    AuditoriaManager.registrar_acao(
-                        usuario=request.user,
-                        acao=acao,
-                        objeto=request.user,  # Usar usuário como objeto em caso de erro
-                        descricao=f"Erro ao executar {funcionalidade}",
-                        request=request,
-                        sucesso=False,
-                        erro_mensagem=str(e),
-                        modulo=modulo,
-                        funcionalidade=funcionalidade
-                    )
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario_comando,
+            acao=TipoAcao.PROCESSAMENTO_LOTE,
+            objeto=objeto,
+            descricao=f"Traitement en lot: {total_vinculadas}/{total_processadas} demandes orphelines liées - {len(emails_processados)} emails traités",
+            request=request,
+            dados_posteriores=dados_processamento,
+            funcionalidade="Traitement en lot"
+        )
 
-                # Re-lançar a exceção
-                raise
+    @staticmethod
+    def registrar_notificacao_vinculacao(usuario_notificado, quantidade_orcamentos, metodo_vinculacao="automatico", request=None):
+        """Registra envio de notificação sobre vinculação de orçamentos"""
+        dados_notificacao = {
+            'usuario_notificado': usuario_notificado.id,
+            'email_notificado': usuario_notificado.email,
+            'quantidade_orcamentos': quantidade_orcamentos,
+            'metodo_vinculacao': metodo_vinculacao,
+            'data_notificacao': timezone.now().isoformat()
+        }
 
-        return wrapper
-    return decorator
+        return AuditoriaManager.registrar_acao(
+            usuario=None,  # Notificação é do sistema
+            acao=TipoAcao.NOTIFICACAO_VINCULACAO,
+            objeto=usuario_notificado,
+            descricao=f"Notification envoyée à {usuario_notificado.get_full_name()} ({usuario_notificado.email}) - {quantidade_orcamentos} demande{'s' if quantidade_orcamentos > 1 else ''} liée{'s' if quantidade_orcamentos > 1 else ''}",
+            request=request,
+            dados_posteriores=dados_notificacao,
+            funcionalidade="Notification système"
+        )
+
+    @staticmethod
+    def registrar_mudanca_status_projeto(usuario, projeto, status_anterior, status_novo, request=None):
+        """Registra mudança de status de projeto"""
+        dados_anteriores = {'status': status_anterior}
+        dados_posteriores = {'status': status_novo}
+
+        campos_alterados = {
+            'status': {
+                'anterior': status_anterior,
+                'novo': status_novo
+            }
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.EDICAO,
+            objeto=projeto,
+            descricao=f"Changement de statut du projet '{projeto.titulo}': {status_anterior} → {status_novo}",
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Changement de statut projet"
+        )
+
+    @staticmethod
+    def registrar_solicitacao_publica_usuario_logado(usuario, solicitacao, request=None):
+        """Registra quando usuário logado usa URL pública"""
+        dados_contexto = {
+            'usuario_logado': usuario.id,
+            'email_formulario': solicitacao.email_solicitante,
+            'emails_coincidem': solicitacao.email_solicitante.lower() == usuario.email.lower(),
+            'vinculacao_automatica': True
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.CRIACAO,
+            objeto=solicitacao,
+            descricao=f"Demande de devis via URL publique par utilisateur connecté - Auto-liaison activée",
+            request=request,
+            dados_posteriores=dados_contexto,
+            funcionalidade="Demande publique avec utilisateur connecté"
+        )
+
+    # ============ MÉTODOS ESPECÍFICOS PARA FATURAS ============
+
+    @staticmethod
+    def registrar_criacao_fatura(usuario, fatura, request=None, origem="manual", orcamento_vinculado=None):
+        """Registra criação de nova fatura"""
+        dados_fatura = {
+            'numero': fatura.numero,
+            'cliente_id': fatura.cliente.id if fatura.cliente else None,
+            'cliente_nome': fatura.cliente.get_full_name() if fatura.cliente else None,
+            'titulo': fatura.titulo,
+            'total': str(fatura.total),
+            'status': fatura.status,
+            'data_emissao': fatura.data_emissao.isoformat() if fatura.data_emissao else None,
+            'data_vencimento': fatura.data_vencimento.isoformat() if fatura.data_vencimento else None,
+            'origem': origem,
+            'orcamento_vinculado': orcamento_vinculado.numero if orcamento_vinculado else None
+        }
+
+        descricao = f"Création de la facture {fatura.numero} pour le client {fatura.cliente.get_full_name() if fatura.cliente else 'N/A'}"
+        if orcamento_vinculado:
+            descricao += f" (basée sur le devis {orcamento_vinculado.numero})"
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.CRIACAO_FATURA,
+            objeto=fatura,
+            descricao=descricao,
+            request=request,
+            dados_posteriores=dados_fatura,
+            funcionalidade="Création de facture"
+        )
+
+    @staticmethod
+    def registrar_envio_fatura(usuario, fatura, request=None):
+        """Registra envio de fatura ao cliente"""
+        dados_anteriores = {
+            'status': 'brouillon',
+            'data_envio': None
+        }
+
+        dados_posteriores = {
+            'status': fatura.status,
+            'data_envio': fatura.data_envio.isoformat() if fatura.data_envio else None,
+            'cliente_email': fatura.cliente.email if fatura.cliente else None
+        }
+
+        campos_alterados = {
+            'status': {
+                'anterior': 'brouillon',
+                'novo': fatura.status
+            },
+            'data_envio': {
+                'anterior': None,
+                'novo': fatura.data_envio.isoformat() if fatura.data_envio else None
+            }
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.ENVIO_FATURA,
+            objeto=fatura,
+            descricao=f"Envoi de la facture {fatura.numero} au client {fatura.cliente.get_full_name() if fatura.cliente else 'N/A'}",
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Envoi de facture"
+        )
+
+    @staticmethod
+    def registrar_pagamento_fatura(usuario, fatura, data_pagamento, request=None):
+        """Registra marcação de fatura como paga"""
+        dados_anteriores = {
+            'status': fatura.status,
+            'data_pagamento': fatura.data_pagamento.isoformat() if fatura.data_pagamento else None
+        }
+
+        dados_posteriores = {
+            'status': 'payee',
+            'data_pagamento': data_pagamento.isoformat() if data_pagamento else None,
+            'total_pago': str(fatura.total)
+        }
+
+        campos_alterados = {
+            'status': {
+                'anterior': fatura.status,
+                'novo': 'payee'
+            },
+            'data_pagamento': {
+                'anterior': fatura.data_pagamento.isoformat() if fatura.data_pagamento else None,
+                'novo': data_pagamento.isoformat() if data_pagamento else None
+            }
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.PAGAMENTO_FATURA,
+            objeto=fatura,
+            descricao=f"Facture {fatura.numero} marquée comme payée - Montant: {fatura.total}€",
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Paiement de facture"
+        )
+
+    @staticmethod
+    def registrar_visualizacao_fatura(usuario, fatura, request=None, tipo_visualizacao="detail"):
+        """Registra visualização de fatura pelo cliente"""
+        dados_visualizacao = {
+            'fatura_numero': fatura.numero,
+            'tipo_visualizacao': tipo_visualizacao,  # 'list', 'detail', 'pdf'
+            'status_fatura': fatura.status,
+            'cliente_id': fatura.cliente.id if fatura.cliente else None,
+            'timestamp': timezone.now().isoformat()
+        }
+
+        descricao_tipo = {
+            'list': 'liste des factures',
+            'detail': 'détails de la facture',
+            'pdf': 'PDF de la facture'
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.VISUALIZACAO_FATURA,
+            objeto=fatura,
+            descricao=f"Consultation de {descricao_tipo.get(tipo_visualizacao, 'facture')} {fatura.numero} par {usuario.get_full_name() if usuario else 'Anonyme'}",
+            request=request,
+            dados_posteriores=dados_visualizacao,
+            funcionalidade="Consultation de facture"
+        )
+
+    @staticmethod
+    def registrar_download_fatura_pdf(usuario, fatura, request=None):
+        """Registra download do PDF da fatura"""
+        dados_download = {
+            'fatura_numero': fatura.numero,
+            'formato': 'PDF',
+            'timestamp': timezone.now().isoformat(),
+            'usuario_id': usuario.id if usuario else None,
+            'usuario_nome': usuario.get_full_name() if usuario else None
+        }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.DOWNLOAD_FATURA_PDF,
+            objeto=fatura,
+            descricao=f"Téléchargement PDF de la facture {fatura.numero} par {usuario.get_full_name() if usuario else 'Anonyme'}",
+            request=request,
+            dados_posteriores=dados_download,
+            funcionalidade="Téléchargement PDF facture"
+        )
+
+    @staticmethod
+    def registrar_edicao_fatura(usuario, fatura, dados_anteriores, dados_posteriores, request=None):
+        """Registra edição de fatura"""
+        # Calcular campos alterados
+        campos_alterados = {}
+        if dados_anteriores and dados_posteriores:
+            for campo, valor_novo in dados_posteriores.items():
+                valor_anterior = dados_anteriores.get(campo)
+                if valor_anterior != valor_novo:
+                    campos_alterados[campo] = {
+                        'anterior': valor_anterior,
+                        'novo': valor_novo
+                    }
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.EDICAO_FATURA,
+            objeto=fatura,
+            descricao=f"Modification de la facture {fatura.numero}",
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Modification de facture"
+        )
+
+    @staticmethod
+    def registrar_anulacao_fatura(usuario, fatura, motivo="", request=None):
+        """Registra anulação de fatura"""
+        dados_anteriores = {
+            'status': fatura.status,
+            'total': str(fatura.total)
+        }
+
+        dados_posteriores = {
+            'status': 'annulee',
+            'motivo_anulacao': motivo,
+            'data_anulacao': timezone.now().isoformat()
+        }
+
+        campos_alterados = {
+            'status': {
+                'anterior': fatura.status,
+                'novo': 'annulee'
+            }
+        }
+
+        descricao = f"Annulation de la facture {fatura.numero}"
+        if motivo:
+            descricao += f" - Motif: {motivo}"
+
+        return AuditoriaManager.registrar_acao(
+            usuario=usuario,
+            acao=TipoAcao.ANULACAO_FATURA,
+            objeto=fatura,
+            descricao=descricao,
+            request=request,
+            dados_anteriores=dados_anteriores,
+            dados_posteriores=dados_posteriores,
+            campos_alterados=campos_alterados,
+            funcionalidade="Annulation de facture"
+        )
+
+    @staticmethod
+    def obter_historico_fatura(fatura):
+        """Obtém histórico completo de uma fatura"""
+        return AuditoriaManager.obter_historico_objeto(fatura)
+
+    @staticmethod
+    def obter_faturas_visualizadas_cliente(usuario, dias=30):
+        """Obtém faturas visualizadas recentemente por um cliente"""
+        data_limite = timezone.now() - timezone.timedelta(days=dias)
+
+        return LogAuditoria.objects.filter(
+            usuario=usuario,
+            acao__in=[
+                TipoAcao.VISUALIZACAO_FATURA,
+                TipoAcao.DOWNLOAD_FATURA_PDF
+            ],
+            timestamp__gte=data_limite
+        ).order_by('-timestamp')
+
+    @staticmethod
+    def obter_estatisticas_faturas(data_inicio=None, data_fim=None):
+        """Obtém estatísticas de atividades relacionadas a faturas"""
+        if not data_inicio:
+            data_inicio = timezone.now() - timezone.timedelta(days=30)
+        if not data_fim:
+            data_fim = timezone.now()
+
+        logs_faturas = LogAuditoria.objects.filter(
+            timestamp__gte=data_inicio,
+            timestamp__lte=data_fim,
+            acao__in=[
+                TipoAcao.CRIACAO_FATURA,
+                TipoAcao.ENVIO_FATURA,
+                TipoAcao.PAGAMENTO_FATURA,
+                TipoAcao.VISUALIZACAO_FATURA,
+                TipoAcao.DOWNLOAD_FATURA_PDF,
+                TipoAcao.EDICAO_FATURA,
+                TipoAcao.ANULACAO_FATURA
+            ]
+        )
+
+        estatisticas = {
+            'total_acoes_faturas': logs_faturas.count(),
+            'faturas_criadas': logs_faturas.filter(acao=TipoAcao.CRIACAO_FATURA).count(),
+            'faturas_enviadas': logs_faturas.filter(acao=TipoAcao.ENVIO_FATURA).count(),
+            'faturas_pagas': logs_faturas.filter(acao=TipoAcao.PAGAMENTO_FATURA).count(),
+            'visualizacoes': logs_faturas.filter(acao=TipoAcao.VISUALIZACAO_FATURA).count(),
+            'downloads_pdf': logs_faturas.filter(acao=TipoAcao.DOWNLOAD_FATURA_PDF).count(),
+            'edicoes': logs_faturas.filter(acao=TipoAcao.EDICAO_FATURA).count(),
+            'anulacoes': logs_faturas.filter(acao=TipoAcao.ANULACAO_FATURA).count(),
+        }
+
+        return estatisticas
+

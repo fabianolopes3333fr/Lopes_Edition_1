@@ -5,7 +5,50 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/COMANDOS_ORFAOS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_admin_orcamentos_orfaos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_auditoria_orcamentos_orfaos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_comando_vincular_orcamentos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_vinculacao_orcamentos_orfaos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/dashboard/admin_projeto_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/dashboard/admin_projetos_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin/devis_pdf_html.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin/fatura_pdf.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/cliente/fatura_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/cliente/fatura_pdf.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/orcamentos/cliente/faturas_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test_devis_debug.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/admin_dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/admin_dashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/clientes/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientes/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/clientes/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientes/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/clientes/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientes/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/clientes/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/auditoria.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/auditoria.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/management/commands/vincular_orcamentos_orfaos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/management/commands/vincular_orcamentos_orfaos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_orcamentos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_orcamentos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projetos/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/projetos/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projetos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/projetos/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/projetos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/projetos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_orcamentos_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_orcamentos_tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/form_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/form_cliente.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/clientes/lista_clientes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_fatura_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_fatura_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos_orfaos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos_orfaos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_pdf.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_pdf.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +64,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -50,6 +96,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.github.copilot.settings.general.GeneralConfigurable&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
     &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\fabia\\AppData\\Roaming\\JetBrains\\PyCharm2025.2\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
@@ -83,7 +130,10 @@
       <workItem from="1759066665605" duration="6000" />
       <workItem from="1759077153427" duration="85004000" />
       <workItem from="1759514994385" duration="10441000" />
-      <workItem from="1759574709010" duration="24262000" />
+      <workItem from="1759574709010" duration="65239000" />
+      <workItem from="1759679689990" duration="751000" />
+      <workItem from="1759680473734" duration="723000" />
+      <workItem from="1759681230908" duration="27510000" />
     </task>
     <servers />
   </component>

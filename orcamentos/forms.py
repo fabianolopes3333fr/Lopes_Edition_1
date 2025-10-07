@@ -515,7 +515,7 @@ class FactureForm(forms.ModelForm):
             'placeholder': 'Tapez le nom ou email du client...',
             'autocomplete': 'off'
         }),
-        required=True,
+        required=False,  # CORREÇÃO: Sempre não obrigatório
         help_text='Recherchez un client par nom ou email'
     )
 
@@ -591,6 +591,8 @@ class FactureForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        # CORREÇÃO: Extrair cliente antes de chamar super
+        cliente_predefinido = kwargs.pop('cliente_predefinido', None)
         super().__init__(*args, **kwargs)
 
         # Configurar queryset para o campo cliente
@@ -598,30 +600,88 @@ class FactureForm(forms.ModelForm):
         User = get_user_model()
         self.fields['cliente'].queryset = User.objects.filter(is_active=True, is_staff=False)
 
+        # CORREÇÃO: Se tem cliente predefinido, configurar automaticamente
+        if cliente_predefinido:
+            self.fields['cliente'].initial = cliente_predefinido
+            nome_cliente = f"{cliente_predefinido.first_name} {cliente_predefinido.last_name}".strip()
+            if not nome_cliente:
+                nome_cliente = cliente_predefinido.email
+            self.fields['cliente_search'].initial = nome_cliente
+            # Tornar o campo cliente não obrigatório temporariamente pois já está definido
+            self.fields['cliente_search'].required = False
+
         # Se estamos editando uma fatura existente, preencher o campo de busca
-        if self.instance.pk and self.instance.cliente:
-            cliente = self.instance.cliente
-            nome_completo = f"{cliente.first_name} {cliente.last_name}".strip()
-            if not nome_completo:
-                nome_completo = cliente.username
-            self.fields['cliente_search'].initial = f"{nome_completo} ({cliente.email})"
+        elif self.instance and self.instance.pk and self.instance.cliente:
+            nome_cliente = f"{self.instance.cliente.first_name} {self.instance.cliente.last_name}".strip()
+            if not nome_cliente:
+                nome_cliente = self.instance.cliente.email
+            self.fields['cliente_search'].initial = nome_cliente
 
-        # Definir valores padrão
-        if not self.instance.pk:  # Apenas para novas faturas
-            from datetime import date, timedelta
-            self.fields['data_emissao'].initial = date.today()
-            self.fields['data_vencimento'].initial = date.today() + timedelta(days=30)
-            self.fields['desconto'].initial = 0.00
+        # CORREÇÃO: Definir data de emissão padrão se não fornecida
+        if not self.initial.get('data_emissao') and not (self.instance and self.instance.pk):
+            from django.utils import timezone
+            self.fields['data_emissao'].initial = timezone.now().date()
 
-        # Tornar todos os campos obrigatórios exceto observações
-        for field_name, field in self.fields.items():
-            if field_name not in ['observacoes', 'cliente_search']:
-                field.required = True
+    def clean(self):
+        cleaned_data = super().clean()
 
-            # Adicionar classe de erro se o campo tem erros
-            if field_name in self.errors:
-                current_classes = field.widget.attrs.get('class', '')
-                field.widget.attrs['class'] = f"{current_classes} border-red-500 focus:border-red-500 focus:ring-red-500"
+        # CORREÇÃO: Validação personalizada para o cliente
+        cliente = cleaned_data.get('cliente')
+        cliente_search = cleaned_data.get('cliente_search', '').strip()
+
+        # Se já tem cliente, não precisa validar busca
+        if cliente:
+            return cleaned_data
+
+        # Se não tem cliente mas tem busca, tentar encontrar
+        if cliente_search:
+            from django.contrib.auth import get_user_model
+            from django.db.models import Q
+            User = get_user_model()
+
+            # Buscar por email exato primeiro
+            try:
+                cliente_encontrado = User.objects.get(
+                    email__iexact=cliente_search.strip(),
+                    is_active=True,
+                    is_staff=False
+                )
+                cleaned_data['cliente'] = cliente_encontrado
+                return cleaned_data
+            except User.DoesNotExist:
+                # Buscar por nome
+                usuarios = User.objects.filter(
+                    is_active=True,
+                    is_staff=False
+                ).filter(
+                    Q(first_name__icontains=cliente_search) |
+                    Q(last_name__icontains=cliente_search) |
+                    Q(email__icontains=cliente_search)
+                )
+
+                if usuarios.count() == 1:
+                    cleaned_data['cliente'] = usuarios.first()
+                    return cleaned_data
+                elif usuarios.count() > 1:
+                    raise forms.ValidationError("Plusieurs clients correspondent à votre recherche. Soyez plus précis.")
+                else:
+                    raise forms.ValidationError("Aucun client trouvé avec ce nom ou email.")
+
+        # Se chegou até aqui, não tem cliente
+        raise forms.ValidationError("Veuillez sélectionner un client.")
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # CORREÇÃO: Garantir que o cliente está definido
+        if not instance.cliente and hasattr(self, 'cleaned_data'):
+            cliente = self.cleaned_data.get('cliente')
+            if cliente:
+                instance.cliente = cliente
+
+        if commit:
+            instance.save()
+        return instance
 
 class ItemFactureForm(forms.ModelForm):
     """Formulário para itens da fatura"""

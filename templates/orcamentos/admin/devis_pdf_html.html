@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis #{{ orcamento.numero }} - LOPES PEINTURE</title>
+    <style>
+        @media print {
+            @page {
+                margin: 0.5in;
+                size: A4;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #0e0f0c;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            position: relative;
+            min-height: calc(100vh - 40px);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #80b14f;
+            padding-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            color: #80b14f;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .company-info p {
+            margin: 2px 0;
+            color: #6e6f6d;
+        }
+
+        .devis-info {
+            text-align: right;
+            flex: 1;
+        }
+
+        .devis-title {
+            font-size: 28px;
+            color: #80b14f;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .devis-number {
+            font-size: 16px;
+            color: #0e0f0c;
+            margin-bottom: 5px;
+        }
+
+        .devis-date {
+            color: #6e6f6d;
+        }
+
+        /* Client Info */
+        .client-section {
+            margin: 30px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-info h3 {
+            color: #80b14f;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .client-details {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        .devis-details {
+            flex: 1;
+            margin-left: 30px;
+        }
+        .devis-details h3 {
+            color: #80b14f;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+
+        .detail-row.highlight {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* Status */
+        .status-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-aprovado {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #80b14f;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-rejeitado {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Items Table */
+        .items-section {
+            margin: 30px 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #80b14f;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .items-table th {
+            background: #80b14f;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .items-table tr:hover {
+            background: #f0f0f0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Totals */
+        .totals-section {
+            margin: 30px 0 20px 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-table {
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .totals-table .label {
+            text-align: left;
+            background: #d4edda;
+            font-weight: bold;
+            color: #0e0f0c;
+        }
+
+        .totals-table .value {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .total-final {
+            background: #80b14f !important;
+            color: white !important;
+            font-size: 14px;
+        }
+
+        /* Description */
+        .description-section {
+            margin: 30px 0;
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #6e6f6d;
+            text-align: center;
+            color: #6e6f6d;
+            font-size: 11px;
+        }
+
+        .payment-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        /* Observations */
+        .observations-section {
+            margin: 30px 0;
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+            page-break-inside: avoid;
+        }
+
+        .signature-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .signature-status-badge {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #d4edda 0%, #c8e6c8 100%);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #155724;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .status-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .signature-timestamp {
+            font-size: 12px;
+            color: #6e6f6d;
+            font-style: italic;
+        }
+
+        .signature-main-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 20px 0;
+            gap: 30px;
+        }
+
+        .signature-details {
+            flex: 1;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .signature-details h4 {
+            font-size: 14px;
+            color: #80b14f;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #80b14f;
+            padding-bottom: 5px;
+        }
+
+        .signature-field {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #0e0f0c;
+            margin-right: 10px;
+            min-width: 120px;
+        }
+
+        .field-value {
+            color: #333;
+            flex: 1;
+        }
+
+        .signature-image-container {
+            flex: 0 0 auto;
+            text-align: center;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .signature-image-container h4 {
+            font-size: 14px;
+            color: #80b14f;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .signature-image-frame {
+            display: inline-block;
+            position: relative;
+            background: #ffffff;
+            padding: 10px;
+            border: 2px solid #80b14f;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .signature-image {
+            max-width: 200px;
+            max-height: 100px;
+            border-radius: 3px;
+            display: block;
+        }
+
+        .signature-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(128, 177, 79, 0.9);
+            color: white;
+            padding: 3px 8px;
+            font-size: 11px;
+            text-align: center;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .signature-declaration {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        .declaration-header {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #80b14f;
+            font-size: 14px;
+        }
+
+        .declaration-text {
+            text-align: justify;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .signature-certificate {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            border-radius: 8px;
+            border: 2px solid #80b14f;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .certificate-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #80b14f;
+        }
+
+        .certificate-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .certificate-title {
+            font-weight: bold;
+            color: #0e0f0c;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .certificate-content {
+            margin: 15px 0;
+        }
+
+        .certificate-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .cert-label {
+            font-weight: bold;
+            color: #0e0f0c;
+            flex: 0 0 auto;
+            margin-right: 15px;
+        }
+
+        .cert-value {
+            color: #333;
+            flex: 1;
+            text-align: right;
+        }
+
+        .cert-valid {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .certificate-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #80b14f;
+        }
+
+        .security-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            color: #333;
+            background: #ffffff;
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #80b14f;
+            font-weight: bold;
+        }
+
+        /* Ensure proper page breaks for print */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 11px;
+            }
+            
+            .container {
+                max-width: none;
+                margin: 0;
+                padding: 15px;
+                min-height: auto;
+                position: relative;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
+            
+            .client-section {
+                margin: 20px 0;
+                page-break-inside: avoid;
+            }
+            
+            .items-section {
+                margin: 20px 0;
+            }
+            
+            .totals-section {
+                margin: 20px 0 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .description-section {
+                margin: 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .observations-section {
+                margin: 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .footer {
+                margin-top: 30px;
+                padding-top: 15px;
+                page-break-inside: avoid;
+                position: relative;
+            }
+            
+            .payment-info {
+                margin-top: 10px;
+                padding: 10px;
+                page-break-inside: avoid;
+            }
+            
+            /* Evitar quebras desnecessárias */
+            .totals-table,
+            .client-details,
+            .status-section {
+                page-break-inside: avoid;
+            }
+            
+            /* Ajustar tamanhos para impressão */
+            .devis-title {
+                font-size: 24px;
+            }
+            
+            .company-info h1 {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 14px;
+            }
+        }
+
+        /* Utilities */
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .font-bold { font-weight: bold; text-transform: uppercase; }
+        .text-sm { font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div>
+                    <img
+                        class="logo"
+                        src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
+                        alt="LOPES"
+                    />
+                </div>
+                <h3>EI: {{ company_info.name }}</h3>
+                <p>{{ company_info.address }}</p>
+                <p>{{ company_info.city }}</p>
+                <p>SIRET: {{ company_info.siret }}</p>
+                <p>TVA Intracom: {{ company_info.tva }}</p>
+                <p>Tél: {{ company_info.phone }}</p>
+                <p>Email: {{ company_info.email }}</p>
+                <p>Site: {{ company_info.site }}</p>
+            </div>
+            <div class="devis-info">
+                <div class="devis-title">DEVIS</div>
+                <div class="devis-number">N° {{ orcamento.numero }}</div>
+                <div class="devis-date">Le {{ date_generation|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status-section">
+            {% if orcamento.status == 'aceito' %}
+                <span class="status-badge status-aprovado">✓ Devis Approuvé</span>
+            {% elif orcamento.status == 'pendente' %}
+                <span class="status-badge status-pendente">⏳ En Attente d'Approbation</span>
+            {% elif orcamento.status == 'recusado' %}
+                <span class="status-badge status-rejeitado">✗ Devis Rejeté</span>
+            {% elif orcamento.status == 'enviado' %}
+                <span class="status-badge status-pendente">📤 Devis Envoyé</span>
+            {% elif orcamento.status == 'em_elaboracao' %}
+                <span class="status-badge status-pendente">📝 En Cours d'Élaboration</span>
+            {% elif orcamento.status == 'expirado' %}
+                <span class="status-badge status-rejeitado">⏰ Devis Expiré</span>
+            {% endif %}
+        </div>
+
+        <!-- Client and Devis Details -->
+        <div class="client-section">
+            <div class="client-info">
+                <h3>Devis pour</h3>
+                <div class="client-details">
+                    {% if orcamento.solicitacao.cliente %}
+                        <div class="font-bold">Client n° {{ orcamento.solicitacao.cliente.code }}</div>
+                    {% endif %}
+                    <div class="font-bold">{{ orcamento.solicitacao.nome_solicitante }}</div>
+                    <div>{{ orcamento.solicitacao.endereco }}</div>
+                    <div>{{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}</div>
+                    <div>{{ orcamento.solicitacao.email_solicitante }}</div>
+                    
+                    {% if orcamento.solicitacao.telefone_solicitante %}
+                    <div>Tél: {{ orcamento.solicitacao.telefone_solicitante }}</div>
+                    {% elif orcamento.solicitacao.cliente.profile.phone %}
+                    <div>Tél: {{ orcamento.solicitacao.cliente.profile.phone }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="devis-details">
+                <h3>Détails du Devis</h3>
+                <div class="client-details">
+                    <div class="detail-row">
+                        <span>Date d'émission:</span>
+                        <span>{{ orcamento.data_elaboracao|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Validité:</span>
+                        <span>{{ orcamento.validade_orcamento|date:"d/m/Y" }}</span>
+                    </div>
+                    {% if orcamento.data_resposta_cliente %}
+                    <div class="detail-row highlight">
+                        <span>Date d'approbation:</span>
+                        <span>{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if orcamento.solicitacao %}
+                    <div class="detail-row">
+                        <span>Demande associée:</span>
+                        <span>#{{ orcamento.solicitacao.numero }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="detail-row">
+                        <span>Élaboré par:</span>
+                        <span>{{ orcamento.elaborado_por.first_name }} {{ orcamento.elaborado_por.last_name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        {% if orcamento.descricao %}
+        <div class="description-section">
+            <div class="section-title">Description du Projet</div>
+            <div>{{ orcamento.descricao|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Items -->
+        {% if items_data %}
+        <div class="items-section">
+            <div class="section-title">Détail des Prestations</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Référence</th>
+                        <th style="width: 35%">Désignation</th>
+                        <th style="width: 8%" class="text-center">Qté</th>
+                        <th style="width: 8%" class="text-center">Unité</th>
+                        <th style="width: 10%" class="text-right">P.U. HT</th>
+                        <th style="width: 8%" class="text-center">TVA</th>
+                        <th style="width: 8%" class="text-center">Remise</th>
+                        <th style="width: 8%" class="text-right">Total HT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items_data %}
+                    <tr>
+                        <td>{{ item.ref|default:"-" }}</td>
+                        <td>{{ item.designation }}</td>
+                        <td class="text-center">{{ item.quantite|floatformat:2 }}</td>
+                        <td class="text-center">{{ item.unite|default:"UN" }}</td>
+                        <td class="text-right">{{ item.pu_ht|floatformat:2 }}€</td>
+                        <td class="text-center">{{ item.taxa_tva }}%</td>
+                        <td class="text-center">
+                            {% if item.remise > 0 %}
+                                {{ item.remise|floatformat:2 }}€
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-right font-bold">{{ item.total_ht|floatformat:2 }}€</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="label">Sous-total HT:</td>
+                    <td class="value">{{ subtotal_ht|floatformat:2 }}€</td>
+                </tr>
+                {% if remise_global > 0 %}
+                <tr>
+                    <td class="label">Remise ({{ remise_global }}%):</td>
+                    <td class="value">-{{ valor_remise|floatformat:2 }}€</td>
+                </tr>
+                <tr>
+                    <td class="label">Sous-total après remise HT:</td>
+                    <td class="value">{{ subtotal_apres_remise_ht|floatformat:2 }}€</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                  {% if taxa_tva_media == "Variável" %}
+                    <td class="label">TVA ({{ taxa_tva_media }}):</td>
+                  {% elif taxa_tva_media == "0" %}
+                    <td class="label">TVA (Exonérée):</td>
+                  {% else %}
+                    <td class="label">TVA ({{ taxa_tva_media }}%):</td>
+                  {% endif %}
+                  <td class="value">{{ taxe_finale|floatformat:2 }}€</td>
+                </tr>
+                <tr>
+                    <td class="label">Acomptés:</td>
+                    <td class="value">0.00€</td>
+                </tr>
+                {% if taxe_finale > 0 %}
+                <tr class="total-final">
+                    <td class="label">Total TTC:</td>
+                    <td class="value">{{ subtotal_apres_remise_ttc|floatformat:2 }}€</td>
+                </tr>
+                {% else %}
+                <tr class="total-final">
+                    <td class="label">Net à Payer:</td>
+                    <td class="value">{{ subtotal_apres_remise_ht|floatformat:2 }}€</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Conditions -->
+        <div class="description-section">
+            <div class="section-title">Conditions Générales</div>
+            <div>
+                {% with acompte_value=orcamento.total|floatformat:2 %}
+                <p><strong>Acompte (30%):</strong> <span>{% widthratio orcamento.total 10 3 %}€ HT</span></p>
+                {% endwith %}
+                <p><strong>Validité du devis:</strong> {{ orcamento.validade_orcamento|date:"d/m/Y" }}</p>
+                <p><strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao|default:"À définir" }} jours</p>
+                {% if orcamento.condicoes_pagamento %}
+                <p><strong>Conditions de paiement:</strong> {{ orcamento.condicoes_pagamento }}</p>
+                {% endif %}
+                <p><strong>• Les prix sont exprimés en euros HT</strong></p>
+                <p><strong>• Devis valable 30 jours à compter de la date d'émission</strong></p>
+                <p><strong>• Acompte de 30% à la commande</strong></p>
+                <p><strong>• Solde à la livraison</strong></p>
+                <p><strong>• Matériaux et main d'œuvre garantis selon les normes en vigueur</strong></p>
+                <p><strong>• Délais d'exécution donnés à titre indicatif</strong></p>
+                <p><strong>• Travaux réalisés selon les règles de l'art</strong></p>
+                <p><strong>• Toute modification ou prestation supplémentaire fera l'objet d'un devis complémentaire</strong></p>
+                <p><strong>• En cas d'annulation par le client, l'acompte restera acquis à l'entreprise</strong></p>
+            </div>
+        </div>
+
+        <!-- Observations -->
+        {% if orcamento.observacoes %}
+        <div class="observations-section">
+            <div class="section-title">Observations</div>
+            <div>{{ orcamento.observacoes|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Signature Section -->
+        {% if orcamento.status == 'aceito' %}
+        <div class="signature-section" style="margin-top: 40px; text-align: left;">
+           <p><strong>Acceptation du devis:</strong></p> <br>
+           
+           <!-- Devis approuvé - informations remplies automatiquement -->
+           <p>Je soussigné(e) <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ HT.</p> <br>
+           
+           <p>Fait à <strong>{{ orcamento.solicitacao.cidade }}</strong>, le <strong>{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</strong></p><br>
+           
+           <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+               <div style="flex: 1;">
+                   <p><strong>Signature du client:</strong></p>
+                   <div style="margin-top: 10px; padding: 15px; border: 2px solid #80b14f; background: #f8fff9; border-radius: 8px; min-height: 80px; position: relative;">
+                       <!-- Signature manuscrite stylisée - PREENCHIDA AUTOMATICAMENTE -->
+                       <div style="font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; font-size: 24px; color: #155724; transform: rotate(-2deg); margin-top: 15px;">
+                           {{ orcamento.solicitacao.nome_solicitante }}
+                       </div>
+                       <div style="position: absolute; bottom: 5px; right: 10px; font-size: 10px; color: #6e6f6d; font-style: italic;">
+                           Signé électroniquement
+                       </div>
+                       <!-- Petit tampon de validation -->
+                       <div style="position: absolute; top: 5px; right: 5px; background: #80b14f; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: bold;">
+                           ✓ VALIDÉ
+                       </div>
+                   </div>
+               </div>
+               
+               <div style="flex: 1; margin-left: 30px;">
+                   <p><strong>Détails de l'acceptation:</strong></p>
+                   <div style="margin-top: 10px; padding: 10px; background: #d4edda; border-left: 4px solid #80b14f; border-radius: 5px; font-size: 11px;">
+                       <p><strong>📅 Date d'acceptation:</strong> {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</p>
+                       <p><strong>🖥️ Acceptation:</strong> Plateforme numérique</p>
+                       <p><strong>📧 Email du signataire:</strong> {{ orcamento.solicitacao.email_solicitante }}</p>
+                       <p><strong>🔒 Statut:</strong> <span style="color: #155724; font-weight: bold;">Juridiquement valide</span></p>
+                       {% if orcamento.ip_assinatura %}
+                       <p><strong>🌐 IP:</strong> {{ orcamento.ip_assinatura }}</p>
+                       {% endif %}
+                   </div>
+               </div>
+           </div>
+           
+           <!-- Certificat de signature électronique -->
+           <div style="margin-top: 30px; padding: 15px; background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%); border: 2px dashed #80b14f; border-radius: 10px; text-align: center;">
+               <div style="display: inline-block; background: #80b14f; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 10px;">
+                   🏆 CERTIFICAT DE SIGNATURE ÉLECTRONIQUE
+               </div>
+               <p style="font-size: 12px; color: #155724; margin: 5px 0;">
+                   Ce document a été signé électroniquement par <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>
+               </p>
+               <p style="font-size: 10px; color: #6e6f6d; margin: 2px 0;">
+                   Signature horodatée et certifiée conforme à la réglementation européenne eIDAS
+               </p>
+               <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 10px; color: #6e6f6d;">
+                   <span>🔐 Chiffrement SHA-256</span>
+                   <span>📅 {{ orcamento.data_resposta_cliente|date:"d/m/Y H:i:s" }}</span>
+                   <span>✅ Légalement contraignant</span>
+               </div>
+           </div>
+        </div>
+        {% elif orcamento.status == 'recusado' %}
+        <!-- Section pour devis refusé -->
+        <div class="signature-section" style="margin-top: 40px; text-align: left;">
+            <p><strong>Statut du devis:</strong></p> <br>
+            <div style="padding: 15px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px;">
+                <p><strong>❌ Devis rejeté le {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</strong></p>
+                {% if orcamento.motivo_recusa %}
+                <p><strong>Motif du rejet:</strong> {{ orcamento.motivo_recusa }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <!-- Section pour devis en attente -->
+        <div class="signature-section" style="margin-top: 40px; text-align: left;">
+           <p><strong>Acceptation du devis:</strong></p> <br>
+           
+           <!-- Devis en attente - champs à remplir -->
+           <p>Je soussigné(e) _____________________, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ HT.</p> <br>
+           
+           <p>Fait à _____________________, le _____________________</p><br>
+           
+           <div style="margin-top: 20px;">
+               <p><strong>Signature du client:</strong></p>
+               <div style="margin-top: 10px; border-bottom: 2px solid #333; width: 300px; height: 60px; position: relative;">
+                   <div style="position: absolute; bottom: -20px; left: 0; font-size: 10px; color: #666;">
+                       (Signature manuscrite)
+                   </div>
+               </div>
+           </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-note">
+                Merci pour votre confiance. En cas de question sur ce devis, n'hésitez pas à nous contacter.
+            </div>
+            <div>
+                Document généré le {{ date_generation|date:"d/m/Y à H:i" }}
+            </div>
+            <div class="text-sm" style="margin-top: 20px;">
+                {{ company_info.name }} - {{ company_info.address }} - {{ company_info.phone }} - {{ company_info.email }}
+            </div>
+            <div class="payment-info">
+                {% if taxa_tva_media == "0" or not taxe_finale %}
+                <strong>TVA non applicable, article 293 B du CGI</strong><br />
+                {% endif %}
+                PAIEMENT PAR VIREMENT BANCAIRE : LOPES DE SOUZA FABIANO (EI) IBAN FR76 1027 8022 3400 0206
+                6300 131
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-print pour le téléchargement
+        window.onload = function() {
+            if (!window.location.search.includes('debug=1')) {
+                window.print();
+            }
+        }
+    </script>
+</body>
+</html>

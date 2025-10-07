@@ -1,0 +1,275 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Facture #{{ fatura.numero }} - LOPES PEINTURE{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="{% url 'orcamentos:cliente_faturas' %}"
+                       class="text-purple-600 hover:text-purple-800 transition-colors duration-200 flex items-center gap-2 mb-4">
+                        <i class="fas fa-arrow-left"></i>
+                        Retour à mes factures
+                    </a>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        <i class="fas fa-file-invoice text-purple-600"></i>
+                        Facture #{{ fatura.numero }}
+                    </h1>
+                    <p class="text-gray-600 mt-2">{{ fatura.titre }}</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'orcamentos:cliente_fatura_pdf' fatura.numero %}"
+                       target="_blank"
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                        <i class="fas fa-download"></i>
+                        Télécharger PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statut de la Facture -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-lg font-semibold text-gray-900">Statut:</div>
+                    {% if fatura.status == 'brouillon' %}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">
+                            <i class="fas fa-edit mr-2"></i>
+                            Brouillon
+                        </span>
+                    {% elif fatura.status == 'envoyee' %}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-800">
+                            <i class="fas fa-clock mr-2"></i>
+                            Envoyée - En attente de paiement
+                        </span>
+                    {% elif fatura.status == 'payee' %}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Payée
+                        </span>
+                    {% elif fatura.status == 'en_retard' %}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            En retard
+                        </span>
+                    {% else %}
+                        <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">
+                            {{ fatura.get_status_display }}
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">Montant total</div>
+                    <div class="text-2xl font-bold text-purple-600">{{ fatura.total|floatformat:2 }}€</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations de la Facture -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Informations Générales -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-purple-600"></i>
+                    Informations Générales
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Numéro:</span>
+                        <span class="font-semibold text-gray-900">#{{ fatura.numero }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Date d'émission:</span>
+                        <span class="font-semibold text-gray-900">{{ fatura.data_emissao|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Date d'échéance:</span>
+                        <span class="font-semibold text-gray-900">{{ fatura.data_vencimento|date:"d/m/Y" }}</span>
+                    </div>
+                    {% if fatura.data_pagamento %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Date de paiement:</span>
+                        <span class="font-semibold text-green-600">{{ fatura.data_pagamento|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Type de paiement:</span>
+                        <span class="font-semibold text-gray-900">{{ fatura.get_tipo_pagamento_display }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">Conditions:</span>
+                        <span class="font-semibold text-gray-900">{{ fatura.get_condicoes_pagamento_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lien avec Devis -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-link text-purple-600"></i>
+                    Lien avec Devis
+                </h2>
+                {% if fatura.orcamento %}
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Devis associé:</span>
+                            <span class="font-semibold text-gray-900">#{{ fatura.orcamento.numero }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Date du devis:</span>
+                            <span class="font-semibold text-gray-900">{{ fatura.orcamento.data_elaboracao|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{% url 'orcamentos:cliente_devis_detail' fatura.orcamento.numero %}"
+                               class="text-purple-600 hover:text-purple-800 transition-colors duration-200 flex items-center gap-2">
+                                <i class="fas fa-eye"></i>
+                                Voir le devis associé
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <div class="text-gray-400 mb-2">
+                            <i class="fas fa-unlink text-2xl"></i>
+                        </div>
+                        <p class="text-gray-600">Cette facture n'est pas liée à un devis</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Description -->
+        {% if fatura.descricao %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-align-left text-purple-600"></i>
+                Description
+            </h2>
+            <div class="text-gray-700 whitespace-pre-line">{{ fatura.descricao }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Détails des Montants -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-calculator text-purple-600"></i>
+                Détails des Montants
+            </h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="text-gray-600">Sous-total HT:</span>
+                    <span class="font-semibold text-gray-900">{{ fatura.subtotal|floatformat:2 }}€</span>
+                </div>
+                {% if fatura.desconto > 0 %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="text-gray-600">Remise ({{ fatura.desconto }}%):</span>
+                    <span class="font-semibold text-red-600">-{{ fatura.valor_desconto|floatformat:2 }}€</span>
+                </div>
+                {% endif %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="text-gray-600">Total HT:</span>
+                    <span class="font-semibold text-gray-900">{{ fatura.total|floatformat:2 }}€</span>
+                </div>
+                {% if fatura.total_ttc %}
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="text-gray-600">TVA:</span>
+                    <span class="font-semibold text-gray-900">{{ fatura.valor_tva|floatformat:2 }}€</span>
+                </div>
+                <div class="flex justify-between items-center py-3 bg-purple-50 rounded-lg px-4">
+                    <span class="text-lg font-semibold text-purple-800">Total TTC:</span>
+                    <span class="text-xl font-bold text-purple-800">{{ fatura.total_ttc|floatformat:2 }}€</span>
+                </div>
+                {% else %}
+                <div class="flex justify-between items-center py-3 bg-purple-50 rounded-lg px-4">
+                    <span class="text-lg font-semibold text-purple-800">Total:</span>
+                    <span class="text-xl font-bold text-purple-800">{{ fatura.total|floatformat:2 }}€</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Itens da Facture (se existirem) -->
+        {% if fatura.itens.all %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-list text-purple-600"></i>
+                    Détail des Prestations
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Désignation</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qté</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P.U. HT</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total HT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in fatura.itens.all %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ item.referencia|default:"-" }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                {{ item.descricao }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ item.quantidade|floatformat:2 }} {{ item.get_unidade_display }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ item.preco_unitario_ht|floatformat:2 }}€
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {{ item.total_ht|floatformat:2 }}€
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Observações -->
+        {% if fatura.observacoes %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-sticky-note text-purple-600"></i>
+                Observations
+            </h2>
+            <div class="text-gray-700 whitespace-pre-line bg-gray-50 p-4 rounded-lg">{{ fatura.observacoes }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-cog text-purple-600"></i>
+                Actions
+            </h2>
+            <div class="flex space-x-4">
+                <a href="{% url 'orcamentos:cliente_fatura_pdf' fatura.numero %}"
+                   target="_blank"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Télécharger PDF
+                </a>
+                <a href="{% url 'orcamentos:cliente_faturas' %}"
+                   class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
+from django.core.exceptions import ValidationError
 from .models import Cliente, AdresseLivraison, AdresseTransporteur, AdresseChantier, TarifTVAClient
 
 
@@ -108,18 +109,16 @@ class ClienteForm(forms.ModelForm):
                 try:
                     last_number = int(last_client.code.replace('CLI', ''))
                     new_number = last_number + 1
-                except:
+                except ValueError:
                     new_number = 1
             else:
                 new_number = 1
             self.fields['code'].initial = f'CLI{new_number:03d}'
 
     def clean_taux_tva_defaut(self):
-        """Validação customizada para taxa TVA"""
+        """Validação corrigida para taxa TVA"""
         value = self.cleaned_data.get('taux_tva_defaut')
-        if value is not None:
-            if value < 0 or value > 100:
-                raise forms.ValidationError("A taxa TVA deve estar entre 0 e 100%")
+        # Este campo é uma choice do TipoTVA, não precisa validação numérica
         return value
 
     def clean_remise_globale(self):
@@ -127,8 +126,48 @@ class ClienteForm(forms.ModelForm):
         value = self.cleaned_data.get('remise_globale')
         if value is not None:
             if value < 0 or value > 100:
-                raise forms.ValidationError("O desconto deve estar entre 0 e 100%")
+                raise ValidationError("O desconto deve estar entre 0 e 100%")
         return value
+
+    def clean_code(self):
+        """Validação para código único"""
+        code = self.cleaned_data.get('code')
+        if code:
+            # Verificar se o código já existe (exceto para o próprio objeto)
+            existing = Cliente.objects.filter(code=code)
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+
+            if existing.exists():
+                raise ValidationError("Este código já está em uso.")
+        return code
+
+    def clean_siret(self):
+        """Validação customizada para SIRET"""
+        siret = self.cleaned_data.get('siret')
+        if siret and len(siret) != 14:
+            raise ValidationError("O SIRET deve conter exatamente 14 dígitos.")
+        return siret
+
+    def clean(self):
+        """Validação customizada do formulário inteiro"""
+        cleaned_data = super().clean()
+
+        # Verificar se pelo menos nome ou razão social está preenchido
+        nom = cleaned_data.get('nom')
+        raison_sociale = cleaned_data.get('raison_sociale')
+
+        if not nom and not raison_sociale:
+            raise ValidationError("Pelo menos o nome ou a razão social deve ser preenchido.")
+
+        # Validação de TVA intracommunautaire
+        tva_intra = cleaned_data.get('tva_intra')
+        tva_intra_custom = cleaned_data.get('tva_intra_custom')
+
+        if tva_intra == 'autre' and not tva_intra_custom:
+            self.add_error('tva_intra_custom', 'Campo obrigatório quando "Autre" é selecionado.')
+
+        return cleaned_data
 
 
 class AdresseLivraisonForm(forms.ModelForm):
@@ -210,17 +249,19 @@ class AdresseTransporteurForm(forms.ModelForm):
         }
 
 
-class AdresseChantiersForm(forms.ModelForm):
+class AdresseChantierForm(forms.ModelForm):
     class Meta:
         model = AdresseChantier
         fields = [
-            'nom', 'adresse', 'code_postal', 'ville', 'pays',
-            'contact_nom', 'contact_telephone', 'date_debut_prevue',
-            'date_fin_prevue', 'instructions'
+            'nom', 'copier_adresse_principale', 'adresse', 'code_postal',
+            'ville', 'pays', 'responsable_nom', 'responsable_telephone', 'instructions_acces'
         ]
         widgets = {
             'nom': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'copier_adresse_principale': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
             }),
             'adresse': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -235,21 +276,13 @@ class AdresseChantiersForm(forms.ModelForm):
             'pays': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-            'contact_nom': forms.TextInput(attrs={
+            'responsable_nom': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-            'contact_telephone': forms.TextInput(attrs={
+            'responsable_telephone': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-            'date_debut_prevue': forms.DateInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'type': 'date'
-            }),
-            'date_fin_prevue': forms.DateInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'type': 'date'
-            }),
-            'instructions': forms.Textarea(attrs={
+            'instructions_acces': forms.Textarea(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'rows': 3
             }),
@@ -259,17 +292,18 @@ class AdresseChantiersForm(forms.ModelForm):
 class TarifTVAClientForm(forms.ModelForm):
     class Meta:
         model = TarifTVAClient
-        fields = ['description', 'taux_tva', 'par_defaut']
+        fields = ['taux_tva', 'description', 'actif']
         widgets = {
+            'taux_tva': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'step': '0.01',
+                'min': '0',
+                'max': '100'
+            }),
             'description': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-            # Removendo step do campo TVA
-            'taux_tva': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'placeholder': '20.00'
-            }),
-            'par_defaut': forms.CheckboxInput(attrs={
+            'actif': forms.CheckboxInput(attrs={
                 'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
             }),
         }
@@ -283,31 +317,39 @@ class TarifTVAClientForm(forms.ModelForm):
         return value
 
 
-# Formsets para as abas
+# Formsets corrigidos com configuração adequada para campos opcionais
 AdresseLivraisonFormSet = inlineformset_factory(
     Cliente, AdresseLivraison,
     form=AdresseLivraisonForm,
-    extra=1,
-    can_delete=True
+    extra=0,  # Mudado de 1 para 0 para evitar campos obrigatórios vazios
+    can_delete=True,
+    min_num=0,  # Mínimo de 0 forms
+    validate_min=False  # Não validar mínimo
 )
 
 AdresseTransporteurFormSet = inlineformset_factory(
     Cliente, AdresseTransporteur,
     form=AdresseTransporteurForm,
-    extra=1,
-    can_delete=True
+    extra=0,  # Mudado de 1 para 0
+    can_delete=True,
+    min_num=0,
+    validate_min=False
 )
 
 AdresseChantierFormSet = inlineformset_factory(
     Cliente, AdresseChantier,
-    form=AdresseChantiersForm,
-    extra=1,
-    can_delete=True
+    form=AdresseChantierForm,
+    extra=0,  # Mudado de 1 para 0
+    can_delete=True,
+    min_num=0,
+    validate_min=False
 )
 
 TarifTVAClientFormSet = inlineformset_factory(
     Cliente, TarifTVAClient,
     form=TarifTVAClientForm,
-    extra=1,
-    can_delete=True
+    extra=0,  # Mudado de 1 para 0
+    can_delete=True,
+    min_num=0,
+    validate_min=False
 )

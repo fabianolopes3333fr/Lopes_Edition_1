@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Devis #{{ orcamento.numero }} - LOPES PEINTURE</title>
+    <title>Facture #{{ fatura.numero }} - LOPES PEINTURE</title>
     <style>
         @media print {
             @page {
@@ -64,25 +64,25 @@
             color: #6e6f6d;
         }
 
-        .devis-info {
+        .invoice-info {
             text-align: right;
             flex: 1;
         }
 
-        .devis-title {
+        .invoice-title {
             font-size: 28px;
             color: #80b14f;
             font-weight: bold;
             margin-bottom: 10px;
         }
 
-        .devis-number {
+        .invoice-number {
             font-size: 16px;
             color: #0e0f0c;
             margin-bottom: 5px;
         }
 
-        .devis-date {
+        .invoice-date {
             color: #6e6f6d;
         }
 
@@ -112,7 +112,7 @@
             border-left: 4px solid #80b14f;
         }
 
-        .devis-details {
+        .invoice-details {
             flex: 1;
             margin-left: 30px;
         }
@@ -146,19 +146,19 @@
             letter-spacing: 1px;
         }
 
-        .status-aprovado {
+        .status-payee {
             background: #d4edda;
             color: #155724;
             border: 1px solid #80b14f;
         }
 
-        .status-pendente {
+        .status-envoyee {
             background: #fff3cd;
             color: #856404;
             border: 1px solid #ffeaa7;
         }
 
-        .status-rejeitado {
+        .status-retard {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
@@ -238,7 +238,7 @@
             text-align: left;
             background: #d4edda;
             font-weight: bold;
-            color: #0e0f0c;
+	        color: #0e0f0c;
         }
 
         .totals-table .value {
@@ -261,7 +261,7 @@
             border-left: 4px solid #80b14f;
         }
 
-        /* Footer */
+        /* Footer - Always at bottom */
         .footer {
             margin-top: 50px;
             padding-top: 20px;
@@ -288,6 +288,11 @@
             padding: 15px;
             border-radius: 5px;
             border-left: 4px solid #80b14f;
+        }
+
+        /* Content area that will push footer down */
+        .content-area {
+            flex: 1;
         }
 
         /* Ensure proper page breaks for print */
@@ -356,7 +361,7 @@
             }
             
             /* Ajustar tamanhos para impressão */
-            .devis-title {
+            .invoice-title {
                 font-size: 24px;
             }
             
@@ -381,13 +386,13 @@
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                <div>
-                    <img
-                        class="logo"
-                        src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
-                        alt="LOPES"
-                    />
-                </div>
+            <div>
+              <img
+                class="logo"
+                src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
+                alt="LOPES"
+              />
+            </div>
                 <h3>EI: {{ empresa.name }}</h3>
                 <p>{{ empresa.address }}</p>
                 <p>{{ empresa.city }}</p>
@@ -397,75 +402,79 @@
                 <p>Email: {{ empresa.email }}</p>
                 <p>Site: {{ empresa.site }}</p>
             </div>
-            <div class="devis-info">
-                <div class="devis-title">DEVIS</div>
-                <div class="devis-number">N° {{ orcamento.numero }}</div>
-                <div class="devis-date">{{ orcamento.data_criacao|date:"d/m/Y" }}</div>
+            <div class="invoice-info">
+                <div class="invoice-title">FACTURE</div>
+                <div class="invoice-number">N° {{ fatura.numero }}</div>
+                <div class="invoice-date">Le {{ fatura.data_emissao|date:"d/m/Y" }}</div>
             </div>
         </div>
 
         <!-- Status -->
         <div class="status-section">
-            {% if orcamento.status == 'aprovado' %}
-                <span class="status-badge status-aprovado">✓ Devis Approuvé</span>
-            {% elif orcamento.status == 'pendente' %}
-                <span class="status-badge status-pendente">⏳ En Attente d'Approbation</span>
-            {% elif orcamento.status == 'rejeitado' %}
-                <span class="status-badge status-rejeitado">✗ Devis Rejeté</span>
+            {% if fatura.status == 'payee' %}
+                <span class="status-badge status-payee">✓ Facture Payée</span>
+            {% elif fatura.status == 'envoyee' %}
+                <span class="status-badge status-envoyee">⏳ En Attente de Paiement</span>
+            {% elif fatura.status == 'en_retard' %}
+                <span class="status-badge status-retard">⚠ Paiement en Retard</span>
             {% endif %}
         </div>
 
-        <!-- Client and Devis Details -->
+        <!-- Client and Invoice Details -->
         <div class="client-section">
             <div class="client-info">
-                <h3>Devis pour</h3>
+                <h3>Facturé à</h3>
                 <div class="client-details">
-                    <div class="font-bold">{{ orcamento.cliente.first_name }} {{ orcamento.cliente.last_name }}</div>
-                    <div>{{ orcamento.cliente.email }}</div>
-                    {% if orcamento.cliente.profile.phone %}
-                    <div>Tél: {{ orcamento.cliente.profile.phone }}</div>
+                    <div class="font-bold">{{ fatura.cliente.first_name }} {{ fatura.cliente.last_name }}</div>
+                    <div>{{ fatura.cliente.email }}</div>
+                    {% if fatura.cliente.profile.phone %}
+                    <div>Tél: {{ fatura.cliente.profile.phone }}</div>
                     {% endif %}
-                    {% if orcamento.cliente.profile.address %}
-                    <div>{{ orcamento.cliente.profile.address }}</div>
+                    {% if fatura.cliente.profile.address %}
+                    <div>{{ fatura.cliente.profile.address }}</div>
                     {% endif %}
-                    {% if orcamento.cliente.profile.city %}
-                    <div>{{ orcamento.cliente.profile.city }}{% if orcamento.cliente.profile.postal_code %}, {{ orcamento.cliente.profile.postal_code }}{% endif %}</div>
+                    {% if fatura.cliente.profile.city %}
+                    <div>{{ fatura.cliente.profile.city }}{% if fatura.cliente.profile.postal_code %}, {{ fatura.cliente.profile.postal_code }}{% endif %}</div>
                     {% endif %}
 
                     <!-- Se não tem profile ou informações limitadas, usa dados da solicitação original -->
-                    {% if orcamento.solicitacao %}
-                        {% if not orcamento.cliente.profile.phone and orcamento.solicitacao.telefone_solicitante %}
-                        <div>Tél: {{ orcamento.solicitacao.telefone_solicitante }} <em>(depuis demande)</em></div>
+                    {% if fatura.orcamento and fatura.orcamento.solicitacao %}
+                        {% if not fatura.cliente.profile.phone and fatura.orcamento.solicitacao.telefone_solicitante %}
+                        <div>Tél: {{ fatura.orcamento.solicitacao.telefone_solicitante }} <em>(depuis devis)</em></div>
                         {% endif %}
 
-                        {% if not orcamento.cliente.profile.address and orcamento.solicitacao.endereco %}
-                        <div>{{ orcamento.solicitacao.endereco }}</div>
-                        <div>{{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}</div>
+                        {% if not fatura.cliente.profile.address and fatura.orcamento.solicitacao.endereco %}
+                        <div>{{ fatura.orcamento.solicitacao.endereco }}</div>
+                        <div>{{ fatura.orcamento.solicitacao.cidade }}, {{ fatura.orcamento.solicitacao.cep }}</div>
                         {% endif %}
                     {% endif %}
                 </div>
             </div>
-            <div class="devis-details">
-                <h3>Détails du Devis</h3>
+            <div class="invoice-details">
+                <h3>Détails de la Facture</h3>
                 <div class="client-details">
                     <div class="detail-row">
                         <span>Date d'émission:</span>
-                        <span>{{ orcamento.data_criacao|date:"d/m/Y" }}</span>
+                        <span>{{ fatura.data_emissao|date:"d/m/Y" }}</span>
                     </div>
                     <div class="detail-row">
-                        <span>Validité:</span>
-                        <span>{{ orcamento.data_validade|date:"d/m/Y" }}</span>
+                        <span>Date d'échéance:</span>
+                        <span>{{ fatura.data_vencimento|date:"d/m/Y" }}</span>
                     </div>
-                    {% if orcamento.data_aprovacao %}
+                    {% if fatura.data_pagamento %}
                     <div class="detail-row highlight">
-                        <span>Date d'approbation:</span>
-                        <span>{{ orcamento.data_aprovacao|date:"d/m/Y" }}</span>
+                        <span>Date de paiement:</span>
+                        <span>{{ fatura.data_pagamento|date:"d/m/Y" }}</span>
                     </div>
                     {% endif %}
-                    {% if orcamento.solicitacao %}
                     <div class="detail-row">
-                        <span>Demande associée:</span>
-                        <span>#{{ orcamento.solicitacao.id }}</span>
+                        <span>Type de paiement:</span>
+                        <span>{{ fatura.get_tipo_pagamento_display }}</span>
+                    </div>
+                    {% if fatura.orcamento %}
+                    <div class="detail-row">
+                        <span>Devis associé:</span>
+                        <span>#{{ fatura.orcamento.numero }}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -473,15 +482,15 @@
         </div>
 
         <!-- Description -->
-        {% if orcamento.descricao %}
+        {% if fatura.descricao %}
         <div class="description-section">
-            <div class="section-title">Description du Projet</div>
-            <div>{{ orcamento.descricao|linebreaksbr }}</div>
+            <div class="section-title">Description</div>
+            <div>{{ fatura.descricao|linebreaksbr }}</div>
         </div>
         {% endif %}
 
         <!-- Items -->
-        {% if orcamento.itens.all %}
+        {% if items %}
         <div class="items-section">
             <div class="section-title">Détail des Prestations</div>
             <table class="items-table">
@@ -496,14 +505,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in orcamento.itens.all %}
+                    {% for item in items %}
                     <tr>
-                        <td>{{ item.produto.codigo|default:"-" }}</td>
-                        <td>{{ item.descricao }}</td>
-                        <td class="text-center">{{ item.quantidade|floatformat:2 }}</td>
-                        <td class="text-center">{{ item.produto.unidade_medida|default:"UN" }}</td>
-                        <td class="text-right">{{ item.preco_unitario|floatformat:2 }}€</td>
-                        <td class="text-right font-bold">{{ item.subtotal|floatformat:2 }}€</td>
+                        <td>{{ item.ref|default:"-" }}</td>
+                        <td>{{ item.designation }}</td>
+                        <td class="text-center">{{ item.quantite|floatformat:2 }}</td>
+                        <td class="text-center">{{ item.unite }}</td>
+                        <td class="text-right">{{ item.pu_ht|floatformat:2 }}€</td>
+                        <td class="text-right font-bold">{{ item.total_ht|floatformat:2 }}€</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -516,72 +525,72 @@
             <table class="totals-table">
                 <tr>
                     <td class="label">Sous-total HT:</td>
-                    <td class="value">{{ orcamento.subtotal|floatformat:2 }}€</td>
+                    <td class="value">{{ subtotal_ht|floatformat:2 }}€</td>
                 </tr>
-                {% if orcamento.desconto > 0 %}
+                {% if fatura.desconto > 0 %}
                 <tr>
-                    <td class="label">Remise ({{ orcamento.desconto }}%):</td>
-                    <td class="value">-{{ orcamento.valor_desconto|floatformat:2 }}€</td>
+                    <td class="label">Remise ({{ fatura.desconto }}%):</td>
+                    <td class="value">-{{ fatura.valor_desconto|floatformat:2 }}€</td>
                 </tr>
                 {% endif %}
                 <tr>
                     <td class="label">Total HT:</td>
-                    <td class="value">{{ orcamento.total|floatformat:2 }}€</td>
+                    <td class="value">{{ fatura.total|floatformat:2 }}€</td>
                 </tr>
-                {% if orcamento.total_impostos > 0 %}
+                {% if total_taxe > 0 %}
                 <tr>
                     <td class="label">TVA:</td>
-                    <td class="value">{{ orcamento.total_impostos|floatformat:2 }}€</td>
+                    <td class="value">{{ total_taxe|floatformat:2 }}€</td>
                 </tr>
                 <tr class="total-final">
                     <td class="label">Total TTC:</td>
-                    <td class="value">{{ orcamento.total_com_impostos|floatformat:2 }}€</td>
+                    <td class="value">{{ total_ttc|floatformat:2 }}€</td>
                 </tr>
                 {% else %}
                 <tr class="total-final">
                     <td class="label">Net à Payer:</td>
-                    <td class="value">{{ orcamento.total|floatformat:2 }}€</td>
+                    <td class="value">{{ fatura.total|floatformat:2 }}€</td>
                 </tr>
                 {% endif %}
             </table>
         </div>
 
-        <!-- Conditions -->
+        <!-- Conditions de paiement -->
         <div class="description-section">
-            <div class="section-title">Conditions Générales</div>
-            <div>
-                <p><strong>Validité du devis:</strong> {{ orcamento.data_validade|date:"d/m/Y" }}</p>
-                <p><strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao|default:"À définir" }}</p>
-                {% if orcamento.condicoes_pagamento %}
-                <p><strong>Conditions de paiement:</strong> {{ orcamento.condicoes_pagamento }}</p>
-                {% endif %}
+            <div class="section-title">Conditions de Paiement</div>
+            <div>{{ fatura.get_condicoes_pagamento_display }}</div>
+            {% if fatura.tipo_pagamento %}
+            <div class="mt-10">
+                <strong>Mode de paiement préféré:</strong> {{ fatura.get_tipo_pagamento_display }}
             </div>
+            {% endif %}
         </div>
 
         <!-- Observations -->
-        {% if orcamento.observacoes %}
+        {% if fatura.observacoes %}
         <div class="observations-section">
             <div class="section-title">Observations</div>
-            <div>{{ orcamento.observacoes|linebreaksbr }}</div>
+            <div>{{ fatura.observacoes|linebreaksbr }}</div>
         </div>
         {% endif %}
 
         <!-- Footer -->
         <div class="footer">
             <div class="footer-note">
-                Merci pour votre confiance. Ce devis est valable jusqu'au {{ orcamento.data_validade|date:"d/m/Y" }}.
+                Merci pour votre confiance. En cas de question sur cette facture, n'hésitez pas à nous contacter.
             </div>
             <div>
-                Document généré le {% now "d/m/Y à H:i" %}
+                Document généré le {{ data_impressao|date:"d/m/Y à H:i" }}
             </div>
             <div class="text-sm" style="margin-top: 20px;">
                 {{ empresa.name }} - {{ empresa.address }} - {{ empresa.phone }} - {{ empresa.email }}
             </div>
             <div class="payment-info">
-                {% if orcamento.total_impostos == 0 or not orcamento.total_impostos %}
+                {% if total_taxe == 0 or not total_taxe %}
                 <strong>TVA non applicable, article 293 B du CGI</strong><br />
                 {% endif %}
-                Pour toute question concernant ce devis, n'hésitez pas à nous contacter.
+                PAIEMENT PAR VIREMENT BANCAIRE : LOPES DE SOUZA FABIANO (EI) IBAN FR76 1027 8022 3400 0206
+                6300 131
             </div>
         </div>
     </div>

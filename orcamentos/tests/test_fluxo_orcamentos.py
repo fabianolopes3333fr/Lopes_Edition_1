@@ -10,8 +10,9 @@ from django.db import transaction
 
 from orcamentos.models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento,
-    StatusOrcamento, StatusProjeto, TipoServico, UrgenciaProjeto,
-    TipoUnidade, TipoAtividade, TipoTVA, CondicoesPagamento
+    Facture, ItemFacture, StatusOrcamento, StatusFacture, StatusProjeto,
+    TipoServico, UrgenciaProjeto, TipoUnidade, TipoAtividade,
+    TipoTVA, CondicoesPagamento, TipoPagamento
 )
 
 User = get_user_model()
@@ -40,8 +41,9 @@ class FluxoOrcamentosTestCase(TestCase):
             password='testpass123',
             first_name='Admin',
             last_name='Sistema',
-            account_type='ADMIN',
-            is_staff=True
+            account_type='ADMINISTRATOR',
+            is_staff=True,
+            is_superuser=True
         )
 
         # Dados padrão para projetos
@@ -365,7 +367,19 @@ class FluxoOrcamentosTestCase(TestCase):
 
         # 1. Criar alguns dados de teste
         self.test_02_fluxo_completo_projeto_cliente()
-        self.test_01_fluxo_completo_solicitacao_publica()
+
+        # Criar solicitação pública sem vínculo automático
+        solicitacao_publica = SolicitacaoOrcamento.objects.create(
+            nome_solicitante='Maria Santos',
+            email_solicitante='maria.santos.publica@email.com',  # Email diferente
+            telefone_solicitante='11888888888',
+            endereco='456 Avenue Test',
+            cidade='Lyon',
+            cep='69001',
+            tipo_servico=TipoServico.PINTURA_EXTERIOR,
+            descricao_servico='Pintura externa da fachada',
+            status=StatusOrcamento.PENDENTE
+        )
 
         # 2. Login como admin
         self.client.login(username='admin@test.com', password='testpass123')
@@ -487,10 +501,352 @@ class FluxoOrcamentosTestCase(TestCase):
 
         print("✓ Performance e paginação funcionando")
 
+    def test_12_fluxo_completo_com_fatura(self):
+        """Teste do fluxo completo: projeto → orçamento → fatura → pagamento"""
+        print("\n=== TESTE 12: Fluxo Completo com Fatura ===")
+
+        # 1. Criar projeto e solicitar orçamento
+        projeto = Projeto.objects.create(
+            cliente=self.cliente,
+            titulo='Projeto com Fatura Completa',
+            descricao='Projeto para testar fluxo completo com fatura',
+            tipo_servico=TipoServico.RENOVACAO_COMPLETA,
+            endereco_projeto='Avenue Test 100',
+            cidade_projeto='Paris',
+            cep_projeto='75008',
+            urgencia=UrgenciaProjeto.ALTA,
+            area_aproximada=Decimal('80.00'),
+            orcamento_estimado=Decimal('5000.00')
+        )
+
+        solicitacao = SolicitacaoOrcamento.objects.create(
+            cliente=self.cliente,
+            projeto=projeto,
+            nome_solicitante=f"{self.cliente.first_name} {self.cliente.last_name}",
+            email_solicitante=self.cliente.email,
+            telefone_solicitante='0123456789',
+            endereco=projeto.endereco_projeto,
+            cidade=projeto.cidade_projeto,
+            cep=projeto.cep_projeto,
+            tipo_servico=projeto.tipo_servico,
+            descricao_servico='Renovação completa',
+            status=StatusOrcamento.PENDENTE
+        )
+        print(f"✓ Projeto e solicitação criados")
+
+        # 2. Admin cria orçamento
+        orcamento = Orcamento.objects.create(
+            solicitacao=solicitacao,
+            elaborado_por=self.admin,
+            titulo='Orçamento Renovação',
+            descricao='Orçamento detalhado',
+            subtotal=Decimal('2000.00'),
+            total=Decimal('2000.00'),
+            prazo_execucao=20,
+            validade_orcamento=date.today() + timedelta(days=30),
+            condicoes_pagamento=CondicoesPagamento.ACOMPTE_30,
+            tipo_pagamento=TipoPagamento.VIREMENT,
+            status=StatusOrcamento.ENVIADO,
+            data_envio=timezone.now()
+        )
+
+        # Adicionar item
+        ItemOrcamento.objects.create(
+            orcamento=orcamento,
+            referencia='REF001',
+            descricao='Renovação completa',
+            unidade='m2',
+            atividade='service',
+            quantidade=Decimal('80.00'),
+            preco_unitario_ht=Decimal('25.00'),
+            taxa_tva='20'
+        )
+        orcamento.calcular_totais()
+        print(f"✓ Orçamento criado: {orcamento.numero}")
+
+        # 3. Cliente aceita orçamento
+        self.client.login(username='cliente@test.com', password='testpass123')
+        response = self.client.post(
+            reverse('orcamentos:cliente_aceitar_orcamento', args=[orcamento.numero])
+        )
+        self.assertEqual(response.status_code, 200)
+
+        orcamento.refresh_from_db()
+        self.assertEqual(orcamento.status, StatusOrcamento.ACEITO)
+        print(f"✓ Orçamento aceito pelo cliente")
+
+        # 4. Admin cria fatura
+        self.client.login(username='admin@test.com', password='testpass123')
+
+        fatura = Facture.objects.create(
+            orcamento=orcamento,
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Renovação',
+            descricao='Fatura para renovação completa',
+            subtotal=orcamento.subtotal,
+            total=orcamento.total,
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            status=StatusFacture.ENVOYEE,
+            data_envio=timezone.now()
+        )
+
+        # Copiar itens
+        for item in orcamento.itens.all():
+            ItemFacture.objects.create(
+                facture=fatura,
+                referencia=item.referencia,
+                descricao=item.descricao,
+                unidade=item.unidade,
+                atividade=item.atividade,
+                quantidade=item.quantidade,
+                preco_unitario_ht=item.preco_unitario_ht,
+                taxa_tva=item.taxa_tva
+            )
+        fatura.calcular_totais()
+        print(f"✓ Fatura criada: {fatura.numero}")
+
+        # 5. Cliente visualiza fatura
+        self.client.login(username='cliente@test.com', password='testpass123')
+        response = self.client.get(reverse('orcamentos:cliente_faturas'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, fatura.numero)
+        print(f"✓ Cliente visualizou lista de faturas")
+
+        # 6. Admin marca fatura como paga
+        self.client.login(username='admin@test.com', password='testpass123')
+        response = self.client.post(
+            reverse('orcamentos:admin_marcar_fatura_paga', args=[fatura.numero]),
+            {'data_pagamento': date.today().isoformat()}
+        )
+
+        fatura.refresh_from_db()
+        self.assertEqual(fatura.status, StatusFacture.PAYEE)
+        print(f"✓ Fatura marcada como paga")
+        print(f"✅ FLUXO COMPLETO COM FATURA TESTADO COM SUCESSO!")
+
+    def test_13_fluxo_fatura_direta(self):
+        """Teste de criação de fatura direta (sem orçamento)"""
+        print("\n=== TESTE 13: Fatura Direta ===")
+
+        fatura = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Serviço Urgente',
+            descricao='Fatura criada diretamente',
+            subtotal=Decimal('500.00'),
+            total=Decimal('500.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            status=StatusFacture.BROUILLON
+        )
+
+        # Adicionar item
+        ItemFacture.objects.create(
+            facture=fatura,
+            referencia='URG001',
+            descricao='Serviço urgente',
+            unidade='forfait',
+            quantidade=Decimal('1.00'),
+            preco_unitario_ht=Decimal('500.00'),
+            taxa_tva='20'
+        )
+        fatura.calcular_totais()
+
+        self.assertIsNone(fatura.orcamento)
+        self.assertEqual(fatura.status, StatusFacture.BROUILLON)
+        print(f"✓ Fatura direta criada: {fatura.numero}")
+
+        # Cliente deve conseguir ver esta fatura
+        self.client.login(username='cliente@test.com', password='testpass123')
+        response = self.client.get(reverse('orcamentos:cliente_faturas'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, fatura.numero)
+        print(f"✓ Cliente pode visualizar fatura direta")
+
+    def test_14_fluxo_estatisticas_faturas(self):
+        """Teste de estatísticas de faturas do cliente"""
+        print("\n=== TESTE 14: Estatísticas Faturas ===")
+
+        # Criar múltiplas faturas com diferentes status
+        Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Paga',
+            descricao='Teste',
+            total=Decimal('1000.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            data_pagamento=date.today(),
+            status=StatusFacture.PAYEE
+        )
+
+        Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Pendente',
+            descricao='Teste',
+            total=Decimal('500.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            status=StatusFacture.ENVOYEE
+        )
+
+        Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Atrasada',
+            descricao='Teste',
+            total=Decimal('300.00'),
+            data_emissao=date.today() - timedelta(days=45),
+            data_vencimento=date.today() - timedelta(days=5),
+            status=StatusFacture.EN_RETARD
+        )
+
+        # Cliente acessa lista
+        self.client.login(username='cliente@test.com', password='testpass123')
+        response = self.client.get(reverse('orcamentos:cliente_faturas'))
+
+        # Verificar estatísticas
+        self.assertEqual(response.context['total_faturas'], 3)
+        self.assertEqual(response.context['faturas_pagas'], 1)
+        self.assertEqual(response.context['faturas_pendentes'], 1)
+        self.assertEqual(response.context['faturas_em_atraso'], 1)
+
+        print(f"✓ Estatísticas calculadas corretamente")
+
+    def test_15_fluxo_seguranca_faturas(self):
+        """Teste de segurança - isolamento de faturas entre clientes"""
+        print("\n=== TESTE 15: Segurança Faturas ===")
+
+        # Criar outro cliente
+        outro_cliente = User.objects.create_user(
+            username='outro@test.com',
+            email='outro@test.com',
+            password='testpass123',
+            account_type='CLIENT'
+        )
+
+        # Criar fatura para outro cliente
+        fatura_outro = Facture.objects.create(
+            cliente=outro_cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Outro Cliente',
+            descricao='Não acessível',
+            total=Decimal('100.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            status=StatusFacture.ENVOYEE
+        )
+
+        # Primeiro cliente tenta acessar
+        self.client.login(username='cliente@test.com', password='testpass123')
+
+        # Não deve aparecer na lista
+        response = self.client.get(reverse('orcamentos:cliente_faturas'))
+        self.assertNotContains(response, fatura_outro.numero)
+
+        # Acesso direto deve dar 404
+        response = self.client.get(
+            reverse('orcamentos:cliente_fatura_detail', args=[fatura_outro.numero])
+        )
+        self.assertEqual(response.status_code, 404)
+
+        print(f"✓ Isolamento de dados funcionando corretamente")
+
+    def test_16_fluxo_calculos_fatura(self):
+        """Teste de cálculos complexos de faturas (HT, TVA, TTC, remise)"""
+        print("\n=== TESTE 16: Cálculos Fatura ===")
+
+        fatura = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura Cálculos',
+            descricao='Teste de cálculos',
+            desconto=Decimal('10.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30)
+        )
+
+        # Item 1
+        ItemFacture.objects.create(
+            facture=fatura,
+            descricao='Item 1',
+            unidade='unite',
+            quantidade=Decimal('2.00'),
+            preco_unitario_ht=Decimal('50.00'),
+            taxa_tva='20'
+        )
+
+        # Item 2
+        ItemFacture.objects.create(
+            facture=fatura,
+            descricao='Item 2',
+            unidade='unite',
+            quantidade=Decimal('3.00'),
+            preco_unitario_ht=Decimal('100.00'),
+            taxa_tva='20'
+        )
+
+        fatura.calcular_totais()
+
+        # Subtotal = (2*50) + (3*100) = 400
+        self.assertEqual(fatura.subtotal, Decimal('400.00'))
+
+        # Desconto = 10% de 400 = 40
+        self.assertEqual(fatura.valor_desconto, Decimal('40.00'))
+
+        # Total HT = 400 - 40 = 360
+        self.assertEqual(fatura.total, Decimal('360.00'))
+
+        print(f"✓ Cálculos validados: Subtotal={fatura.subtotal}€, Total={fatura.total}€")
+
+    def test_17_fluxo_pdf_fatura(self):
+        """Teste de geração de PDF de fatura"""
+        print("\n=== TESTE 17: PDF Fatura ===")
+
+        fatura = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura PDF Test',
+            descricao='Teste de PDF',
+            total=Decimal('1000.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30),
+            status=StatusFacture.ENVOYEE
+        )
+
+        # Adicionar itens
+        ItemFacture.objects.create(
+            facture=fatura,
+            referencia='PDF001',
+            descricao='Serviço de teste',
+            unidade='m2',
+            quantidade=Decimal('50.00'),
+            preco_unitario_ht=Decimal('20.00'),
+            taxa_tva='20'
+        )
+
+        # Cliente acessa PDF
+        self.client.login(username='cliente@test.com', password='testpass123')
+        response = self.client.get(
+            reverse('orcamentos:cliente_fatura_pdf', args=[fatura.numero])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'FACTURE')
+        self.assertContains(response, fatura.numero)
+        self.assertContains(response, 'PDF001')
+
+        print(f"✓ PDF gerado com sucesso")
+
     def tearDown(self):
         """Limpeza após cada teste"""
         # Limpar dados criados durante os testes na ordem correta
         # Primeiro deletar itens que dependem de outros
+        ItemFacture.objects.all().delete()
+        Facture.objects.all().delete()
         ItemOrcamento.objects.all().delete()
         Orcamento.objects.all().delete()
         SolicitacaoOrcamento.objects.all().delete()
@@ -547,3 +903,168 @@ if __name__ == '__main__':
 
     if failures:
         sys.exit(1)
+
+class FluxoFacturesTestCase(TestCase):
+    """Testes específicos para funcionalidades de faturas"""
+
+    def setUp(self):
+        """Setup para testes de faturas"""
+        self.client = Client()
+
+        self.cliente = User.objects.create_user(
+            username='cliente.fat@test.com',
+            email='cliente.fat@test.com',
+            password='testpass123',
+            first_name='Cliente',
+            last_name='Faturas',
+            account_type='CLIENT'
+        )
+
+        self.admin = User.objects.create_user(
+            username='admin.fat@test.com',
+            email='admin.fat@test.com',
+            password='testpass123',
+            first_name='Admin',
+            last_name='Faturas',
+            account_type='ADMINISTRATOR',
+            is_staff=True,
+            is_superuser=True
+        )
+
+    def test_fatura_numero_generation(self):
+        """Teste geração automática de número único de fatura"""
+        print("\n=== TESTE: Geração Número Fatura ===")
+
+        fatura1 = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura 1',
+            descricao='Teste',
+            total=Decimal('100.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30)
+        )
+
+        fatura2 = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura 2',
+            descricao='Teste',
+            total=Decimal('200.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30)
+        )
+
+        # Verificar formato: FA + ano(4) + random(5) = 11 caracteres
+        self.assertTrue(fatura1.numero.startswith('FA'))
+        self.assertEqual(len(fatura1.numero), 11)
+
+        # Verificar unicidade
+        self.assertNotEqual(fatura1.numero, fatura2.numero)
+
+        print(f"✓ Números gerados: {fatura1.numero}, {fatura2.numero}")
+
+    def test_item_facture_calculations(self):
+        """Teste cálculos automáticos de itens de fatura"""
+        print("\n=== TESTE: Cálculos Item Fatura ===")
+
+        fatura = Facture.objects.create(
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Teste Cálculos',
+            descricao='Teste',
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30)
+        )
+
+        item = ItemFacture.objects.create(
+            facture=fatura,
+            descricao='Serviço teste',
+            unidade='m2',
+            quantidade=Decimal('50.00'),
+            preco_unitario_ht=Decimal('20.00'),
+            remise_percentual=Decimal('10.00'),
+            taxa_tva='20'
+        )
+
+        # Total bruto = 50 * 20 = 1000
+        # Remise = 10% = 100
+        # Total HT = 900
+        self.assertEqual(item.total_ht, Decimal('900.00'))
+
+        # PU TTC = 20 * 1.20 = 24
+        self.assertEqual(item.preco_unitario_ttc, Decimal('24.00'))
+
+        # Total TTC = 900 * 1.20 = 1080
+        self.assertEqual(item.total_ttc, Decimal('1080.00'))
+
+        print(f"✓ Cálculos validados: HT={item.total_ht}€, TTC={item.total_ttc}€")
+
+    def test_fatura_relationship_orcamento(self):
+        """Teste relacionamento fatura-orçamento"""
+        print("\n=== TESTE: Relacionamento Fatura-Orçamento ===")
+
+        # Criar estrutura completa
+        projeto = Projeto.objects.create(
+            cliente=self.cliente,
+            titulo='Projeto Teste',
+            descricao='Teste',
+            tipo_servico=TipoServico.PINTURA_INTERIOR,
+            endereco_projeto='Rua Teste',
+            cidade_projeto='Paris',
+            cep_projeto='75001'
+        )
+
+        solicitacao = SolicitacaoOrcamento.objects.create(
+            cliente=self.cliente,
+            projeto=projeto,
+            nome_solicitante='Teste',
+            email_solicitante='teste@test.com',
+            telefone_solicitante='0123456789',
+            endereco='Rua Teste',
+            cidade='Paris',
+            cep='75001',
+            tipo_servico=TipoServico.PINTURA_INTERIOR,
+            descricao_servico='Teste',
+            status=StatusOrcamento.ACEITO
+        )
+
+        orcamento = Orcamento.objects.create(
+            solicitacao=solicitacao,
+            elaborado_por=self.admin,
+            titulo='Orçamento Teste',
+            descricao='Teste',
+            total=Decimal('1000.00'),
+            prazo_execucao=15,
+            validade_orcamento=date.today() + timedelta(days=30),
+            status=StatusOrcamento.ACEITO
+        )
+
+        fatura = Facture.objects.create(
+            orcamento=orcamento,
+            cliente=self.cliente,
+            elaborado_por=self.admin,
+            titulo='Fatura do Orçamento',
+            descricao='Teste',
+            total=Decimal('1000.00'),
+            data_emissao=date.today(),
+            data_vencimento=date.today() + timedelta(days=30)
+        )
+
+        # Verificar relacionamento
+        self.assertEqual(fatura.orcamento, orcamento)
+        self.assertIn(fatura, orcamento.faturas.all())
+        self.assertEqual(orcamento.faturas.count(), 1)
+
+        print(f"✓ Relacionamento validado: Fatura {fatura.numero} vinculada a Orçamento {orcamento.numero}")
+
+    def tearDown(self):
+        """Limpeza após testes"""
+        ItemFacture.objects.all().delete()
+        Facture.objects.all().delete()
+        ItemOrcamento.objects.all().delete()
+        Orcamento.objects.all().delete()
+        SolicitacaoOrcamento.objects.all().delete()
+        Projeto.objects.all().delete()
+        User.objects.all().delete()
+

@@ -34,6 +34,12 @@
                             Envoyé le {{ orcamento.data_envio|date:"d/m/Y H:i" }}
                         </span>
                         {% endif %}
+                        {% if orcamento.data_resposta_cliente %}
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-reply text-purple-500"></i>
+                            Réponse le {{ orcamento.data_resposta_cliente|date:"d/m/Y H:i" }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -63,6 +69,10 @@
                     <div class="text-center">
                         <div class="text-3xl font-bold text-green-600">{{ orcamento.total|floatformat:2 }}€</div>
                         <div class="text-sm text-gray-500">Total HT</div>
+                        {% if orcamento.total_ttc %}
+                        <div class="text-xl font-semibold text-purple-600">{{ orcamento.total_ttc|floatformat:2 }}€</div>
+                        <div class="text-xs text-gray-500">Total TTC</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -200,119 +210,251 @@
                                     <th class="text-right py-3 px-4 font-medium text-gray-700 border-b border-gray-200">Total TTC</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-200">
                                 {% for item in orcamento.itens.all %}
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="py-3 px-4 font-mono text-sm">{{ item.referencia|default:"-" }}</td>
-                                        <td class="py-3 px-4">{{ item.descricao }}</td>
-                                        <td class="py-3 px-4 text-center text-sm">{{ item.get_unidade_display }}</td>
-                                        <td class="py-3 px-4 text-center font-medium">{{ item.quantidade }}</td>
-                                        <td class="py-3 px-4 text-right font-medium">{{ item.preco_unitario_ht|floatformat:2 }}€</td>
-                                        <td class="py-3 px-4 text-center text-sm">
-                                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{{ item.taxa_tva }}%</span>
-                                        </td>
-                                        <td class="py-3 px-4 text-center">
-                                            {% if item.remise_percentual %}
-                                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">{{ item.remise_percentual }}%</span>
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td class="py-3 px-4 text-right font-bold text-green-600">{{ item.total_ht|floatformat:2 }}€</td>
-                                        <td class="py-3 px-4 text-right font-bold text-blue-600">{{ item.total_ttc|floatformat:2 }}€</td>
-                                    </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-sm">{{ item.referencia|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-sm font-medium">{{ item.descricao }}</td>
+                                    <td class="py-3 px-4 text-center text-sm">{{ item.get_unidade_display }}</td>
+                                    <td class="py-3 px-4 text-center text-sm font-medium">{{ item.quantidade }}</td>
+                                    <td class="py-3 px-4 text-right text-sm font-medium">{{ item.preco_unitario_ht|floatformat:2 }}€</td>
+                                    <td class="py-3 px-4 text-center text-xs">
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ item.taxa_tva }}%</span>
+                                    </td>
+                                    <td class="py-3 px-4 text-center text-xs">
+                                        {% if item.remise_percentual %}
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded">{{ item.remise_percentual }}%</span>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 px-4 text-right font-bold text-green-600">{{ item.total_ht|floatformat:2 }}€</td>
+                                    <td class="py-3 px-4 text-right font-bold text-purple-600">{{ item.total_ttc|floatformat:2 }}€</td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="bg-gray-50">
                                 <tr class="border-t-2 border-gray-300">
-                                    <td colspan="7" class="py-3 px-4 text-right font-medium text-gray-700">Sous-total HT:</td>
-                                    <td class="py-3 px-4 text-right font-bold text-gray-900">{{ orcamento.subtotal|floatformat:2 }}€</td>
-                                    <td class="py-3 px-4 text-right font-bold text-gray-900">{{ orcamento.total_ttc|floatformat:2 }}€</td>
+                                    <td colspan="7" class="py-4 px-4 text-right font-semibold text-gray-700">Sous-total HT:</td>
+                                    <td class="py-4 px-4 text-right font-bold text-gray-900">{{ orcamento.subtotal|floatformat:2 }}€</td>
+                                    <td class="py-4 px-4 text-right font-bold text-gray-900">{{ orcamento.subtotal_ttc|floatformat:2 }}€</td>
                                 </tr>
                                 {% if orcamento.desconto %}
                                 <tr>
                                     <td colspan="7" class="py-2 px-4 text-right font-medium text-red-600">Remise ({{ orcamento.desconto }}%):</td>
                                     <td class="py-2 px-4 text-right font-bold text-red-600">-{{ orcamento.valor_desconto|floatformat:2 }}€</td>
-                                    <td class="py-2 px-4 text-right font-bold text-red-600">-{{ orcamento.valor_desconto|floatformat:2 }}€</td>
+                                    <td class="py-2 px-4 text-right font-bold text-red-600">-{{ orcamento.valor_desconto_ttc|floatformat:2 }}€</td>
                                 </tr>
                                 {% endif %}
                                 <tr>
                                     <td colspan="7" class="py-2 px-4 text-right font-medium text-blue-600">TVA:</td>
                                     <td class="py-2 px-4 text-right font-bold text-blue-600">{{ orcamento.valor_tva|floatformat:2 }}€</td>
-                                    <td class="py-2 px-4 text-right font-bold text-blue-600">-</td>
+                                    <td></td>
                                 </tr>
-                                <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-500">
-                                    <td colspan="7" class="py-4 px-4 text-right font-bold text-xl text-green-800">TOTAL FINAL:</td>
+                                <tr class="bg-gradient-to-r from-purple-50 to-indigo-50 border-t-2 border-purple-500">
+                                    <td colspan="7" class="py-4 px-4 text-right font-bold text-xl text-purple-800">TOTAL:</td>
                                     <td class="py-4 px-4 text-right font-bold text-xl text-green-600">{{ orcamento.total|floatformat:2 }}€</td>
-                                    <td class="py-4 px-4 text-right font-bold text-xl text-green-600">{{ orcamento.total_ttc|floatformat:2 }}€</td>
+                                    <td class="py-4 px-4 text-right font-bold text-xl text-purple-600">{{ orcamento.total_ttc|floatformat:2 }}€</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-12">
+                    <div class="text-center py-8">
                         <div class="text-gray-400 mb-4">
-                            <i class="fas fa-list text-6xl"></i>
+                            <i class="fas fa-inbox text-5xl"></i>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun item</h3>
-                        <p class="text-gray-600">Ce devis ne contient aucun item pour le moment.</p>
+                        <p class="text-gray-600">Aucun item dans ce devis.</p>
                     </div>
                 {% endif %}
             </div>
+
+            <!-- Faturas Relacionadas -->
+            {% if orcamento.faturas.exists %}
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-file-invoice-dollar text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Factures liées</h2>
+                </div>
+
+                <div class="space-y-3">
+                    {% for fatura in orcamento.faturas.all %}
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">{{ fatura.numero }}</h3>
+                                <p class="text-sm text-gray-600">{{ fatura.titulo }}</p>
+                                <p class="text-xs text-gray-500">Créée le {{ fatura.data_criacao|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-green-600">{{ fatura.total|floatformat:2 }}€</div>
+                                {% if fatura.status == 'brouillon' %}
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Brouillon</span>
+                                {% elif fatura.status == 'envoyee' %}
+                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Envoyée</span>
+                                {% elif fatura.status == 'payee' %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Payée</span>
+                                {% elif fatura.status == 'en_retard' %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">En retard</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <a href="{% url 'orcamentos:admin_fatura_detail' fatura.numero %}"
+                               class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded transition-colors">
+                                Voir Facture
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
-        <!-- Sidebar -->
+        <!-- Sidebar Actions -->
         <div class="space-y-6">
             <!-- Actions -->
             <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-tools text-blue-600"></i>
+                    <i class="fas fa-cogs text-blue-600"></i>
                     Actions
                 </h3>
 
                 <div class="space-y-3">
-                    {% if orcamento.status == 'em_elaboracao' %}
-                        <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
-                           class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
-                            <i class="fas fa-edit mr-2"></i>
-                            Éditer le devis
-                        </a>
-
-                        <a href="{% url 'orcamentos:admin_enviar_orcamento' orcamento.numero %}"
-                           class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
-                            <i class="fas fa-paper-plane mr-2"></i>
-                            Envoyer au client
-                        </a>
+                    <!-- Editar Orçamento -->
+                    {% if orcamento.status in 'em_elaboracao,pendente' %}
+                    <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
+                       class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-edit mr-2"></i>
+                        Éditer le devis
+                    </a>
                     {% endif %}
 
-                    {% if orcamento.status == 'aceito' %}
-                        {% if not orcamento.faturas.exists %}
-                            <a href="{% url 'orcamentos:admin_criar_fatura_from_orcamento' orcamento.numero %}"
-                               class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
-                                <i class="fas fa-file-invoice-dollar mr-2"></i>
-                                Créer Facture
-                            </a>
-                        {% else %}
-                            <a href="{% url 'orcamentos:admin_fatura_detail' orcamento.faturas.first.numero %}"
-                               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
-                                <i class="fas fa-file-invoice mr-2"></i>
-                                Voir Facture
-                            </a>
-                        {% endif %}
+                    <!-- Enviar Orçamento -->
+                    {% if orcamento.status in 'em_elaboracao,pendente' %}
+                    <a href="{% url 'orcamentos:admin_enviar_orcamento' orcamento.numero %}"
+                       class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Envoyer le devis
+                    </a>
                     {% endif %}
 
-                    <a href="{% url 'orcamentos:admin_orcamento_pdf' orcamento.numero %}" target="_blank"
-                       class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                    <!-- Download PDF -->
+                    <a href="{% url 'orcamentos:admin_orcamento_pdf_html' orcamento.numero %}"
+                       class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                       target="_blank">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Télécharger PDF
                     </a>
 
-                    {% if orcamento.status == 'enviado' %}
-                        <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
-                           class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
-                            <i class="fas fa-edit mr-2"></i>
-                            Modifier le devis
+                    <!-- BOTÃO CRIAR FACTURA - AQUI ESTAVA O PROBLEMA! -->
+                    {% if orcamento.status == 'aceito' and orcamento.solicitacao.cliente %}
+                    <a href="{% url 'orcamentos:admin_criar_fatura_from_orcamento' orcamento.numero %}"
+                       class="w-full inline-flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>
+                        Créer Facture
+                    </a>
+                    {% elif orcamento.status != 'aceito' %}
+                    <div class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>
+                        Créer Facture
+                        <span class="text-xs ml-2">(Devis non accepté)</span>
+                    </div>
+                    {% elif not orcamento.solicitacao.cliente %}
+                    <div class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>
+                        Créer Facture
+                        <span class="text-xs ml-2">(Pas de client)</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                    Informations
+                </h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Statut</div>
+                        <div class="font-medium text-gray-900">{{ orcamento.get_status_display }}</div>
+                    </div>
+
+                    {% if orcamento.solicitacao.projeto %}
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Projet lié</div>
+                        <a href="{% url 'orcamentos:admin_projeto_detail' orcamento.solicitacao.projeto.uuid %}"
+                           class="text-blue-600 hover:text-blue-800 font-medium">
+                            {{ orcamento.solicitacao.projeto.titulo }}
                         </a>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Demande originale</div>
+                        <a href="{% url 'orcamentos:admin_solicitacao_detail' orcamento.solicitacao.numero %}"
+                           class="text-blue-600 hover:text-blue-800 font-medium">
+                            {{ orcamento.solicitacao.numero }}
+                        </a>
+                    </div>
+
+                    {% if orcamento.solicitacao.tipo_servico %}
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Type de service</div>
+                        <div class="font-medium text-gray-900">{{ orcamento.solicitacao.get_tipo_servico_display }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Histórico -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-history text-blue-600"></i>
+                    Historique
+                </h3>
+
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div>
+                            <div class="font-medium">Devis créé</div>
+                            <div class="text-gray-500">{{ orcamento.data_elaboracao|date:"d/m/Y H:i" }}</div>
+                        </div>
+                    </div>
+
+                    {% if orcamento.data_envio %}
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                            <div class="font-medium">Devis envoyé</div>
+                            <div class="text-gray-500">{{ orcamento.data_envio|date:"d/m/Y H:i" }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if orcamento.data_resposta_cliente %}
+                    <div class="flex items-center gap-3 text-sm">
+                        {% if orcamento.status == 'aceito' %}
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <div>
+                                <div class="font-medium">Devis accepté</div>
+                                <div class="text-gray-500">{{ orcamento.data_resposta_cliente|date:"d/m/Y H:i" }}</div>
+                            </div>
+                        {% elif orcamento.status == 'recusado' %}
+                            <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <div>
+                                <div class="font-medium">Devis refusé</div>
+                                <div class="text-gray-500">{{ orcamento.data_resposta_cliente|date:"d/m/Y H:i" }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
             </div>

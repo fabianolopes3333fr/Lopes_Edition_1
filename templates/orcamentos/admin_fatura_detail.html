@@ -88,25 +88,83 @@
                     <h2 class="text-xl font-semibold text-gray-900">Informations Client</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="text-sm font-medium text-gray-500 mb-1 block">Nom</label>
-                        <p class="text-gray-900 font-medium">{{ fatura.cliente.first_name }} {{ fatura.cliente.last_name }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Nom</div>
+                        <div class="font-semibold text-gray-900">
+                            {{ fatura.cliente.first_name }} {{ fatura.cliente.last_name }}
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-500 mb-1 block">Email</label>
-                        <p class="text-gray-900">{{ fatura.cliente.email }}</p>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Email</div>
+                        {% if fatura.cliente.email %}
+                        <a href="mailto:{{ fatura.cliente.email }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                            {{ fatura.cliente.email }}
+                        </a>
+                        {% else %}
+                        <span class="text-gray-500">Non renseigné</span>
+                        {% endif %}
                     </div>
+
+                    <!-- Se o User tem profile, mostra informações adicionais -->
+                    {% if fatura.cliente.profile %}
+                        {% if fatura.cliente.profile.phone %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Téléphone</div>
+                            <a href="tel:{{ fatura.cliente.profile.phone }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                                {{ fatura.cliente.profile.phone }}
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if fatura.cliente.profile.address %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Adresse</div>
+                            <div class="font-semibold text-gray-900">
+                                {{ fatura.cliente.profile.address }}
+                                {% if fatura.cliente.profile.city or fatura.cliente.profile.postal_code %}
+                                <br>
+                                {% if fatura.cliente.profile.city %}{{ fatura.cliente.profile.city }}{% endif %}{% if fatura.cliente.profile.postal_code %}{% if fatura.cliente.profile.city %}, {% endif %}{{ fatura.cliente.profile.postal_code }}{% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Se não tem profile ou informações limitadas, usa dados da solicitação original -->
+                    {% if fatura.orcamento and fatura.orcamento.solicitacao %}
+                        {% if not fatura.cliente.profile.phone and fatura.orcamento.solicitacao.telefone_solicitante %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Téléphone (depuis devis)</div>
+                            <a href="tel:{{ fatura.orcamento.solicitacao.telefone_solicitante }}" class="text-purple-600 hover:text-purple-800 font-medium">
+                                {{ fatura.orcamento.solicitacao.telefone_solicitante }}
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if not fatura.cliente.profile.address and fatura.orcamento.solicitacao.endereco %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Adresse (depuis devis)</div>
+                            <div class="font-semibold text-gray-900">
+                                {{ fatura.orcamento.solicitacao.endereco }}<br>
+                                {{ fatura.orcamento.solicitacao.cidade }}, {{ fatura.orcamento.solicitacao.cep }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
 
                 {% if fatura.orcamento %}
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <label class="text-sm font-medium text-gray-500 mb-2 block">Devis de référence</label>
-                    <a href="{% url 'orcamentos:admin_orcamento_detail' fatura.orcamento.numero %}"
-                       class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
-                        <i class="fas fa-file-alt"></i>
-                        {{ fatura.orcamento.numero }}
-                    </a>
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="text-xs font-semibold text-blue-600 uppercase mb-2">Devis de référence</div>
+                        <a href="{% url 'orcamentos:admin_orcamento_detail' fatura.orcamento.numero %}"
+                           class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
+                            <i class="fas fa-file-alt"></i>
+                            Devis {{ fatura.orcamento.numero }}
+                        </a>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -244,7 +302,7 @@
                         </a>
                     {% endif %}
 
-                    <a href="#" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                    <a href="{% url 'orcamentos:admin_fatura_pdf' fatura.numero %}" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Télécharger PDF
                     </a>
@@ -293,4 +351,3 @@
     </div>
 </div>
 {% endblock %}
-

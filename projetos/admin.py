@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Projeto, ImageProjeto
+from accounts.admin_dashboard import admin_site
 
 
 class ImageProjetoInline(admin.TabularInline):
@@ -8,7 +9,6 @@ class ImageProjetoInline(admin.TabularInline):
     fields = ("image", "legende", "ordre")
 
 
-@admin.register(Projeto)
 class ProjetoAdmin(admin.ModelAdmin):
     list_display = (
         "titre",
@@ -28,7 +28,7 @@ class ProjetoAdmin(admin.ModelAdmin):
         ("Informations générales", {"fields": ("titre", "description", "type_projet")}),
         ("Localisation", {"fields": ("ville", "adresse")}),
         (
-            "Projet",
+            "Projeto",
             {
                 "fields": (
                     "status",
@@ -41,3 +41,12 @@ class ProjetoAdmin(admin.ModelAdmin):
         ),
         ("Média", {"fields": ("image_principale", "visible_site")}),
     )
+
+
+# Registrar no admin padrão
+admin.site.register(Projeto, ProjetoAdmin)
+admin.site.register(ImageProjeto)
+
+# Registrar no admin personalizado
+admin_site.register(Projeto, ProjetoAdmin)
+admin_site.register(ImageProjeto)

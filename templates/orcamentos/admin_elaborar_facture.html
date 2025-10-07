@@ -65,7 +65,11 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- CORREÇÃO: Sempre renderizar o campo cliente hidden -->
+                {{ form.cliente }}
+
                 {% if not cliente %}
+                <!-- CENÁRIO 1: Sem cliente pré-definido - renderizar campos normais -->
                 <div class="field-container md:col-span-2">
                     {{ form.cliente_search.label_tag }}
                     <div class="relative">
@@ -83,6 +87,21 @@
                         <div class="text-gray-500 text-xs mt-1">{{ form.cliente_search.help_text }}</div>
                     {% endif %}
                 </div>
+                {% else %}
+                <!-- CENÁRIO 2: Cliente pré-definido do orçamento -->
+                <div class="field-container md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Client</label>
+                    <div class="bg-gray-50 border border-gray-300 rounded-lg p-3">
+                        <div class="font-semibold text-gray-900">
+                            {{ cliente.first_name }} {{ cliente.last_name }}
+                        </div>
+                        <div class="text-sm text-gray-600">{{ cliente.email }}</div>
+                    </div>
+                </div>
+
+                <!-- CORREÇÃO CRÍTICA: Campos hidden obrigatórios -->
+                <input type="hidden" name="cliente" value="{{ cliente.id }}" id="id_cliente">
+                <input type="hidden" name="cliente_search" value="{{ cliente.first_name }} {{ cliente.last_name }}" id="id_cliente_search">
                 {% endif %}
 
                 <div class="field-container md:col-span-2">

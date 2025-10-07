@@ -42,17 +42,19 @@ class TestRunner:
         TestRunner = get_runner(settings)
         test_runner = TestRunner(verbosity=2, interactive=False)
 
-        # Executar testes específicos do fluxo - corrigir caminho
+        # Executar testes específicos do fluxo - incluindo novos testes de faturas
         failures = test_runner.run_tests([
             "orcamentos.tests.test_fluxo_orcamentos.FluxoOrcamentosTestCase",
+            "orcamentos.tests.test_fluxo_orcamentos.FluxoFacturesTestCase",
+            "orcamentos.tests.test_fluxo_orcamentos.FluxoOrcamentosEdgeCasesTestCase",
         ])
 
         if failures:
             print("❌ Alguns testes falharam!")
             return False
-        else:
-            print("✅ Todos os testes de fluxo passaram!")
-            return True
+
+        print("✅ Todos os testes passaram com sucesso!")
+        return True
 
     def executar_testes_unitarios(self):
         """Executa testes unitários do app orcamentos"""

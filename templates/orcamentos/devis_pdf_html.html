@@ -1,531 +1,728 @@
-{% load currency_filters %}
-
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Devis - Lopes Peinture</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devis #{{ orcamento.numero }} - LOPES PEINTURE</title>
     <style>
-      @page {
-        size: A4;
-        margin: 0;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 9pt;
-        line-height: 1.5;
-        color: #000;
-        background: #fff;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      .page {
-        width: 210mm;
-        min-height: 297mm;
-        padding: 15mm;
-        margin: 0 auto;
-        background: white;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 30px;
-      }
-
-      .logo-section {
-        flex: 1;
-      }
-
-      .logo {
-        max-width: 100%;
-        height: auto;
-        font-size: 32pt;
-        font-weight: bold;
-        color: #000;
-        margin-bottom: 0;
-        line-height: 1;
-      }
-      .company-tagline {
-        font-size: 12pt;
-        opacity: 0.9;
-        font-weight: 400;
-        position: relative;
-        color: #6b9c3d;
-        z-index: 1;
-      }
-
-      .logo-subtitle {
-        font-size: 18pt;
-        color: #6b9c3d;
-        font-weight: bold;
-        margin-left: 5px;
-      }
-      .row {
-        display: flex;
-        justify-content: space-between;
-      }
-      .company-info {
-        font-size: 8pt;
-        line-height: 1.5;
-        margin-top: 15px;
-      }
-
-      .date-section {
-        text-align: right;
-        font-size: 9pt;
-      }
-
-      .client-header {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 15px;
-        margin-bottom: 5px;
-      }
-
-      .client-info {
-        flex: 1;
-        font-size: 9pt;
-        line-height: 1.6;
-      }
-
-      .devis-title {
-        font-size: 18pt;
-        font-weight: bold;
-        color: #5b9bd5;
-        margin-bottom: 10px;
-      }
-
-      .devis-meta {
-        display: flex;
-
-        gap: 40px;
-        font-size: 9pt;
-        margin-bottom: 3px;
-      }
-      .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        font-size: 8pt;
-      }
-
-      .invoice-table th {
-        background: linear-gradient(to bottom, #5b9bd5 0%, #4a8ec4 100%);
-        color: white;
-        padding: 8px 4px;
-        text-align: center;
-        font-size: 7.5pt;
-        font-weight: bold;
-        border: 2px solid #4a8ec4;
-      }
-
-      .invoice-table th:first-child,
-      .invoice-table th:nth-child(2) {
-        text-align: left;
-      }
-
-      .invoice-table td {
-        padding: 5px 4px;
-        border: 2px solid #e0e0e0;
-        text-align: right;
-      }
-
-      .invoice-table td:first-child,
-      .invoice-table td:nth-child(2) {
-        text-align: left;
-      }
-
-      .invoice-table tbody tr:nth-child(even) {
-        background: #fffef5;
-      }
-
-      .item-title {
-        font-weight: bold;
-        margin-bottom: 3px;
-      }
-
-      .item-detail {
-        color: #666;
-        font-size: 7.5pt;
-        line-height: 1.4;
-      }
-
-      .item-description {
-        grid-column: 1 / 3;
-        padding-right: 10px;
-      }
-
-      .item-title {
-        font-weight: bold;
-        margin-bottom: 3px;
-      }
-
-      .item-detail {
-        color: #666;
-        font-size: 7.5pt;
-        line-height: 1.4;
-      }
-
-      .footer {
-        margin-top: auto;
-        padding-top: 20px;
-        border-top: 2px solid #ddd;
-      }
-
-      .payment-note {
-        font-size: 8pt;
-        margin-bottom: 10px;
-      }
-
-      .payment-note strong {
-        color: #000;
-      }
-
-      .validity-note {
-        color: red;
-        font-size: 8pt;
-        margin-bottom: 15px;
-      }
-
-      .totals-section {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 15px;
-      }
-
-      .totals-box {
-        width: 300px;
-      }
-
-      .total-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 15px;
-        background: #e8f0f8;
-        margin-bottom: 2px;
-        font-size: 9pt;
-      }
-
-      .total-row.highlight {
-        background: #5b9bd5;
-        color: white;
-        font-weight: bold;
-        font-size: 10pt;
-      }
-
-      .payment-info {
-        font-size: 7.5pt;
-        line-height: 1.6;
-        color: #333;
-        text-align: center;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #ddd;
-      }
-
-      .text-right {
-        text-align: right !important;
-      }
-
-      .text-center {
-        text-align: center !important;
-      }
-
-      /* ===== PRINT CONTROLS ===== */
-      .print-controls {
-        position: fixed;
-        top: 30px;
-        right: 30px;
-        z-index: 1000;
-        display: flex;
-        gap: 15px;
-      }
-
-      .print-btn {
-        background: linear-gradient(135deg, #3b82f6, #1e40af);
-        color: white;
-        border: none;
-        padding: 15px 25px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 14px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .print-btn:hover {
-        background: linear-gradient(135deg, #1e40af, #1d4ed8);
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      }
-
-      .download-btn {
-        background: linear-gradient(135deg, #059669, #047857);
-        color: white;
-        border: none;
-        padding: 15px 25px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 14px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .download-btn:hover {
-        background: linear-gradient(135deg, #047857, #065f46);
-        transform: translateY(-3px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Print Controls -->
-    <div class="print-controls no-print">
-      <button class="print-btn" onclick="window.print()">🖨️ Imprimer PDF</button>
-      <button class="download-btn" onclick="downloadHTML()">💾 Télécharger HTML</button>
-    </div>
-    <div class="page">
-      <div class="content-area">
-        <div class="header">
-          <div class="logo-section">
-            <div>
-              <img
-                class="logo"
-                src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
-                alt="LOPES"
-              />
-            </div>
-            <div class="row">
-              <div class="company-info">
-                <strong>EI : {{ company_info.name }}</strong> <br />
-                SIRET: {{ company_info.siret }}<br />
-                APE: {{ company_info.ape }} - TVA: {{ company_info.tva }} <br>
-                  {{ company_info.address }}<br />
-                {{ company_info.city }}<br />
-                France<br />
-                {{ company_info.phone }}<br />
-                {{ company_info.email }}<br />
-                www.lopespeinture.fr
-              </div>
-              <div class="client-header">
-                <div class="client-info">
-                  <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong><br />
-                  {{ orcamento.solicitacao.endereco }}<br>
-                        {{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}<br>
-                        {{ orcamento.solicitacao.email_solicitante }}<br>
-
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="date-section">Le {{ date_generation|date:"d/m/Y" }}</div>
-        </div>
-
-        <div class="devis-title">Devis</div>
-
-        <div class="devis-meta">
-          <div><strong>DEVIS N° {{ orcamento.numero }}</strong></div>
-          <div><strong>Code Client : 1</strong></div>
-          <div><strong>TVA Client :</strong></div>
-        </div>
-        {% if items_data %}
-        <table class="invoice-table">
-          <thead>
-            <tr>
-              <th>Réf</th>
-              <th>Désignation</th>
-              <th>Unité</th>
-              <th>Quantité</th>
-              <th>P.U. HT</th>
-              <th>P.U.TTC</th>
-              <th>Remise</th>
-              <th>Total HT</th>
-              <th>Total TTC</th>
-              <th>Taux</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in items_data %}
-            <tr>
-              <td>{{ item.ref }}</td>
-              <td class="text-left item-detail">{{ item.designation }}</td>
-              <td class="text-center">{{ item.unite }}</td>
-              <td class="text-right">{{ item.quantite }}</td>
-              <td class="text-right">{{ item.pu_ht|floatformat:2 }}€</td>
-              <td class="text-right">{{ item.pu_ttc|floatformat:2 }}€</td>
-              <td class="text-right">{{ item.remise|floatformat:2 }}€</td>
-              <td class="text-right">{{ item.total_ht|floatformat:2 }}€</td>
-              <td class="text-right">{{ item.total_ttc|floatformat:2 }}€</td>
-              <td class="text-right">{{ item.taxe|floatformat:2 }}€</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="footer">
-        <div class="payment-note"><strong>Mode de reglement :</strong> {{ orcamento.tipo_pagamento }}</div>
-        <div class="condition-item">
-          <h4>Conditions de paiement</h4>
-          <p>{{ orcamento.condicoes_pagamento|linebreaks }}</p>
-        </div>
-
-        <div class="validity-note">
-          <strong>Devis valable jusqu'au : {{ orcamento.validade_orcamento|date:"d/m/Y" }}</strong>
-        </div>
-        <br />
-        <div class="meta-group">
-          <div class="meta-label">Délai d'exécution</div>
-          <div class="meta-value">{{ orcamento.prazo_execucao }} jours</div>
-        </div>
-        <br />
-        <div class="meta-group">
-          <div class="meta-label">Service</div>
-          <div class="meta-value">{{ orcamento.solicitacao.get_tipo_servico_display }}</div>
-        </div>
-
-        <div class="totals-section">
-          <div class="totals-box">
-            <div class="total-row">
-              <span>Total HT :</span>
-              <span>{{ subtotal_ht|floatformat:2 }}€</span>
-            </div>
-            {% if remise_global > 0 %}
-            <div class="total-row">
-              <span>Remise ({{ remise_global }}%):</span>
-              <span>-{{ valor_remise|floatformat:2 }}€</span>
-            </div>
-            <div class="total-row">
-              <span>Sous-total après remise:</span>
-              <span>{{ subtotal_apres_remise_ht|floatformat:2 }}€</span>
-            </div>
-            {% endif %}
-            <div class="total-row">
-              {% if taxa_tva_media == "Variável" %}
-                <span>TVA ({{ taxa_tva_media }}) :</span>
-              {% elif taxa_tva_media == "0" %}
-                <span>TVA (Exonérée) :</span>
-              {% else %}
-                <span>TVA ({{ taxa_tva_media }}%) :</span>
-              {% endif %}
-              <span>{{ taxe_finale|floatformat:2 }}€</span>
-            </div>
-            <div class="total-row">
-              <span>Total TTC :</span>
-              <span>{{ subtotal_apres_remise_ttc|floatformat:2 }}€</span>
-            </div>
-            <div class="total-row">
-              <span>Acomptés :</span>
-              <span>0.00€</span>
-            </div>
-            <div class="total-row highlight">
-              <span>Net à Payer :</span>
-              <span>{{ subtotal_apres_remise_ttc|floatformat:2 }}€</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="text-align: right; font-size: 8pt; margin-top: 10px">
-          Net à payer {{ subtotal_apres_remise_ttc|currency_to_words }}.
-        </div>
-        {% else %}
-        <div class="no-items-card">
-          <div class="no-items-icon">📋</div>
-          <div class="no-items-title">Aucun élément détaillé</div>
-          <div class="no-items-text">
-            Les prestations détaillées seront précisées lors de la finalisation du devis.<br />
-            Le montant final sera communiqué après étude complète de votre projet.
-          </div>
-        </div>
-        {% endif %}
-        <div class="payment-info">
-          <strong>TVA non applicable, article 293 B du CGI</strong><br />
-          PAIEMENT PAR VIREMENT BANCAIRE : LOPES DE SOUZA FABIANO (EI) IBAN FR76 1027 8022 3400 0206
-          6300 131
-        </div>
-      </div>
-    </div>
-    <script>
-      // Enhanced functionality
-      document.addEventListener('DOMContentLoaded', function () {
-        // Print button
-        const printBtn = document.querySelector('.print-btn');
-        if (printBtn) {
-          printBtn.addEventListener('click', function () {
-            window.print();
-          });
+        @media print {
+            @page {
+                margin: 0.5in;
+                size: A4;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
         }
 
-        // Download HTML button
-        window.downloadHTML = function () {
-          const element = document.documentElement.outerHTML;
-          const blob = new Blob([element], { type: 'text/html' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download =
-            'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}.html';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #0e0f0c;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            position: relative;
+            min-height: calc(100vh - 40px);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #80b14f;
+            padding-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            color: #80b14f;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .company-info p {
+            margin: 2px 0;
+            color: #6e6f6d;
+        }
+
+        .devis-info {
+            text-align: right;
+            flex: 1;
+        }
+
+        .devis-title {
+            font-size: 28px;
+            color: #80b14f;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .devis-number {
+            font-size: 16px;
+            color: #0e0f0c;
+            margin-bottom: 5px;
+        }
+
+        .devis-date {
+            color: #6e6f6d;
+        }
+
+        /* Client Info */
+        .client-section {
+            margin: 30px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-info h3 {
+            color: #80b14f;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .client-details {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        .devis-details {
+	        
+            flex: 1;
+            margin-left: 30px;
+        }
+        .devis-details h3 {
+			color: #80b14f;
+			margin-bottom: 10px;
+			font-size: 14px;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+	       
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+
+        .detail-row.highlight {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* Status */
+        .status-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-aprovado {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #80b14f;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-rejeitado {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Items Table */
+        .items-section {
+            margin: 30px 0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #80b14f;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .items-table th {
+            background: #80b14f;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .items-table tr:hover {
+            background: #f0f0f0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Totals */
+        .totals-section {
+            margin: 30px 0 20px 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-table {
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .totals-table .label {
+            text-align: left;
+            background: #d4edda;
+            font-weight: bold;
+            color: #0e0f0c;
+        }
+
+        .totals-table .value {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .total-final {
+            background: #80b14f !important;
+            color: white !important;
+            font-size: 14px;
+        }
+
+        /* Description */
+        .description-section {
+            margin: 30px 0;
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #6e6f6d;
+            text-align: center;
+            color: #6e6f6d;
+            font-size: 11px;
+        }
+
+        .payment-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        /* Observations */
+        .observations-section {
+            margin: 30px 0;
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #80b14f;
+        }
+
+        /* Ensure proper page breaks for print */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 11px;
+            }
+            
+            .container {
+                max-width: none;
+                margin: 0;
+                padding: 15px;
+                min-height: auto;
+                position: relative;
+            }
+            
+            .header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
+            
+            .client-section {
+                margin: 20px 0;
+                page-break-inside: avoid;
+            }
+            
+            .items-section {
+                margin: 20px 0;
+            }
+            
+            .totals-section {
+                margin: 20px 0 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .description-section {
+                margin: 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .observations-section {
+                margin: 15px 0;
+                page-break-inside: avoid;
+            }
+            
+            .footer {
+                margin-top: 30px;
+                padding-top: 15px;
+                page-break-inside: avoid;
+                position: relative;
+            }
+            
+            .payment-info {
+                margin-top: 10px;
+                padding: 10px;
+                page-break-inside: avoid;
+            }
+            
+            /* Evitar quebras desnecessárias */
+            .totals-table,
+            .client-details,
+            .status-section {
+                page-break-inside: avoid;
+            }
+            
+            /* Ajustar tamanhos para impressão */
+            .devis-title {
+                font-size: 24px;
+            }
+            
+            .company-info h1 {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 14px;
+            }
+        }
+
+        /* Utilities */
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .font-bold { font-weight: bold; text-transform: uppercase; }
+        .text-sm { font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div>
+                    <img
+                        class="logo"
+                        src="http://127.0.0.1:8000/static/img/logo-220x80-preto.svg"
+                        alt="LOPES"
+                    />
+                </div>
+                <h3>EI: {{ company_info.name }}</h3>
+                <p>{{ company_info.address }}</p>
+                <p>{{ company_info.city }}</p>
+                <p>SIRET: {{ company_info.siret }}</p>
+                <p>TVA Intracom: {{ company_info.tva }}</p>
+                <p>Tél: {{ company_info.phone }}</p>
+                <p>Email: {{ company_info.email }}</p>
+                <p>Site: {{ company_info.site }}</p>
+            </div>
+            <div class="devis-info">
+                <div class="devis-title">DEVIS</div>
+                <div class="devis-number">N° {{ orcamento.numero }}</div>
+                <div class="devis-date">Le {{ date_generation|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status-section">
+            {% if orcamento.status == 'aceito' %}
+                <span class="status-badge status-aprovado">✓ Devis Approuvé</span>
+            {% elif orcamento.status == 'pendente' %}
+                <span class="status-badge status-pendente">⏳ En Attente d'Approbation</span>
+            {% elif orcamento.status == 'recusado' %}
+                <span class="status-badge status-rejeitado">✗ Devis Rejeté</span>
+            {% elif orcamento.status == 'enviado' %}
+                <span class="status-badge status-pendente">📤 Devis Envoyé</span>
+            {% elif orcamento.status == 'em_elaboracao' %}
+                <span class="status-badge status-pendente">📝 En Cours d'Élaboration</span>
+            {% elif orcamento.status == 'expirado' %}
+                <span class="status-badge status-rejeitado">⏰ Devis Expiré</span>
+            {% endif %}
+        </div>
+
+        <!-- Client and Devis Details -->
+        <div class="client-section">
+            <div class="client-info">
+                <h3>Devis pour</h3>
+                <div class="client-details">
+	                <div class="font-bold">Client n° {{ orcamento.cliente.code }}</div>
+                    <div class="font-bold">{{ orcamento.solicitacao.nome_solicitante }} </div>
+                    <div>{{ orcamento.solicitacao.endereco }}</div>
+	                <div>{{ orcamento.solicitacao.cidade }}, {{ orcamento.solicitacao.cep }}</div>
+	                <div>{{ orcamento.solicitacao.email_solicitante }}</div>
+                    {% if orcamento.cliente.profile.phone %}
+                    <div>Tél: {{ orcamento.cliente.profile.phone }}</div>
+                    {% endif %}
+
+                    <!-- Se não tem profile ou informações limitadas, usa dados da solicitação original -->
+                    {% if orcamento.solicitacao %}
+                        {% if not orcamento.cliente.profile.phone and orcamento.solicitacao.telefone_solicitante %}
+                        <div>Tél: {{ orcamento.solicitacao.telefone_solicitante }} <em>(depuis demande)</em></div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="devis-details ">
+                <h3>Détails du Devis</h3>
+                <div class="client-details">
+                    <div class="detail-row">
+                        <span>Date d'émission:</span>
+                        <span>{{ orcamento.data_elaboracao|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Validité:</span>
+                        <span>{{ orcamento.validade_orcamento|date:"d/m/Y" }}</span>
+                    </div>
+                    {% if orcamento.data_resposta_cliente %}
+                    <div class="detail-row highlight">
+                        <span>Date d'approbation:</span>
+                        <span>{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if orcamento.solicitacao %}
+                    <div class="detail-row">
+                        <span>Demande associée:</span>
+                        <span>#{{ orcamento.solicitacao.numero }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        {% if orcamento.descricao %}
+        <div class="description-section">
+            <div class="section-title">Description du Projet</div>
+            <div>{{ orcamento.descricao|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Items -->
+        {% if orcamento.itens.all %}
+        <div class="items-section">
+            <div class="section-title">Détail des Prestations</div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Référence</th>
+                        <th style="width: 40%">Désignation</th>
+                        <th style="width: 10%" class="text-center">Qté</th>
+                        <th style="width: 10%" class="text-center">Unité</th>
+                        <th style="width: 12%" class="text-right">P.U. HT</th>
+                        <th style="width: 13%" class="text-right">Total TTC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for  item in items_data %}
+                    <tr>
+                        <td>{{ item.ref|default:" " }}</td>
+                        <td>{{ item.designation }}</td>
+                        <td class="text-center">{{ item.quantite|floatformat:2 }}</td>
+                        <td class="text-center">{{ item.unite|default:"UN" }}</td>
+                        <td class="text-right">{{ item.pu_ht|floatformat:2 }}€</td>
+                        <td class="text-right font-bold">{{ item.pu_ttc|floatformat:2 }}€</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="label">Total HT:</td>
+                    <td class="value">{{ orcamento.total|floatformat:2 }}€</td>
+                </tr>
+                {% if remise_global > 0 %}
+                <tr>
+                    <td class="label">Remise ({{ remise_global }}%):</td>
+                    <td class="value">-{{  valor_remise|floatformat:2 }}€</td>
+                </tr>
+	            <tr>
+		            <td class="label">Sous-total après remise HT:</td>
+					<td class="value">{{ subtotal_apres_remise_ht|floatformat:2 }}€</td>
+	            </tr>
+                {% endif %}
+	            <tr class="total-row">
+	              {% if taxa_tva_media == "Variável" %}
+	                <td class="label">TVA ({{ taxa_tva_media }}) :</td>
+	              {% elif taxa_tva_media == "0" %}
+	                <td class="label">TVA (Exonérée) :</td>
+	              {% else %}
+	                <td class="label">TVA ({{ taxa_tva_media }}%) :</td>
+	              {% endif %}
+	              <td class="value">{{ taxe_finale|floatformat:2 }}€</td>
+	            </tr>
+                {% if orcamento.total_impostos > 0 %}
+                <tr>
+                    <td class="label">TVA:</td>
+                    <td class="value">{{ orcamento.total_impostos|floatformat:2 }}€</td>
+                </tr>
+                <tr>
+                    <td class="label">Acomptés:</td>
+                    <td class="value">0.00€</td>
+                </tr>
+                <tr class="total-final">
+                    <td class="label">Total TTC:</td>
+                    <td class="value">{{ subtotal_apres_remise_ttc|floatformat:2 }}€</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td class="label">Acomptés:</td>
+                    <td class="value">0.00€</td>
+                </tr>
+                <tr class="total-final">
+                    <td class="label">Net à Payer:</td>
+                    <td class="value">{{ subtotal_apres_remise_ttc|floatformat:2 }}€</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+
+        <!-- Conditions -->
+        <div class="description-section">
+            <div class="section-title">Conditions Générales</div>
+            <div>
+                {% with acompte_value=orcamento.total|floatformat:2 %}
+                <p><strong>Acompte (30%):</strong>  <span>{% widthratio orcamento.total 10 3 %}€ HT</span></p>
+                {% endwith %}
+                <p><strong>Validité du devis:</strong> {{ orcamento.validade_orcamento|date:"d/m/Y" }}</p>
+                <p><strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao|default:"À définir" }}</p>
+                {% if orcamento.condicoes_pagamento %}
+                <p><strong>Conditions de paiement:</strong> {{ orcamento.condicoes_pagamento }}</p>
+                {% endif %}
+	            <p><strong>• Les prix sont exprimés en euros TTC</strong> </p>
+	            <p><strong>• Devis valable 30 jours à compter de la date d'émission</strong></p>
+				<p><strong>• Acompte de 30% à la commande</strong></p>
+				<p><strong>• Solde à la livraison</strong></p>
+	            <p><strong>• Matériaux et main d'œuvre garantis selon les normes en vigueur</strong></p>
+	            <p><strong>• Délais d'exécution donnés à titre indicatif</strong></p>
+	            <p><strong>• Travaux réalisés selon les règles de l'art </strong></p>
+	            <p><strong>• Toute modification ou prestation supplémentaire fera l'objet d'un devis complémentaire</strong></p>
+	            <p><strong>• En cas d'annulation par le client, l'acompte restera acquis à l'entreprise</strong></p>
+	            
+	            
+	            
+            </div>
+        </div>
+
+        <!-- Observations -->
+        {% if orcamento.observacoes %}
+        <div class="observations-section">
+            <div class="section-title">Observations</div>
+            <div>{{ orcamento.observacoes|linebreaksbr }}</div>
+        </div>
+        {% endif %}
+       <!-- sign -->
+	    
+       <!-- Signature Section -->
+       <div class="signature-section" style="margin-top: 40px; text-align: left;">
+           <p><strong>Acceptation du devis:</strong></p> <br>
+           
+           {% if orcamento.status == 'aceito' and orcamento.data_resposta_cliente %}
+               <!-- Devis approuvé - informations remplies automatiquement -->
+               <p>Je soussigné(e) <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ HT.</p> <br>
+               
+               <p>Fait à <strong>{{ orcamento.solicitacao.cidade }}</strong>, le <strong>{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</strong></p><br>
+               
+               <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+                   <div style="flex: 1;">
+                       <p><strong>Signature du client:</strong></p>
+                       <div style="margin-top: 10px; padding: 15px; border: 2px solid #80b14f; background: #f8fff9; border-radius: 8px; min-height: 80px; position: relative;">
+                           <!-- Signature manuscrite stylisée -->
+                           <div style="font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; font-size: 24px; color: #155724; transform: rotate(-2deg); margin-top: 15px;">
+                               {{ orcamento.solicitacao.nome_solicitante }}
+                           </div>
+                           <div style="position: absolute; bottom: 5px; right: 10px; font-size: 10px; color: #6e6f6d; font-style: italic;">
+                               Signé électroniquement
+                           </div>
+                           <!-- Petit tampon de validation -->
+                           <div style="position: absolute; top: 5px; right: 5px; background: #80b14f; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: bold;">
+                               ✓ VALIDÉ
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <div style="flex: 1; margin-left: 30px;">
+                       <p><strong>Détails de l'acceptation:</strong></p>
+                       <div style="margin-top: 10px; padding: 10px; background: #d4edda; border-left: 4px solid #80b14f; border-radius: 5px; font-size: 11px;">
+                           <p><strong>📅 Date d'acceptation:</strong> {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</p>
+                           <p><strong>🖥️ Acceptation:</strong> Plateforme numérique</p>
+                           <p><strong>📧 Email du signataire:</strong> {{ orcamento.solicitacao.email_solicitante }}</p>
+                           <p><strong>🔒 Statut:</strong> <span style="color: #155724; font-weight: bold;">Juridiquement valide</span></p>
+                           {% if orcamento.observacoes_cliente %}
+                           <p><strong>💬 Commentaires:</strong> {{ orcamento.observacoes_cliente }}</p>
+                           {% endif %}
+                       </div>
+                   </div>
+               </div>
+               
+               <!-- Certificat de signature électronique -->
+               <div style="margin-top: 30px; padding: 15px; background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%); border: 2px dashed #80b14f; border-radius: 10px; text-align: center;">
+                   <div style="display: inline-block; background: #80b14f; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin-bottom: 10px;">
+                       🏆 CERTIFICAT DE SIGNATURE ÉLECTRONIQUE
+                   </div>
+                   <p style="font-size: 12px; color: #155724; margin: 5px 0;">
+                       Ce document a été signé électroniquement par <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>
+                   </p>
+                   <p style="font-size: 10px; color: #6e6f6d; margin: 2px 0;">
+                       Signature horodatée et certifiée conforme à la réglementation européenne eIDAS
+                   </p>
+                   <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 10px; color: #6e6f6d;">
+                       <span>🔐 Chiffrement SHA-256</span>
+                       <span>📅 {{ orcamento.data_resposta_cliente|date:"d/m/Y H:i:s" }}</span>
+                       <span>✅ Légalement contraignant</span>
+                   </div>
+               </div>
+               
+           {% else %}
+               <!-- Devis en attente - champs à remplir -->
+               <p>Je soussigné(e) _____________________, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ TTC.</p> <br>
+               
+               <p>Fait à _____________________, le _____________________</p><br>
+               
+               <div style="margin-top: 20px;">
+                   <p><strong>Signature du client:</strong></p>
+                   <div style="margin-top: 10px; border-bottom: 2px solid #333; width: 300px; height: 60px; position: relative;">
+                       <div style="position: absolute; bottom: -20px; left: 0; font-size: 10px; color: #666;">
+                           (Signature manuscrite)
+                       </div>
+                   </div>
+               </div>
+               
+               {% if orcamento.status == 'recusado' %}
+               <div style="margin-top: 20px; padding: 10px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px;">
+                   <p><strong>✗ Devis rejeté le {{ orcamento.data_resposta_cliente|date:"d/m/Y à H:i" }}</strong></p>
+                   {% if orcamento.observacoes_cliente %}
+                   <p><strong>Motif du rejet:</strong> {{ orcamento.observacoes_cliente }}</p>
+                   {% endif %}
+               </div>
+               {% endif %}
+           {% endif %}
+       </div>
+	    
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-note">
+                Merci pour votre confiance. Ce devis est valable jusqu'au {{ orcamento.data_validade|date:"d/m/Y" }}.
+            </div>
+            <div>
+                Document généré le {% now "d/m/Y à H:i" %}
+            </div>
+            <div class="text-sm" style="margin-top: 20px;">
+                LOPES PEINTURE - 123 Rue de la Peinture - 01 23 45 67 89 - contact@lopespeinture.fr
+            </div>
+            <div class="payment-info">
+                {% if taxa_tva_media == "0" or taxa_tva_media == 0 or not taxe_finale or taxe_finale == 0 %}
+                <strong>TVA non applicable, article 293 B du CGI</strong><br />
+                {% endif %}
+                Pour toute question concernant ce devis, n'hésitez pas à nous contacter.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-print pour le téléchargement
+        window.onload = function() {
+            if (!window.location.search.includes('debug=1')) {
+                setTimeout(function() {
+                    window.print();
+                }, 500);
+            }
         };
-      });
-
-      // Print optimization
-      window.addEventListener('beforeprint', function () {
-        document.title =
-          'Devis_{{ orcamento.numero }}_{{ orcamento.solicitacao.nome_solicitante|slugify }}';
-      });
-
-      window.addEventListener('afterprint', function () {
-        document.title = 'Devis {{ orcamento.numero }} - {{ company_info.name }}';
-      });
-
-      // Add smooth animations
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-
-      // Observe elements for animation
-      document.querySelectorAll('.section-title, .table-container, .totals-card').forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'all 0.6s ease';
-        observer.observe(el);
-      });
     </script>
-  </body>
+</body>
 </html>

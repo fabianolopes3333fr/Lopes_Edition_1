@@ -39,7 +39,7 @@
                 </div>
                 <div class="bg-yellow-50 p-4 rounded-lg">
                     <label class="block text-sm font-medium text-yellow-700 mb-1">Création</label>
-                    <p class="text-yellow-900 font-semibold">{{ orcamento.created_at|date:"d/m/Y" }}</p>
+                    <p class="text-yellow-900 font-semibold">{{ orcamento.data_elaboracao|date:"d/m/Y" }}</p>
                 </div>
             </div>
         </div>
@@ -220,13 +220,13 @@
 <!-- Modal para adicionar item -->
 <div id="modal-add-item" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     <i class="fas fa-plus-circle text-blue-600"></i>
                     <span id="modal-title">Ajouter un Item</span>
                 </h3>
-                <button type="button" id="btn-close-modal" class="text-gray-400 hover:text-gray-600 text-2xl transition-colors">
+                <button type="button" id="btn-close-modal" class="text-gray-400 hover:text-gray-600 text-2xl">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -237,17 +237,15 @@
                     <div class="relative">
                         <input type="text" id="item-referencia"
                                autocomplete="off"
-                               placeholder="Tapez pour rechercher un produit ou créer un nouveau..."
+                               placeholder="Tapez pour rechercher un produit..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <div id="produto-suggestions" class="absolute z-20 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
+                        <div id="produto-suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Désignation *</label>
-                    <textarea id="item-descricao" rows="2"
-                              placeholder="Description détaillée du produit ou service..."
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                    <textarea id="item-descricao" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Description détaillée du produit ou service..."></textarea>
                 </div>
 
                 <div>
@@ -257,7 +255,6 @@
                         <option value="piece">Pièce</option>
                         <option value="m2">M²</option>
                         <option value="ml">ML</option>
-                        <option value="longueur">Longueur</option>
                         <option value="kg">Kg</option>
                         <option value="heure">Heure</option>
                         <option value="forfait">Forfait</option>
@@ -274,14 +271,12 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Quantité *</label>
-                    <input type="number" id="item-quantidade" value="1" step="0.01" min="0"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="number" id="item-quantidade" value="1" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Prix Unitaire HT (€) *</label>
-                    <input type="number" id="item-preco-ht" value="0" step="0.01" min="0"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="number" id="item-preco-ht" value="0" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
 
                 <div>
@@ -296,8 +291,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Remise (%)</label>
-                    <input type="number" id="item-remise" value="0" step="0.01" min="0" max="100"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="number" id="item-remise" value="0" step="0.01" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
             </div>
 
@@ -326,8 +320,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando admin_editar_orcamento...');
-
     let items = [];
     let editingIndex = -1;
 
@@ -350,31 +342,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputTaxaTva = document.getElementById('item-taxa-tva');
     const inputRemise = document.getElementById('item-remise');
 
-    // Verificar se os elementos existem
-    if (!modal) {
-        console.error('❌ Modal não encontrado!');
-        return;
-    }
-
-    if (!btnAddItem) {
-        console.error('❌ Botão adicionar item não encontrado!');
-        return;
-    }
-
-    console.log('✅ Elementos do modal encontrados');
-
-    // Carregar itens existentes do orçamento PRIMEIRO
+    // Carregar dados existentes PRIMEIRO
     loadExistingItems();
 
-    // Event listeners
+    // Open modal para adicionar
     btnAddItem.addEventListener('click', function() {
-        console.log('🔵 Clicou em adicionar item');
         clearModalInputs();
         editingIndex = -1;
         modalTitle.textContent = 'Ajouter un Item';
         btnConfirmText.textContent = 'Ajouter';
         modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevenir scroll
+        document.body.style.overflow = 'hidden';
     });
 
     // Close modal
@@ -417,8 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Confirm item
     btnConfirmItem.addEventListener('click', function() {
-        console.log('💾 Confirmando item...');
-
         const descricao = inputDescricao.value.trim();
         if (!descricao) {
             alert('La désignation est obligatoire');
@@ -437,10 +413,8 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         if (editingIndex >= 0) {
-            console.log('✏️ Editando item existente:', editingIndex);
             items[editingIndex] = item;
         } else {
-            console.log('➕ Adicionando novo item');
             items.push(item);
         }
 
@@ -461,47 +435,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadExistingItems() {
-        console.log('📥 Carregando itens existentes...');
-
-        // Dados dos itens existentes do orçamento (passados do backend)
-        const existingItems = {{ existing_items|safe }};
-
-        console.log('📋 Dados recebidos do backend:', existingItems);
-
-        if (!existingItems || existingItems.length === 0) {
-            console.log('⚠️ Nenhum item existente encontrado');
-            renderItems();
-            return;
-        }
-
-        items = existingItems.map((item, index) => {
-            console.log(`📦 Processando item ${index + 1}:`, item);
-            return {
-                referencia: item.referencia || '',
-                descricao: item.descricao || '',
-                unidade: item.unidade || 'unite',
-                atividade: item.atividade || 'marchandise',
-                quantidade: parseFloat(item.quantidade) || 1,
-                preco_unitario_ht: parseFloat(item.preco_unitario_ht) || 0,
-                remise_percentual: parseFloat(item.remise_percentual) || 0,
-                taxa_tva: String(item.taxa_tva) || '20'
-            };
-        });
-
-        console.log('✅ Items processados:', items);
-        renderItems();
+        // Carregar itens existentes do orçamento via AJAX
+        const numeroOrcamento = '{{ orcamento.numero }}';
+        fetch(`/devis/ajax/orcamento-items/${numeroOrcamento}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.items) {
+                    items = data.items.map(item => ({
+                        referencia: item.referencia || '',
+                        descricao: item.descricao || '',
+                        unidade: item.unidade || 'unite',
+                        atividade: item.atividade || 'marchandise',
+                        quantidade: parseFloat(item.quantidade) || 1,
+                        preco_unitario_ht: parseFloat(item.preco_unitario_ht) || 0,
+                        remise_percentual: parseFloat(item.remise_percentual) || 0,
+                        taxa_tva: String(item.taxa_tva) || '20'
+                    }));
+                    console.log('✅ Items carregados via AJAX:', items.length);
+                } else {
+                    console.log('⚠️ Nenhum item encontrado:', data);
+                    items = [];
+                }
+                renderItems();
+            })
+            .catch(error => {
+                console.error('❌ Erro ao carregar itens via AJAX:', error);
+                items = [];
+                renderItems();
+            });
     }
 
     function renderItems() {
-        console.log('🎨 Renderizando items:', items.length, 'items');
-
         const tbody = document.getElementById('items-body');
         const emptyMessage = document.getElementById('empty-items-message');
-
-        if (!tbody) {
-            console.error('❌ Tabela não encontrada!');
-            return;
-        }
 
         tbody.innerHTML = '';
 
@@ -547,13 +513,10 @@ document.addEventListener('DOMContentLoaded', function() {
             tbody.appendChild(row);
         });
 
-        console.log('✅ Items renderizados na tabela');
         updateTotals();
     }
 
     window.editItem = function(index) {
-        console.log('✏️ Editando item:', index);
-
         editingIndex = index;
         const item = items[index];
 
@@ -575,8 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.deleteItem = function(index) {
-        console.log('🗑️ Excluindo item:', index);
-
         if (confirm('Êtes-vous sûr de vouloir supprimer cet item?')) {
             items.splice(index, 1);
             renderItems();
@@ -609,30 +570,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalTvaComDesconto = totalTva - valorDescontoTva;
         const totalFinal = totalHtComDesconto + totalTvaComDesconto;
 
-        // Atualizar elementos na página
-        const elements = {
-            'subtotal-ht': totalHtComDesconto.toFixed(2) + '€',
-            'subtotal-ttc': subtotalTtc.toFixed(2) + '€',
-            'total-tva': totalTvaComDesconto.toFixed(2) + '€',
-            'total-final-ht': totalHtComDesconto.toFixed(2) + '€',
-            'total-final-ttc': totalFinal.toFixed(2) + '€'
-        };
-
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
-            }
-        });
+        document.getElementById('subtotal-ht').textContent = totalHtComDesconto.toFixed(2) + '€';
+        document.getElementById('subtotal-ttc').textContent = subtotalTtc.toFixed(2) + '€';
+        document.getElementById('total-tva').textContent = totalTvaComDesconto.toFixed(2) + '€';
+        document.getElementById('total-final-ht').textContent = totalHtComDesconto.toFixed(2) + '€';
+        document.getElementById('total-final-ttc').textContent = totalFinal.toFixed(2) + '€';
 
         // Update hidden input
         document.getElementById('itens-json').value = JSON.stringify(items);
-
-        console.log('💰 Totais atualizados:', {
-            items: items.length,
-            totalHt: totalHtComDesconto.toFixed(2),
-            totalTtc: totalFinal.toFixed(2)
-        });
     }
 
     function getUnidadeLabel(unidade) {
@@ -641,7 +586,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'piece': 'Pièce',
             'm2': 'M²',
             'ml': 'ML',
-            'longueur': 'Longueur',
             'kg': 'Kg',
             'heure': 'Heure',
             'forfait': 'Forfait'
@@ -652,7 +596,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     document.getElementById('form-orcamento').addEventListener('submit', function() {
         updateTotals(); // Ensure JSON is up to date
-        console.log('📤 Submetendo formulário com', items.length, 'items');
     });
 
     // Desconto global listener
@@ -690,7 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        console.log('🔍 Buscando produtos para:', searchTerm);
         const produtos = await buscarProdutos(searchTerm);
 
         if (produtos.length > 0) {
@@ -705,17 +647,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             suggestionBox.innerHTML = html;
             suggestionBox.classList.remove('hidden');
-            console.log('✅ Mostrando', produtos.length, 'produtos');
         } else {
             suggestionBox.innerHTML = '<div class="p-3 text-gray-500 text-sm">Aucun produit trouvé</div>';
             suggestionBox.classList.remove('hidden');
-            console.log('⚠️ Nenhum produto encontrado');
         }
     });
 
     window.selecionarProduto = function(referencia, nome, preco) {
-        console.log('🎯 Produto selecionado:', referencia, nome, preco);
-
         inputReferencia.value = referencia;
         inputDescricao.value = nome;
         inputPrecoHt.value = preco;
@@ -729,8 +667,6 @@ document.addEventListener('DOMContentLoaded', function() {
             suggestionBox.classList.add('hidden');
         }
     });
-
-    console.log('🎉 Inicialização completa!');
 });
 </script>
 {% endblock %}

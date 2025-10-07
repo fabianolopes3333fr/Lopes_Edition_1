@@ -1,0 +1,391 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <i class="fas fa-link-slash text-orange-500"></i>
+                    Gestion des Demandes Orphelines
+                </h1>
+                <p class="text-gray-600 mt-2">Demandes de devis non associées à un compte utilisateur</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="processarTodosVinculaveis()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class="fas fa-magic"></i>
+                    Lier tout automatiquement
+                </button>
+                <button onclick="executarComandoVinculacao()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class="fas fa-terminal"></i>
+                    Commande en lot
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Orphelines</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_orfas }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-unlink text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Emails Uniques</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.emails_unicos }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-envelope text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Peuvent être liées</p>
+                        <p class="text-2xl font-bold text-green-600">{{ stats.podem_ser_vinculadas }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-link text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Sans Utilisateur</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.sem_usuario }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-slash text-gray-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+                <button onclick="showTab('vinculaveis')" id="tab-vinculaveis"
+                        class="tab-btn active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-link mr-2"></i>
+                    Peuvent être liées ({{ stats.podem_ser_vinculadas }})
+                </button>
+                <button onclick="showTab('sem-usuario')" id="tab-sem-usuario"
+                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-user-slash mr-2"></i>
+                    Sans utilisateur ({{ stats.sem_usuario }})
+                </button>
+                <button onclick="showTab('detalhes')" id="tab-detalhes"
+                        class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-list mr-2"></i>
+                    Toutes les demandes
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="content-vinculaveis" class="tab-content">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-link text-green-500"></i>
+                    Demandes pouvant être liées automatiquement
+                </h3>
+                <p class="text-gray-600 text-sm mt-1">Ces emails ont des utilisateurs correspondants dans le système</p>
+            </div>
+            <div class="p-6">
+                {% if emails_com_usuarios %}
+                    <div class="space-y-4">
+                        {% for email_info in emails_com_usuarios %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">{{ email_info.email_solicitante }}</h4>
+                                            <p class="text-sm text-gray-600">
+                                                Utilisateur: {{ email_info.usuario.first_name }} {{ email_info.usuario.last_name }}
+                                                {% if email_info.multiplos_usuarios %}
+                                                    <span class="text-yellow-600">(Multiple users found)</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-file-alt text-blue-500"></i>
+                                            {{ email_info.count }} demande{{ email_info.count|pluralize:",:s" }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-calendar text-green-500"></i>
+                                            Dernière: {{ email_info.ultima_solicitacao|date:"d/m/Y H:i" }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="vincularEmail('{{ email_info.email_solicitante }}')"
+                                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+                                        <i class="fas fa-link"></i>
+                                        Lier maintenant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-check-circle text-green-500 text-6xl mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune demande à lier</h3>
+                        <p class="text-gray-600">Toutes les demandes possibles ont déjà été liées aux utilisateurs correspondants.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="content-sem-usuario" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-user-slash text-orange-500"></i>
+                    Demandes sans utilisateur correspondant
+                </h3>
+                <p class="text-gray-600 text-sm mt-1">Ces emails n'ont pas d'utilisateurs enregistrés dans le système</p>
+            </div>
+            <div class="p-6">
+                {% if emails_sem_usuarios %}
+                    <div class="space-y-4">
+                        {% for email_info in emails_sem_usuarios %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-envelope text-gray-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">{{ email_info.email_solicitante }}</h4>
+                                            <p class="text-sm text-red-600">Aucun utilisateur trouvé avec cet email</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-file-alt text-blue-500"></i>
+                                            {{ email_info.count }} demande{{ email_info.count|pluralize:",:s" }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-calendar text-green-500"></i>
+                                            Dernière: {{ email_info.ultima_solicitacao|date:"d/m/Y H:i" }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="convidarUsuario('{{ email_info.email_solicitante }}')"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+                                        <i class="fas fa-user-plus"></i>
+                                        Inviter à s'inscrire
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-users text-blue-500 text-6xl mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">Tous les emails ont des utilisateurs</h3>
+                        <p class="text-gray-600">Tous les emails des demandes orphelines ont des utilisateurs correspondants.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="content-detalhes" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-list text-blue-500"></i>
+                    Toutes les demandes orphelines
+                </h3>
+                <p class="text-gray-600 text-sm mt-1">Liste détaillée de toutes les demandes sans client associé</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Numéro</th>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Email</th>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Nom</th>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Service</th>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Date</th>
+                            <th class="text-left py-3 px-6 font-medium text-gray-700">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for solicitacao in solicitacoes_orfas %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-6">
+                                <a href="{% url 'orcamentos:admin_solicitacao_detail' solicitacao.numero %}"
+                                   class="text-blue-600 hover:text-blue-700 font-medium">
+                                    {{ solicitacao.numero }}
+                                </a>
+                            </td>
+                            <td class="py-3 px-6">{{ solicitacao.email_solicitante }}</td>
+                            <td class="py-3 px-6">{{ solicitacao.nome_solicitante }}</td>
+                            <td class="py-3 px-6">{{ solicitacao.get_tipo_servico_display }}</td>
+                            <td class="py-3 px-6">{{ solicitacao.created_at|date:"d/m/Y H:i" }}</td>
+                            <td class="py-3 px-6">
+                                <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
+                                    {{ solicitacao.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-gray-500">
+                                <i class="fas fa-check-circle text-green-500 text-4xl mb-2"></i>
+                                <p>Aucune demande orpheline trouvée!</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tabs functionality
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+
+    // Show selected tab content
+    document.getElementById(`content-${tabName}`).classList.remove('hidden');
+
+    // Add active class to selected tab
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    activeTab.classList.add('active', 'border-blue-500', 'text-blue-600');
+    activeTab.classList.remove('border-transparent', 'text-gray-500');
+}
+
+// Vincular email específico
+async function vincularEmail(email) {
+    try {
+        const response = await fetch('{% url "orcamentos:admin_vincular_orcamentos_orfaos" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `email=${encodeURIComponent(email)}`
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert(`✅ Succès!\n${data.message}\nUtilisateur: ${data.usuario}\nDemandes liées: ${data.vinculadas.join(', ')}`);
+            location.reload();
+        } else {
+            alert(`❌ Erreur: ${data.error}`);
+        }
+    } catch (error) {
+        alert('❌ Erreur de communication avec le serveur');
+        console.error(error);
+    }
+}
+
+// Processar todos os vincuáveis
+async function processarTodosVinculaveis() {
+    if (!confirm('Voulez-vous lier automatiquement toutes les demandes possibles?\nCette action ne peut pas être annulée.')) {
+        return;
+    }
+
+    const emails = [
+        {% for email_info in emails_com_usuarios %}
+        '{{ email_info.email_solicitante }}',
+        {% endfor %}
+    ];
+
+    let processed = 0;
+    let errors = 0;
+
+    for (const email of emails) {
+        try {
+            const response = await fetch('{% url "orcamentos:admin_vincular_orcamentos_orfaos" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `email=${encodeURIComponent(email)}`
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                processed++;
+            } else {
+                errors++;
+            }
+        } catch (error) {
+            errors++;
+        }
+    }
+
+    alert(`✅ Traitement terminé!\nLiées avec succès: ${processed}\nErreurs: ${errors}`);
+    location.reload();
+}
+
+// Placeholder para convite de usuário
+function convidarUsuario(email) {
+    alert(`Fonctionnalité à implémenter: inviter ${email} à créer un compte`);
+}
+
+// Executar comando em lote
+function executarComandoVinculacao() {
+    alert('Exécutez cette commande dans le terminal:\npython manage.py vincular_orcamentos_orfaos --notify');
+}
+</script>
+
+<style>
+.tab-btn.active {
+    border-color: #3b82f6 !important;
+    color: #3b82f6 !important;
+}
+</style>
+{% endblock %}

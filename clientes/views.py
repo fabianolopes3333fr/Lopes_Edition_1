@@ -67,9 +67,21 @@ def criar_cliente(request):
         form = ClienteForm(request.POST)
 
         if form.is_valid():
-            cliente = form.save()
-            messages.success(request, f'Cliente {cliente.nom_complet} criado com sucesso!')
-            return redirect('clientes:editar_cliente', pk=cliente.pk)
+            try:
+                with transaction.atomic():
+                    cliente = form.save()
+                    messages.success(request, f'Cliente {cliente.nom_complet} criado com sucesso!')
+                    return redirect('clientes:editar_cliente', pk=cliente.pk)
+            except Exception as e:
+                messages.error(request, f'Erro ao salvar cliente: {str(e)}')
+                print(f"Erro ao salvar cliente: {e}")  # Debug
+        else:
+            messages.error(request, 'Erro no formulário. Verifique os dados.')
+            # Mostrar erros específicos para debug
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+            print(f"Erros no formulário: {form.errors}")  # Debug
     else:
         form = ClienteForm()
 
@@ -88,59 +100,119 @@ def editar_cliente(request, pk):
 
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
-        livraison_formset = AdresseLivraisonFormSet(request.POST, instance=cliente, prefix='livraison')
-        transporteur_formset = AdresseTransporteurFormSet(request.POST, instance=cliente, prefix='transporteur')
-        chantier_formset = AdresseChantierFormSet(request.POST, instance=cliente, prefix='chantier')
-        tva_formset = TarifTVAClientFormSet(request.POST, instance=cliente, prefix='tva')
 
-        with transaction.atomic():
-            if form.is_valid():
-                cliente = form.save()
+        # Inicializar formsets com tratamento de erro melhorado
+        formsets_data = {}
+        formsets_valid = True
+        formset_errors = []
 
-                # Validar e salvar formsets
-                formsets_valid = True
+        try:
+            # Criar formsets com dados do POST
+            livraison_formset = AdresseLivraisonFormSet(
+                request.POST, instance=cliente, prefix='livraison'
+            )
+            transporteur_formset = AdresseTransporteurFormSet(
+                request.POST, instance=cliente, prefix='transporteur'
+            )
+            chantier_formset = AdresseChantierFormSet(
+                request.POST, instance=cliente, prefix='chantier'
+            )
+            tva_formset = TarifTVAClientFormSet(
+                request.POST, instance=cliente, prefix='tva'
+            )
 
-                if livraison_formset.is_valid():
-                    livraison_formset.save()
-                else:
+            formsets_data = {
+                'livraison': livraison_formset,
+                'transporteur': transporteur_formset,
+                'chantier': chantier_formset,
+                'tva': tva_formset
+            }
+
+            # Validar cada formset individualmente
+            for formset_name, formset in formsets_data.items():
+                if not formset.is_valid():
                     formsets_valid = False
+                    # Filtrar apenas erros de forms preenchidos (ignorar forms vazios)
+                    errors_filtered = []
+                    for form_errors in formset.errors:
+                        if form_errors:  # Só adicionar se há erros reais
+                            errors_filtered.append(form_errors)
 
-                if transporteur_formset.is_valid():
-                    transporteur_formset.save()
-                else:
-                    formsets_valid = False
+                    if errors_filtered:  # Só reportar se há erros em forms preenchidos
+                        formset_errors.append(f'{formset_name}: {errors_filtered}')
 
-                if chantier_formset.is_valid():
-                    chantier_formset.save()
-                else:
-                    formsets_valid = False
+        except Exception as e:
+            messages.error(request, f'Erro ao processar formulários relacionados: {str(e)}')
+            formsets_valid = False
 
-                if tva_formset.is_valid():
-                    tva_formset.save()
-                else:
-                    formsets_valid = False
+        # Validar formulário principal
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Salvar cliente principal
+                    cliente = form.save()
 
-                if formsets_valid:
-                    messages.success(request, f'Cliente {cliente.nom_complet} atualizado com sucesso!')
+                    # Salvar formsets válidos
+                    for formset_name, formset in formsets_data.items():
+                        try:
+                            if formset.is_valid():
+                                # Salvar apenas instances com dados preenchidos
+                                instances = formset.save(commit=False)
+                                for instance in instances:
+                                    # Verificar se a instance tem dados essenciais preenchidos
+                                    if hasattr(instance, 'nom') and instance.nom:
+                                        instance.save()
+                                formset.save_m2m()
+
+                        except Exception as e:
+                            formset_errors.append(f'{formset_name}: Erro ao salvar - {str(e)}')
+
+                    if formset_errors:
+                        messages.warning(
+                            request,
+                            f'Cliente salvo com problemas nos formulários relacionados: {"; ".join(formset_errors)}'
+                        )
+                    else:
+                        messages.success(request, f'Cliente {cliente.nom_complet} atualizado com sucesso!')
+
                     return redirect('clientes:editar_cliente', pk=cliente.pk)
-                else:
-                    messages.error(request, 'Erro ao salvar algumas informações. Verifique os dados.')
-            else:
-                messages.error(request, 'Erro no formulário principal. Verifique os dados.')
+
+            except Exception as e:
+                messages.error(request, f'Erro ao salvar: {str(e)}')
+                print(f"Erro detalhado ao salvar: {e}")
+        else:
+            messages.error(request, 'Erro no formulário principal.')
+            # Mostrar erros específicos do form principal
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+
     else:
+        # GET request - inicializar forms vazios
         form = ClienteForm(instance=cliente)
-        livraison_formset = AdresseLivraisonFormSet(instance=cliente, prefix='livraison')
-        transporteur_formset = AdresseTransporteurFormSet(instance=cliente, prefix='transporteur')
-        chantier_formset = AdresseChantierFormSet(instance=cliente, prefix='chantier')
-        tva_formset = TarifTVAClientFormSet(instance=cliente, prefix='tva')
+        try:
+            formsets_data = {
+                'livraison': AdresseLivraisonFormSet(instance=cliente, prefix='livraison'),
+                'transporteur': AdresseTransporteurFormSet(instance=cliente, prefix='transporteur'),
+                'chantier': AdresseChantierFormSet(instance=cliente, prefix='chantier'),
+                'tva': TarifTVAClientFormSet(instance=cliente, prefix='tva')
+            }
+        except Exception as e:
+            messages.error(request, f'Erro ao carregar formulários: {str(e)}')
+            formsets_data = {
+                'livraison': None,
+                'transporteur': None,
+                'chantier': None,
+                'tva': None
+            }
 
     context = {
         'cliente': cliente,
         'form': form,
-        'livraison_formset': livraison_formset,
-        'transporteur_formset': transporteur_formset,
-        'chantier_formset': chantier_formset,
-        'tva_formset': tva_formset,
+        'livraison_formset': formsets_data.get('livraison'),
+        'transporteur_formset': formsets_data.get('transporteur'),
+        'chantier_formset': formsets_data.get('chantier'),
+        'tva_formset': formsets_data.get('tva'),
         'action': 'Editar',
     }
 
