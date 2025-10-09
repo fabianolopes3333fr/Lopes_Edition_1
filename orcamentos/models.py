@@ -86,6 +86,9 @@ class TipoNotificacao(models.TextChoices):
     ORCAMENTO_ACEITO = "orcamento_aceito", "Devis accepté"
     ORCAMENTO_RECUSADO = "orcamento_recusado", "Devis refusé"
     PROJETO_CRIADO = "projeto_criado", "Nouveau projet créé"
+    FATURA_CRIADA = "fatura_criada", "Nouvelle facture créée"
+    FATURA_ENVIADA = "fatura_enviada", "Facture envoyée"
+    FATURA_PAGA = "fatura_paga", "Facture payée"
 
 # Model para projetos criados por clientes logados
 class Projeto(models.Model):
@@ -437,6 +440,32 @@ class Orcamento(models.Model):
         for item in self.itens.all():
             total += item.quantidade * item.preco_compra_unitario
         return total
+
+    @property
+    def total_acomptes_pagos(self):
+        """Retorna o total de acomptes já pagos"""
+        return sum(acompte.valor_ttc for acompte in self.acomptes.filter(status=StatusAcompte.PAGO))
+
+    @property
+    def total_acomptes_pendentes(self):
+        """Retorna o total de acomptes pendentes"""
+        return sum(acompte.valor_ttc for acompte in self.acomptes.filter(status=StatusAcompte.PENDENTE))
+
+    @property
+    def saldo_em_aberto(self):
+        """Retorna o saldo em aberto do orçamento (Total TTC - Acomptes pagos)"""
+        return self.total_ttc - self.total_acomptes_pagos
+
+    @property
+    def percentual_pago(self):
+        """Retorna o percentual já pago do orçamento"""
+        if self.total_ttc > 0:
+            return (self.total_acomptes_pagos / self.total_ttc) * 100
+        return Decimal('0.00')
+
+    def pode_criar_acompte(self):
+        """Verifica se ainda é possível criar acomptes"""
+        return self.saldo_em_aberto > 0 and self.status == StatusOrcamento.ACEITO
 
     def __str__(self):
         return f"Devis {self.numero}"
@@ -849,6 +878,209 @@ class ItemFacture(models.Model):
 
     def __str__(self):
         return f"{self.referencia} - {self.descricao}"
+
+class TipoAcompte(models.TextChoices):
+    INICIAL = "inicial", "Acompte initial"
+    INTERMEDIARIO = "intermediario", "Acompte intermédiaire"
+    FINAL = "final", "Solde final"
+
+class StatusAcompte(models.TextChoices):
+    PENDENTE = "pendente", "En attente"
+    PAGO = "pago", "Payé"
+    VENCIDO = "vencido", "Échu"
+    CANCELADO = "cancelado", "Annulé"
+
+# Model para gestão de acomptes (entradas/adiantamentos)
+class AcompteOrcamento(models.Model):
+    """Modelo para gestão de acomptes de orçamentos"""
+    
+    # Identificação
+    numero = models.CharField(max_length=20, unique=True, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    
+    # Relacionamentos
+    orcamento = models.ForeignKey(
+        Orcamento,
+        on_delete=models.CASCADE,
+        related_name='acomptes',
+        verbose_name="Devis"
+    )
+    criado_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='acomptes_criados',
+        verbose_name="Créé par"
+    )
+    
+    # Dados do acompte
+    tipo = models.CharField(
+        max_length=20,
+        choices=TipoAcompte.choices,
+        default=TipoAcompte.INICIAL,
+        verbose_name="Type d'acompte"
+    )
+    descricao = models.CharField(
+        max_length=255,
+        verbose_name="Description"
+    )
+    
+    # Valores
+    percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('30.00'),
+        verbose_name="Pourcentage (%)"
+    )
+    valor_ht = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Montant HT (€)"
+    )
+    valor_ttc = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Montant TTC (€)"
+    )
+    valor_tva = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        verbose_name="Montant TVA (€)"
+    )
+    
+    # Datas
+    data_vencimento = models.DateField(
+        verbose_name="Date d'échéance"
+    )
+    data_pagamento = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Date de paiement"
+    )
+    
+    # Status e pagamento
+    status = models.CharField(
+        max_length=20,
+        choices=StatusAcompte.choices,
+        default=StatusAcompte.PENDENTE,
+        verbose_name="Statut"
+    )
+    tipo_pagamento = models.CharField(
+        max_length=20,
+        choices=TipoPagamento.choices,
+        default=TipoPagamento.VIREMENT,
+        verbose_name="Type de paiement"
+    )
+    
+    # Fatura de acompte (pode ser gerada automaticamente)
+    fatura_acompte = models.OneToOneField(
+        Facture,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='acompte_origem',
+        verbose_name="Facture d'acompte"
+    )
+    
+    # Observações
+    observacoes = models.TextField(
+        blank=True,
+        verbose_name="Observations"
+    )
+    
+    # Metadados
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Acompte"
+        verbose_name_plural = "Acomptes"
+        ordering = ['-created_at']
+        unique_together = ['orcamento', 'numero']
+    
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            self.numero = self.gerar_numero()
+        
+        # Calcular valores se não foram definidos
+        if not self.valor_ht and self.percentual and self.orcamento:
+            self.calcular_valores()
+        
+        super().save(*args, **kwargs)
+    
+    def gerar_numero(self):
+        """Gera número único para o acompte"""
+        import random
+        while True:
+            numero = f"AC{timezone.now().year}{random.randint(10000, 99999)}"
+            if not AcompteOrcamento.objects.filter(numero=numero).exists():
+                return numero
+    
+    def calcular_valores(self):
+        """Calcula os valores do acompte baseado no percentual"""
+        if self.orcamento:
+            # Calcular valor HT baseado no percentual
+            self.valor_ht = (self.orcamento.total * self.percentual) / 100
+            
+            # Calcular valor TTC baseado no percentual do total TTC do orçamento
+            self.valor_ttc = (self.orcamento.total_ttc * self.percentual) / 100
+            
+            # Calcular TVA
+            self.valor_tva = self.valor_ttc - self.valor_ht
+    
+    def marcar_como_pago(self, data_pagamento=None, tipo_pagamento=None):
+        """Marca o acompte como pago"""
+        self.status = StatusAcompte.PAGO
+        self.data_pagamento = data_pagamento or timezone.now().date()
+        if tipo_pagamento:
+            self.tipo_pagamento = tipo_pagamento
+        self.save()
+    
+    def gerar_fatura_acompte(self):
+        """Gera uma fatura automática para o acompte"""
+        if self.fatura_acompte:
+            return self.fatura_acompte
+        
+        # Criar fatura
+        fatura = Facture.objects.create(
+            cliente=self.orcamento.solicitacao.cliente,
+            elaborado_por=self.criado_por,
+            titulo=f"Facture d'acompte - {self.descricao}",
+            descricao=f"Acompte de {self.percentual}% pour le devis {self.orcamento.numero}",
+            orcamento=self.orcamento,
+            subtotal=self.valor_ht,
+            total=self.valor_ht,
+            data_vencimento=self.data_vencimento,
+            condicoes_pagamento=CondicoesPagamento.COMPTANT,
+            tipo_pagamento=self.tipo_pagamento,
+            status=StatusFacture.ENVOYEE
+        )
+        
+        # Criar item da fatura
+        ItemFacture.objects.create(
+            facture=fatura,
+            descricao=self.descricao,
+            quantidade=1,
+            preco_unitario_ht=self.valor_ht,
+            taxa_tva='20',  # Usar TVA padrão
+            total_ht=self.valor_ht,
+            total_ttc=self.valor_ttc
+        )
+        
+        # Associar fatura ao acompte
+        self.fatura_acompte = fatura
+        self.save()
+        
+        return fatura
+    
+    @property
+    def is_vencido(self):
+        """Verifica se o acompte está vencido"""
+        return (self.status == StatusAcompte.PENDENTE and
+                self.data_vencimento < timezone.now().date())
+    
+    def __str__(self):
+        return f"Acompte {self.numero} - {self.percentual}% ({self.orcamento.numero})"
 
 # Model para fotos/anexos dos projetos
 class AnexoProjeto(models.Model):

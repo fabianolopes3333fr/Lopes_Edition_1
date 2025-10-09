@@ -302,7 +302,7 @@
                         </a>
                     {% endif %}
 
-                    <a href="{% url 'orcamentos:admin_fatura_pdf' fatura.numero %}" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
+                    <a href="{% url 'orcamentos:admin_fatura_pdf' fatura.numero %}" target="_blank" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-center block transition-colors">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Télécharger PDF
                     </a>

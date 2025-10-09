@@ -181,7 +181,7 @@
                                 </a>
                                 {% endif %}
                                 <!-- Botão para criar devis apenas para clientes criados via dashboard -->
-                                {% if cliente.origem == 'dashboard' %}
+                                {% if cliente.origem == 'dashboard' or 'auto_registro' or 'devis_publico' %}
                                 <a href="{% url 'orcamentos:admin_criar_orcamento_cliente' cliente.pk %}"
                                    class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 border border-purple-200">
                                     <i class="fas fa-file-invoice-dollar"></i>

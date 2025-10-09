@@ -12,6 +12,7 @@ from django.views.decorators.http import require_http_methods
 from decimal import Decimal
 import json
 
+from accounts.models import User
 from .models import (
     Projeto, SolicitacaoOrcamento, Orcamento, ItemOrcamento,
     AnexoProjeto, StatusOrcamento, StatusProjeto, Facture, ItemFacture
@@ -1478,6 +1479,270 @@ def admin_projeto_change_status(request, uuid):
 
     return redirect('orcamentos:admin_projeto_detail', uuid=projeto.uuid)
 
+# ============ VIEWS PARA FATURAS DOS CLIENTES ============
+
+@login_required
+def cliente_faturas(request):
+    """Lista de faturas do cliente logado"""
+    if request.user.account_type != 'CLIENT':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('accounts:dashboard')
+
+    # Buscar todas as faturas do cliente
+    faturas = Facture.objects.filter(
+        cliente=request.user
+    ).order_by('-data_criacao')
+
+    # Estatísticas
+    total_faturas = faturas.count()
+    faturas_pagas = faturas.filter(status='payee').count()
+    faturas_pendentes = faturas.filter(status='envoyee').count()
+    faturas_em_atraso = faturas.filter(status='en_retard').count()
+
+    # Valor total
+    from decimal import Decimal
+    valor_total = faturas.aggregate(
+        total=models.Sum('total')
+    )['total'] or Decimal('0.00')
+
+    valor_pago = faturas.filter(status='payee').aggregate(
+        total=models.Sum('total')
+    )['total'] or Decimal('0.00')
+
+    valor_pendente = faturas.exclude(status='payee').aggregate(
+        total=models.Sum('total')
+    )['total'] or Decimal('0.00')
+
+    context = {
+        'faturas': faturas,
+        'total_faturas': total_faturas,
+        'faturas_pagas': faturas_pagas,
+        'faturas_pendentes': faturas_pendentes,
+        'faturas_em_atraso': faturas_em_atraso,
+        'valor_total': valor_total,
+        'valor_pago': valor_pago,
+        'valor_pendente': valor_pendente,
+    }
+
+    return render(request, 'orcamentos/cliente/faturas_list.html', context)
+
+@login_required
+@staff_member_required
+def buscar_clientes_ajax(request):
+    """Busca clientes via AJAX para uso nas faturas"""
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    query = request.GET.get('q', '')
+
+    if len(query) < 2:
+        return JsonResponse({'clientes': []})
+
+    clientes = User.objects.filter(
+        is_active=True,
+        is_staff=False
+    ).filter(
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query) |
+        Q(email__icontains=query) |
+        Q(username__icontains=query)
+    )[:10]
+
+    clientes_data = []
+    for cliente in clientes:
+        nome_completo = f"{cliente.first_name} {cliente.last_name}".strip()
+        if not nome_completo:
+            nome_completo = cliente.username
+
+        clientes_data.append({
+            'id': cliente.id,
+            'nome_completo': nome_completo,
+            'email': cliente.email,
+            'username': cliente.username,
+            'first_name': cliente.first_name,
+            'last_name': cliente.last_name
+        })
+
+    return JsonResponse({'clientes': clientes_data})
+
+@login_required
+@staff_member_required
+def buscar_produtos_ajax(request):
+    """Busca produtos via AJAX para uso nos orçamentos"""
+    query = request.GET.get('q', '')
+
+    if len(query) < 2:
+        return JsonResponse({'produtos': []})
+
+    try:
+        from .models import Produto
+        produtos = Produto.objects.filter(
+            ativo=True
+        ).filter(
+            Q(referencia__icontains=query)|
+            Q(descricao__icontains=query)
+        )[:10]
+
+        produtos_data = []
+        for produto in produtos:
+            produtos_data.append({
+                'id': produto.id,
+                'referencia': produto.referencia,
+                'nome': produto.descricao,
+                'descricao': produto.descricao,
+                'preco_venda': float(produto.preco_venda_ht),
+                'preco_venda_ht': float(produto.preco_venda_ht),
+                'preco_compra_ht': float(produto.preco_compra),
+                'unidade': produto.unidade,
+                'categoria': '',
+                'fornecedor': produto.fornecedor.nome if produto.fornecedor else ''
+            })
+
+        return JsonResponse({'produtos': produtos_data})
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro na busca de produtos: {str(e)}")
+        return JsonResponse({'produtos': [], 'error': str(e)})
+    
+@staff_member_required
+def ajax_orcamento_items(request, numero):
+    """Retorna os itens de um orçamento via AJAX para edição"""
+    try:
+        orcamento = get_object_or_404(Orcamento, numero=numero)
+
+        items = []
+        for item in orcamento.itens.all():
+            items.append({
+                'referencia': item.referencia or '',
+                'descricao': item.descricao,
+                'unidade': item.unidade,
+                'atividade': item.atividade,
+                'quantidade': float(item.quantidade),
+                'preco_unitario_ht': float(item.preco_unitario_ht),
+                'remise_percentual': float(item.remise_percentual),
+                'taxa_tva': item.taxa_tva,
+            })
+
+        return JsonResponse({
+            'success': True,
+            'items': items,
+            'count': len(items)
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'items': []
+        })
+
+@login_required
+def cliente_fatura_detail(request, numero):
+    """Detalhes de uma fatura específica do cliente"""
+    if request.user.account_type != 'CLIENT':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('accounts:dashboard')
+
+    fatura = get_object_or_404(
+        Facture,
+        numero=numero,
+        cliente=request.user
+    )
+
+    context = {
+        'fatura': fatura,
+    }
+
+    return render(request, 'orcamentos/cliente/fatura_detail.html', context)
+
+@login_required
+def cliente_fatura_pdf(request, numero):
+    """Gerar PDF da fatura para o cliente"""
+    if request.user.account_type != 'CLIENT':
+        messages.error(request, 'Accès non autorisé.')
+        return redirect('accounts:dashboard')
+
+    fatura = get_object_or_404(
+        Facture,
+        numero=numero,
+        cliente=request.user
+    )
+
+    # Usar a mesma lógica do admin_orcamento_pdf
+    from django.http import HttpResponse
+    from django.template.loader import render_to_string
+    from decimal import Decimal
+    from datetime import datetime
+
+    # Calcular totais para o PDF
+    subtotal_ht = Decimal('0.00')
+    total_taxe = Decimal('0.00')
+    total_ttc = Decimal('0.00')
+
+    items_data = []
+    for i, item in enumerate(fatura.itens.all(), 1):
+        # Usar a TVA real do item
+        taxa_tva_decimal = Decimal(item.taxa_tva) / 100
+
+        pu_ht = item.preco_unitario_ht
+        pu_ttc = pu_ht * (1 + taxa_tva_decimal)
+        total_item_ht = item.total_ht
+        total_item_ttc = item.total_ttc
+        taxe_item = total_item_ttc - total_item_ht
+
+        subtotal_ht += total_item_ht
+        total_taxe += taxe_item
+        total_ttc += total_item_ttc
+
+        items_data.append({
+            'ref': item.referencia or f"REF{i:03d}",
+            'designation': item.descricao,
+            'unite': item.get_unidade_display(),
+            'quantite': item.quantidade,
+            'pu_ht': pu_ht,
+            'pu_ttc': pu_ttc,
+            'total_ht': total_item_ht,
+            'total_ttc': total_item_ttc,
+            'taxe': taxe_item,
+            'taxa_tva': item.taxa_tva
+        })
+
+    # Context para o template
+    context = {
+        'fatura': fatura,
+        'items': items_data,
+        'subtotal_ht': subtotal_ht,
+        'total_taxe': total_taxe,
+        'total_ttc': total_ttc,
+        'empresa': {
+            'name': 'LOPES DE SOUZA fabiano',
+            'address': '261 Chemin de La Castellane',
+            'city': '31790 Saint Sauveur, France',
+            'phone': '+33 7 69 27 37 76',
+            'email': 'contact@lopespeinture.fr',
+            'siret': '978 441 756 00019',
+            'ape': '4334Z',
+            'tva': 'FR35978441756',
+            'site': 'www.lopespeinture.fr'
+        },
+        'data_impressao': datetime.now(),
+    }
+
+    # Renderizar template HTML
+    html_content = render_to_string('orcamentos/admin/fatura_pdf.html', context)
+
+    # Para desenvolvimento, retornar HTML diretamente
+    if request.GET.get('debug') == '1':
+        return HttpResponse(html_content, content_type='text/html')
+    else:
+        # Preparar para download como PDF (usando print do navegador)
+        response = HttpResponse(html_content, content_type='text/html')
+        filename = f"facture_{fatura.numero}_{fatura.cliente.first_name}_{fatura.cliente.last_name}.html"
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        return response
+
 @login_required
 @require_http_methods(["POST"])
 def upload_anexo_projeto(request, uuid):
@@ -2051,304 +2316,91 @@ def admin_fatura_pdf(request, numero):
         return response
 
 
-# ============ DASHBOARD STATS ============
-def get_cliente_stats(user):
-    """Estatísticas para dashboard do cliente"""
-    if user.account_type != 'CLIENT':
-        return {}
-
-    stats = {
-        'client_projects': Projeto.objects.filter(cliente=user).count(),
-        'client_quotes': SolicitacaoOrcamento.objects.filter(cliente=user).count(),
-        'client_investment': Orcamento.objects.filter(
-            solicitacao__cliente=user,
-            status=StatusOrcamento.ACEITO
-        ).aggregate(Sum('total'))['total__sum'] or 0,
-        'recent_projects': Projeto.objects.filter(cliente=user).order_by('-created_at')[:3],
-        'recent_quotes': SolicitacaoOrcamento.objects.filter(cliente=user).order_by('-created_at')[:3]
-    }
-    return stats
-
-def get_admin_stats():
-    """Estatísticas para dashboard do administrador"""
-    stats = {
-        'total_projects': Projeto.objects.count(),
-        'total_clients': Projeto.objects.values('cliente').distinct().count(),
-        'monthly_revenue': Orcamento.objects.filter(
-            data_envio__month=timezone.now().month,
-            status=StatusOrcamento.ACEITO
-        ).aggregate(Sum('total'))['total__sum'] or 0,
-        'pending_requests': SolicitacaoOrcamento.objects.filter(
-            status=StatusOrcamento.PENDENTE
-        ).count()
-    }
-    return stats
-
-# ============ VIEWS AJAX ============
+# ============ SISTEMA DE NOTIFICAÇÕES ============
 
 @login_required
-@staff_member_required
-def buscar_clientes_ajax(request):
-    """Busca clientes via AJAX para uso nas faturas"""
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+def get_user_notifications(request):
+    """API endpoint para buscar notificações do usuário"""
+    from .models import Notificacao
 
-    query = request.GET.get('q', '')
+    # Buscar notificações não lidas do usuário
+    notificacoes = Notificacao.objects.filter(
+        usuario=request.user,
+        lida=False
+    ).order_by('-created_at')[:10]
 
-    if len(query) < 2:
-        return JsonResponse({'clientes': []})
+    # Contar total de não lidas
+    total_nao_lidas = Notificacao.objects.filter(
+        usuario=request.user,
+        lida=False
+    ).count()
 
-    clientes = User.objects.filter(
-        is_active=True,
-        is_staff=False
-    ).filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(email__icontains=query) |
-        Q(username__icontains=query)
-    )[:10]
-
-    clientes_data = []
-    for cliente in clientes:
-        nome_completo = f"{cliente.first_name} {cliente.last_name}".strip()
-        if not nome_completo:
-            nome_completo = cliente.username
-
-        clientes_data.append({
-            'id': cliente.id,
-            'nome_completo': nome_completo,
-            'email': cliente.email,
-            'username': cliente.username,
-            'first_name': cliente.first_name,
-            'last_name': cliente.last_name
+    # Preparar dados para JSON
+    notifications_data = []
+    for notif in notificacoes:
+        notifications_data.append({
+            'id': notif.id,
+            'tipo': notif.tipo,
+            'titulo': notif.titulo,
+            'mensagem': notif.mensagem,
+            'url_acao': notif.url_acao or '#',
+            'created_at': notif.created_at.strftime('%d/%m/%Y %H:%M'),
+            'icon': get_notification_icon(notif.tipo)
         })
 
-    return JsonResponse({'clientes': clientes_data})
+    return JsonResponse({
+        'notifications': notifications_data,
+        'total_unread': total_nao_lidas
+    })
 
 @login_required
-@staff_member_required
-def buscar_produtos_ajax(request):
-    """Busca produtos via AJAX para uso nos orçamentos"""
-    query = request.GET.get('q', '')
+def mark_notification_read(request, notification_id):
+    """Marcar notificação como lida"""
+    from .models import Notificacao
 
-    if len(query) < 2:
-        return JsonResponse({'produtos': []})
+    if request.method == 'POST':
+        try:
+            notificacao = Notificacao.objects.get(
+                id=notification_id,
+                usuario=request.user
+            )
+            notificacao.lida = True
+            notificacao.read_at = timezone.now()
+            notificacao.save()
 
-    try:
-        from .models import Produto
-        produtos = Produto.objects.filter(
-            ativo=True
-        ).filter(
-            Q(referencia__icontains=query)|
-            Q(descricao__icontains=query)
-        )[:10]
+            return JsonResponse({'success': True})
+        except Notificacao.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Notification not found'})
 
-        produtos_data = []
-        for produto in produtos:
-            produtos_data.append({
-                'id': produto.id,
-                'referencia': produto.referencia,
-                'nome': produto.descricao,
-                'descricao': produto.descricao,
-                'preco_venda': float(produto.preco_venda_ht),
-                'preco_venda_ht': float(produto.preco_venda_ht),
-                'preco_compra_ht': float(produto.preco_compra),
-                'unidade': produto.unidade,
-                'categoria': '',
-                'fornecedor': produto.fornecedor.nome if produto.fornecedor else ''
-            })
-
-        return JsonResponse({'produtos': produtos_data})
-
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Erro na busca de produtos: {str(e)}")
-        return JsonResponse({'produtos': [], 'error': str(e)})
-
-@staff_member_required
-def ajax_orcamento_items(request, numero):
-    """Retorna os itens de um orçamento via AJAX para edição"""
-    try:
-        orcamento = get_object_or_404(Orcamento, numero=numero)
-
-        items = []
-        for item in orcamento.itens.all():
-            items.append({
-                'referencia': item.referencia or '',
-                'descricao': item.descricao,
-                'unidade': item.unidade,
-                'atividade': item.atividade,
-                'quantidade': float(item.quantidade),
-                'preco_unitario_ht': float(item.preco_unitario_ht),
-                'remise_percentual': float(item.remise_percentual),
-                'taxa_tva': item.taxa_tva,
-            })
-
-        return JsonResponse({
-            'success': True,
-            'items': items,
-            'count': len(items)
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e),
-            'items': []
-        })
-
-# ============ VIEWS PARA FATURAS DOS CLIENTES ============
+    return JsonResponse({'success': False, 'error': 'Method not allowed'})
 
 @login_required
-def cliente_faturas(request):
-    """Lista de faturas do cliente logado"""
-    if request.user.account_type != 'CLIENT':
-        messages.error(request, 'Accès non autorisé.')
-        return redirect('accounts:dashboard')
+def mark_all_notifications_read(request):
+    """Marcar todas as notificações como lidas"""
+    from .models import Notificacao
+    
+    if request.method == 'POST':
+        Notificacao.objects.filter(
+            usuario=request.user,
+            lida=False
+        ).update(
+            lida=True,
+            read_at=timezone.now()
+        )
 
-    # Buscar todas as faturas do cliente
-    faturas = Facture.objects.filter(
-        cliente=request.user
-    ).order_by('-data_criacao')
+        return JsonResponse({'success': True})
 
-    # Estatísticas
-    total_faturas = faturas.count()
-    faturas_pagas = faturas.filter(status='payee').count()
-    faturas_pendentes = faturas.filter(status='envoyee').count()
-    faturas_em_atraso = faturas.filter(status='en_retard').count()
+    return JsonResponse({'success': False, 'error': 'Method not allowed'})
 
-    # Valor total
-    from decimal import Decimal
-    valor_total = faturas.aggregate(
-        total=models.Sum('total')
-    )['total'] or Decimal('0.00')
-
-    valor_pago = faturas.filter(status='payee').aggregate(
-        total=models.Sum('total')
-    )['total'] or Decimal('0.00')
-
-    valor_pendente = faturas.exclude(status='payee').aggregate(
-        total=models.Sum('total')
-    )['total'] or Decimal('0.00')
-
-    context = {
-        'faturas': faturas,
-        'total_faturas': total_faturas,
-        'faturas_pagas': faturas_pagas,
-        'faturas_pendentes': faturas_pendentes,
-        'faturas_em_atraso': faturas_em_atraso,
-        'valor_total': valor_total,
-        'valor_pago': valor_pago,
-        'valor_pendente': valor_pendente,
+def get_notification_icon(tipo):
+    """Retorna o ícone apropriado para cada tipo de notificação"""
+    icons = {
+        'nova_solicitacao': 'fas fa-plus-circle text-blue-500',
+        'orcamento_elaborado': 'fas fa-file-invoice-dollar text-green-500',
+        'orcamento_enviado': 'fas fa-paper-plane text-blue-500',
+        'orcamento_aceito': 'fas fa-check-circle text-green-500',
+        'orcamento_recusado': 'fas fa-times-circle text-red-500',
+        'projeto_criado': 'fas fa-project-diagram text-purple-500',
     }
-
-    return render(request, 'orcamentos/cliente/faturas_list.html', context)
-
-
-@login_required
-def cliente_fatura_detail(request, numero):
-    """Detalhes de uma fatura específica do cliente"""
-    if request.user.account_type != 'CLIENT':
-        messages.error(request, 'Accès non autorisé.')
-        return redirect('accounts:dashboard')
-
-    fatura = get_object_or_404(
-        Facture,
-        numero=numero,
-        cliente=request.user
-    )
-
-    context = {
-        'fatura': fatura,
-    }
-
-    return render(request, 'orcamentos/cliente/fatura_detail.html', context)
-
-
-@login_required
-def cliente_fatura_pdf(request, numero):
-    """Gerar PDF da fatura para o cliente"""
-    if request.user.account_type != 'CLIENT':
-        messages.error(request, 'Accès non autorisé.')
-        return redirect('accounts:dashboard')
-
-    fatura = get_object_or_404(
-        Facture,
-        numero=numero,
-        cliente=request.user
-    )
-
-    # Usar a mesma lógica do admin_orcamento_pdf
-    from django.http import HttpResponse
-    from django.template.loader import render_to_string
-    from decimal import Decimal
-    from datetime import datetime
-
-    # Calcular totais para o PDF
-    subtotal_ht = Decimal('0.00')
-    total_taxe = Decimal('0.00')
-    total_ttc = Decimal('0.00')
-
-    items_data = []
-    for i, item in enumerate(fatura.itens.all(), 1):
-        # Usar a TVA real do item
-        taxa_tva_decimal = Decimal(item.taxa_tva) / 100
-
-        pu_ht = item.preco_unitario_ht
-        pu_ttc = pu_ht * (1 + taxa_tva_decimal)
-        total_item_ht = item.total_ht
-        total_item_ttc = item.total_ttc
-        taxe_item = total_item_ttc - total_item_ht
-
-        subtotal_ht += total_item_ht
-        total_taxe += taxe_item
-        total_ttc += total_item_ttc
-
-        items_data.append({
-            'ref': item.referencia or f"REF{i:03d}",
-            'designation': item.descricao,
-            'unite': item.get_unidade_display(),
-            'quantite': item.quantidade,
-            'pu_ht': pu_ht,
-            'pu_ttc': pu_ttc,
-            'total_ht': total_item_ht,
-            'total_ttc': total_item_ttc,
-            'taxe': taxe_item,
-            'taxa_tva': item.taxa_tva
-        })
-
-    # Context para o template
-    context = {
-        'fatura': fatura,
-        'items': items_data,
-        'subtotal_ht': subtotal_ht,
-        'total_taxe': total_taxe,
-        'total_ttc': total_ttc,
-        'empresa': {
-            'name': 'LOPES DE SOUZA fabiano',
-            'address': '261 Chemin de La Castellane',
-            'city': '31790 Saint Sauveur, France',
-            'phone': '+33 7 69 27 37 76',
-            'email': 'contact@lopespeinture.fr',
-            'siret': '978 441 756 00019',
-            'ape': '4334Z',
-            'tva': 'FR35978441756',
-            'site': 'www.lopespeinture.fr'
-        },
-        'data_impressao': datetime.now(),
-    }
-
-    # Renderizar template HTML
-    html_content = render_to_string('orcamentos/admin/fatura_pdf.html', context)
-
-    # Para desenvolvimento, retornar HTML diretamente
-    if request.GET.get('debug') == '1':
-        return HttpResponse(html_content, content_type='text/html')
-    else:
-        # Preparar para download como PDF (usando print do navegador)
-        response = HttpResponse(html_content, content_type='text/html')
-        filename = f"facture_{fatura.numero}_{fatura.cliente.first_name}_{fatura.cliente.last_name}.html"
-        response['Content-Disposition'] = f'inline; filename="{filename}"'
-        return response
+    return icons.get(tipo, 'fas fa-bell text-gray-500')
 

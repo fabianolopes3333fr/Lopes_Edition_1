@@ -87,4 +87,9 @@ urlpatterns = [
     path('ajax/buscar-clientes/', views.buscar_clientes_ajax, name='buscar_clientes_ajax'),
     path('ajax/buscar-produtos/', views.buscar_produtos_ajax, name='buscar_produtos_ajax'),
     path('ajax/orcamento-items/<str:numero>/', views.ajax_orcamento_items, name='ajax_orcamento_items'),
+
+    # ============ URLs DE NOTIFICAÇÕES ============
+    path('api/notifications/', views.get_user_notifications, name='get_user_notifications'),
+    path('api/notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('api/notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
 ]

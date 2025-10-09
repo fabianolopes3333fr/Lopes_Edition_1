@@ -411,10 +411,31 @@
             <!-- User Menu -->
             <div class="flex items-center space-x-4">
                 <!-- Notifications -->
-                <button class="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 relative">
-                    <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                </button>
+                <div class="relative">
+                    <button id="notificationBtn" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 relative">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                    
+                    <!-- Dropdown de Notificações -->
+                    <div id="notificationDropdown" class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
+                                <button id="markAllReadBtn" class="text-sm text-blue-600 hover:text-blue-800">Tout marquer comme lu</button>
+                            </div>
+                        </div>
+                        <div id="notificationsList" class="max-h-96 overflow-y-auto">
+                            <div id="loadingNotifications" class="p-4 text-center text-gray-500">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>Chargement...
+                            </div>
+                            <div id="noNotifications" class="p-4 text-center text-gray-500 hidden">
+                                <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                                <p>Aucune notification</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- User Info -->
                 <div class="hidden md:flex items-center space-x-3 text-gray-700">
@@ -674,6 +695,195 @@
     <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ========== SISTEMA DE NOTIFICAÇÕES ==========
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationBadge = document.getElementById('notificationBadge');
+            const notificationsList = document.getElementById('notificationsList');
+            const loadingNotifications = document.getElementById('loadingNotifications');
+            const noNotifications = document.getElementById('noNotifications');
+            const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+            let notificationsLoaded = false;
+
+            // Toggle dropdown de notificações
+            notificationBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (notificationDropdown.classList.contains('hidden')) {
+                    notificationDropdown.classList.remove('hidden');
+                    if (!notificationsLoaded) {
+                        loadNotifications();
+                    }
+                } else {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+
+            // Fechar dropdown ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!notificationDropdown.contains(e.target) && !notificationBtn.contains(e.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+
+            // Carregar notificações
+            function loadNotifications() {
+                fetch('/devis/api/notifications/')
+                    .then(response => response.json())
+                    .then(data => {
+                        notificationsLoaded = true;
+                        loadingNotifications.style.display = 'none';
+                        
+                        updateNotificationBadge(data.total_unread);
+                        
+                        if (data.notifications.length === 0) {
+                            noNotifications.classList.remove('hidden');
+                        } else {
+                            renderNotifications(data.notifications);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar notificações:', error);
+                        loadingNotifications.innerHTML = '<p class="text-red-500">Erro ao carregar notificações</p>';
+                    });
+            }
+
+            // Renderizar notificações
+            function renderNotifications(notifications) {
+                const notificationsHtml = notifications.map(notification => `
+                    <div class="notification-item p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer" data-id="${notification.id}">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="${notification.icon}"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">${notification.titulo}</p>
+                                <p class="text-xs text-gray-500 mt-1">${notification.mensagem}</p>
+                                <p class="text-xs text-gray-400 mt-1">${notification.created_at}</p>
+                            </div>
+                            <button class="mark-read-btn text-xs text-blue-600 hover:text-blue-800" data-id="${notification.id}">
+                                Marquer lu
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                notificationsList.innerHTML = notificationsHtml;
+
+                // Adicionar eventos aos botões
+                document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        markNotificationRead(this.dataset.id);
+                    });
+                });
+
+                // Adicionar eventos aos itens de notificação
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const notification = notifications.find(n => n.id == this.dataset.id);
+                        if (notification.url_acao && notification.url_acao !== '#') {
+                            markNotificationRead(this.dataset.id);
+                            window.location.href = notification.url_acao;
+                        }
+                    });
+                });
+            }
+
+            // Atualizar badge de notificações
+            function updateNotificationBadge(count) {
+                if (count > 0) {
+                    notificationBadge.textContent = count > 99 ? '99+' : count;
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+            }
+
+            // Marcar notificação como lida
+            function markNotificationRead(notificationId) {
+                fetch(`/devis/api/notifications/${notificationId}/read/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remover notificação da lista
+                        const notificationElement = document.querySelector(`[data-id="${notificationId}"]`);
+                        if (notificationElement) {
+                            notificationElement.remove();
+                        }
+                        
+                        // Atualizar badge
+                        const currentCount = parseInt(notificationBadge.textContent) || 0;
+                        updateNotificationBadge(Math.max(0, currentCount - 1));
+                        
+                        // Se não há mais notificações, mostrar mensagem
+                        if (notificationsList.children.length === 0) {
+                            noNotifications.classList.remove('hidden');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao marcar notificação como lida:', error);
+                });
+            }
+
+            // Marcar todas como lidas
+            markAllReadBtn.addEventListener('click', function() {
+                fetch('/devis/api/notifications/mark-all-read/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notificationsList.innerHTML = '';
+                        noNotifications.classList.remove('hidden');
+                        updateNotificationBadge(0);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao marcar todas as notificações como lidas:', error);
+                });
+            });
+
+            // Verificar periodicamente por novas notificações (a cada 30 segundos)
+            setInterval(function() {
+                if (!notificationDropdown.classList.contains('hidden')) {
+                    loadNotifications();
+                } else {
+                    // Apenas atualizar o badge sem mostrar as notificações
+                    fetch('/devis/api/notifications/')
+                        .then(response => response.json())
+                        .then(data => {
+                            updateNotificationBadge(data.total_unread);
+                        })
+                        .catch(error => {
+                            console.error('Erro ao verificar notificações:', error);
+                        });
+                }
+            }, 30000);
+
+            // Carregar badge inicial
+            fetch('/devis/api/notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationBadge(data.total_unread);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar badge inicial:', error);
+                });
+
+            // ========== SISTEMA DE SIDEBAR ==========
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
