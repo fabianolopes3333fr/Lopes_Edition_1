@@ -4,125 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/COMO_LIMPAR_MIGRACOES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CORRECAO_FINAL_TESTE_ORCAMENTO.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CORRECOES_FINAIS_TESTES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CORRECOES_TESTES_FINAIS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CORRECOES_TESTES_ORCAMENTOS_ORFAOS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CORRECOES_WARNINGS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DOCUMENTACAO_FLUXO_ACOMPTES_DEVIS_FACTURES.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/STATUS_FINAL_TESTES_ORCAMENTOS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/limpar_migracoes.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/limpar_migracoes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/acompte_views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/notificacao_views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_acomptes_facture.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_fluxo_completo_acomptes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/tests/test_public_endpoints.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_busca_ajax.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_faturas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_orfao.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_projetos.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_solicitacoes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_uploader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/orcamentos/views_via_publica.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/projetos/tests/test_api_projects.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_test_acomptes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/smoke_test.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_acompte.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_deletar_acompte.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_acompte.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_marcar_acompte_pago.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_marcar_fatura_paga.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_acomptes.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_excluir_projeto.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/orcamentos/notifications/listar.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_correcoes_manual.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_urls_debug.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_warnings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SOCIAL_LOGIN_GUIDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/SOCIAL_LOGIN_GUIDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/adapters.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/adapters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/management/commands/setup_oauth.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/management/commands/setup_oauth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blog/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/blog/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/clientes/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0002_alter_cliente_options_cliente_origem_cliente_user.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0003_cliente_tva_intra_custom_alter_cliente_tva_intra.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0004_alter_cliente_taux_tva_defaut.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0005_auto_20251005_0231.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0006_alter_adressechantier_options_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientes/migrations/0007_alter_adressechantier_date_creation_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contato/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/contato/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/home/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/home/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/auditoria.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/auditoria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0002_add_auditoria.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0002_notificacao.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0003_fornecedor_alter_itemorcamento_options_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0004_orcamento_tipo_pagamento_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0005_facture_itemfacture.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0006_merge_0002_add_auditoria_0005_facture_itemfacture.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0007_rename_orcamentos_l_timesta_idx_orcamentos__timesta_77cd44_idx_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/migrations/0008_alter_notificacao_tipo_acompteorcamento.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/monitor_auditoria.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/monitor_auditoria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/notification_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/notification_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/pdf_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/pdf_generator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_admin_orcamentos_orfaos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_admin_orcamentos_orfaos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_auditoria.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_auditoria.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_auditoria_orcamentos_orfaos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_auditoria_orcamentos_orfaos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_basico.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_basico.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_comando_vincular_orcamentos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_comando_vincular_orcamentos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/tests/test_vinculacao_orcamentos_orfaos.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/tests/test_vinculacao_orcamentos_orfaos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/profiles/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/profiles/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/projetos/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/projetos/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytest.ini" beforeDir="false" afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup_social_auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup_social_auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/profile-modals.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/profile-modals.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/profile-navigation.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/profile-navigation.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/project-modal.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/project-modal.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/projects-crud.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/projects-crud.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/emails/welcome_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/emails/welcome_email.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/modals/projet_modal.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/modals/projet_modal.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/accounts/sections/mes_projets.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/sections/mes_projets.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard/admin_projeto_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard/admin_projeto_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin/devis_pdf_html.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin/devis_pdf_html.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin/fatura_pdf.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin/fatura_pdf.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_criar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_editar_facture.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_facture.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_editar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_facture.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_elaborar_orcamento.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamento_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/admin_orcamentos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_devis_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_orcamentos.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/cliente_projeto_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_confirmacao.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_confirmacao.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/devis_pdf_html.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_enviado_cliente.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/emails/orcamento_enviado_cliente.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/orcamentos/visualizar_publico.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/orcamentos/visualizar_publico.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/emails/sistema_email.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/emails/sistema_email.py" afterDir="false" />
-    </list>
+    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -221,7 +103,7 @@
       <workItem from="1760133093147" duration="33609000" />
       <workItem from="1760217971189" duration="11280000" />
       <workItem from="1760265867223" duration="31135000" />
-      <workItem from="1760372452289" duration="17457000" />
+      <workItem from="1760372452289" duration="18078000" />
     </task>
     <servers />
   </component>

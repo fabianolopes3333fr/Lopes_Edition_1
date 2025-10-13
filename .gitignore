@@ -9,7 +9,9 @@ __pycache__/
 
 # C extensions
 *.so
-
+/docs
+/debug_admin_template.html
+/debug_simple_template.html
 # Distribution / packaging
 .Python
 build/
