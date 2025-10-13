@@ -283,7 +283,7 @@ class ItemOrcamentoForm(forms.ModelForm):
         model = ItemOrcamento
         fields = [
             'produto', 'referencia', 'descricao', 'unidade', 'atividade',
-            'quantidade', 'preco_unitario_ht', 'remise_percentual', 'taxa_tva'
+            'quantidade', 'preco_unitario_ttc', 'remise_percentual', 'taxa_tva'
         ]
 
         widgets = {
@@ -308,7 +308,7 @@ class ItemOrcamentoForm(forms.ModelForm):
                 'min': 0,
                 'value': 1
             }),
-            'preco_unitario_ht': forms.NumberInput(attrs={
+            'preco_unitario_ttc': forms.NumberInput(attrs={
                 'class': 'excel-input preco-ht',
                 'step': '0.01',
                 'min': 0,
@@ -536,8 +536,8 @@ class FactureForm(forms.ModelForm):
         labels = {
             'titulo': 'Titre de la facture',
             'descricao': 'Description',
-            'data_emissao': 'Date d\'émission',
-            'data_vencimento': 'Date d\'échéance',
+            'data_emissao': "Date d'émission",
+            'data_vencimento': "Date d'échéance",
             'desconto': 'Remise globale (%)',
             'condicoes_pagamento': 'Conditions de paiement',
             'tipo_pagamento': 'Type de paiement',
@@ -600,14 +600,19 @@ class FactureForm(forms.ModelForm):
         User = get_user_model()
         self.fields['cliente'].queryset = User.objects.filter(is_active=True, is_staff=False)
 
+        # Guardar referência para uso no clean()
+        self._cliente_predefinido = cliente_predefinido
+
         # CORREÇÃO: Se tem cliente predefinido, configurar automaticamente
         if cliente_predefinido:
             self.fields['cliente'].initial = cliente_predefinido
+            # Em POST o hidden pode não vir (ex.: testes); tornar não obrigatório
+            self.fields['cliente'].required = False
             nome_cliente = f"{cliente_predefinido.first_name} {cliente_predefinido.last_name}".strip()
             if not nome_cliente:
                 nome_cliente = cliente_predefinido.email
             self.fields['cliente_search'].initial = nome_cliente
-            # Tornar o campo cliente não obrigatório temporariamente pois já está definido
+            # Tornar o campo cliente_search não obrigatório
             self.fields['cliente_search'].required = False
 
         # Se estamos editando uma fatura existente, preencher o campo de busca
@@ -628,6 +633,11 @@ class FactureForm(forms.ModelForm):
         # CORREÇÃO: Validação personalizada para o cliente
         cliente = cleaned_data.get('cliente')
         cliente_search = cleaned_data.get('cliente_search', '').strip()
+
+        # Se cliente não veio no POST mas temos predefinido (ex.: fluxo a partir do devis), usar ele
+        if not cliente and getattr(self, '_cliente_predefinido', None) is not None:
+            cleaned_data['cliente'] = self._cliente_predefinido
+            return cleaned_data
 
         # Se já tem cliente, não precisa validar busca
         if cliente:
@@ -690,7 +700,7 @@ class ItemFactureForm(forms.ModelForm):
         model = ItemFacture
         fields = [
             'produto', 'referencia', 'descricao', 'unidade', 'atividade',
-            'quantidade', 'preco_unitario_ht', 'remise_percentual', 'taxa_tva'
+            'quantidade', 'preco_unitario_ttc', 'remise_percentual', 'taxa_tva'
         ]
 
         widgets = {
@@ -715,7 +725,7 @@ class ItemFactureForm(forms.ModelForm):
                 'min': 0,
                 'value': 1
             }),
-            'preco_unitario_ht': forms.NumberInput(attrs={
+            'preco_unitario_ttc': forms.NumberInput(attrs={
                 'class': 'excel-input preco-ht',
                 'step': '0.01',
                 'min': 0,

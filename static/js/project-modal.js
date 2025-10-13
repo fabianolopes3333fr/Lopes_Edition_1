@@ -20,6 +20,20 @@ function debugModal() {
   console.log('==================');
 }
 
+// Helpers de mapeamento
+function buildProjectPayloadFromForm(formEl) {
+  const fd = new FormData(formEl);
+  return {
+    titre: fd.get('titre') || '',
+    description: fd.get('description') || '',
+    type_projet: fd.get('type_projet') || fd.get('type_service') || '',
+    adresse: fd.get('adresse') || '',
+    ville: fd.get('ville') || '',
+    prix_estime: (fd.get('prix_estime') || fd.get('budget_estime')) ? parseFloat(fd.get('prix_estime') || fd.get('budget_estime')) : null,
+    date_debut: fd.get('date_debut') || fd.get('date_souhaite') || fd.get('date_souhaitee') || undefined,
+  };
+}
+
 // Função para criar novo projeto (abrir modal)
 // Modifique a função createProject para incluir debug
 function createProject() {
@@ -136,11 +150,11 @@ function resetProjectForm() {
 // Função para editar projeto existente
 function editProject(projectId) {
   // Fazer requisição para buscar dados do projeto
-  fetch(`/accounts/api/projets/${projectId}/`)
+  fetch(`/projects/${projectId}/`)
     .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        populateProjectForm(data.projet);
+    .then((project) => {
+      if (project && project.id) {
+        populateProjectForm(project);
 
         // Configurar modal para edição
         document.getElementById('modal-title').textContent = 'Modifier le Projet';
@@ -159,17 +173,17 @@ function editProject(projectId) {
 }
 
 // Função para popular o formulário com dados existentes
-function populateProjectForm(projet) {
-  document.getElementById('titre').value = projet.titre || '';
-  document.getElementById('type_service').value = projet.type_service || '';
-  document.getElementById('description').value = projet.description || '';
-  document.getElementById('budget_estime').value = projet.budget_estime || '';
-  document.getElementById('date_souhaite').value = projet.date_souhaite || '';
-  document.getElementById('adresse').value = projet.adresse || '';
-  document.getElementById('ville').value = projet.ville || '';
-  document.getElementById('code_postal').value = projet.code_postal || '';
-  document.getElementById('surface').value = projet.surface || '';
-  document.getElementById('urgent').checked = projet.urgent || false;
+function populateProjectForm(project) {
+  document.getElementById('titre').value = project.titre || '';
+  (document.getElementById('type_projet') || document.getElementById('type_service')).value = project.type_projet || '';
+  document.getElementById('description').value = project.description || '';
+  document.getElementById('budget_estime').value = project.prix_estime ?? '';
+  (document.getElementById('date_souhaite') || document.getElementById('date_souhaitee')).value = project.date_debut || '';
+  document.getElementById('adresse').value = project.adresse || '';
+  if (document.getElementById('ville')) document.getElementById('ville').value = project.ville || '';
+  if (document.getElementById('code_postal')) document.getElementById('code_postal').value = '';
+  if (document.getElementById('surface')) document.getElementById('surface').value = '';
+  if (document.getElementById('urgent')) document.getElementById('urgent').checked = false;
 }
 
 // Fechar modal ao clicar fora dele
@@ -206,45 +220,39 @@ document.getElementById('projectForm').addEventListener('submit', function (e) {
   const submitText = document.getElementById('submit-text');
   const submitLoading = document.getElementById('submit-loading');
 
-  submitText.classList.add('hidden');
-  submitLoading.classList.remove('hidden');
-  submitBtn.disabled = true;
+  if (submitText && submitLoading && submitBtn) {
+    submitText.classList.add('hidden');
+    submitLoading.classList.remove('hidden');
+    submitBtn.disabled = true;
+  }
 
-  // Preparar dados do formulário
-  const formData = new FormData(this);
   const projectId = document.getElementById('project-id').value;
+  const url = projectId ? `/projects/${projectId}/` : '/projects/';
+  const method = projectId ? 'PATCH' : 'POST';
+  const payload = buildProjectPayloadFromForm(this);
 
-  // Determinar URL e método
-  const url = projectId
-    ? `/accounts/api/projets/${projectId}/update/`
-    : '/accounts/api/projets/create/';
-
-  const method = projectId ? 'PUT' : 'POST';
-
-  // Fazer requisição
   fetch(url, {
     method: method,
-    body: formData,
     headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
       'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
     },
+    body: JSON.stringify(payload),
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success) {
+      if (data && data.id) {
         showNotification(
-          projectId ? 'Projet mis à jour avec succès!' : 'Projet créé avec succès!',
+          projectId ? 'Projet mis à jour avec succès!' : 'Projet criado com sucesso!',
           'success'
         );
         closeProjectModal();
-
-        // Recarregar a lista de projetos ou atualizar dinamicamente
         setTimeout(() => {
           window.location.reload();
-        }, 1000);
+        }, 800);
       } else {
-        // Mostrar erros de validação
-        showFormErrors(data.errors);
+        showFormErrors(data.errors || {});
       }
     })
     .catch((error) => {
@@ -252,10 +260,11 @@ document.getElementById('projectForm').addEventListener('submit', function (e) {
       showNotification('Erreur lors de la sauvegarde', 'error');
     })
     .finally(() => {
-      // Restaurar estado do botão
-      submitText.classList.remove('hidden');
-      submitLoading.classList.add('hidden');
-      submitBtn.disabled = false;
+      if (submitText && submitLoading && submitBtn) {
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
+        submitBtn.disabled = false;
+      }
     });
 });
 
@@ -318,7 +327,7 @@ function showNotification(message, type = 'info') {
 
 // Função para visualizar projeto
 function viewProject(projectId) {
-  window.location.href = `/accounts/projets/${projectId}/`;
+  window.location.href = `/projects/projetos/${projectId}/`;
 }
 
 // Função para confirmar exclusão
@@ -330,17 +339,15 @@ function confirmDelete(projectId, projectTitle) {
 
 // Função para deletar projeto
 function deleteProject(projectId) {
-  fetch(`/accounts/api/projets/${projectId}/delete/`, {
+  fetch(`/projects/${projectId}/`, {
     method: 'DELETE',
     headers: {
       'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
+    .then((response) => {
+      if (response.status === 204 || response.status === 200) {
         showNotification('Projet supprimé avec succès!', 'success');
-        // Remover o card do DOM
         const projectCard = document.querySelector(`[data-project-id="${projectId}"]`);
         if (projectCard) {
           projectCard.remove();

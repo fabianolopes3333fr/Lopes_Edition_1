@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from datetime import timedelta
 from unittest.mock import patch, MagicMock
@@ -15,6 +16,9 @@ class AuditoriaTestCase(TestCase):
     """Testes para o sistema de auditoria"""
 
     def setUp(self):
+        # Limpar cache do ContentType antes de cada teste
+        ContentType.objects.clear_cache()
+        
         self.user = User.objects.create_user(
             username='test@test.com',
             email='test@test.com',

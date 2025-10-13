@@ -1,9 +1,10 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from .models import Notificacao
+from django.utils import timezone
 
 @login_required
 def listar_notificacoes(request):
@@ -67,7 +68,7 @@ def get_notificacoes_nao_lidas(request):
     notificacoes_data = []
     for notif in notificacoes_recentes:
         notificacoes_data.append({
-            'id': notif.id,
+            'id': notif.pk,
             'titulo': notif.titulo,
             'mensagem': notif.mensagem,
             'tipo': notif.tipo,

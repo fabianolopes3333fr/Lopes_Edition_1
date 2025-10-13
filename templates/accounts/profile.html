@@ -558,6 +558,12 @@
   console.log('===============================');
 </script>
 
+<script>
+  window.URLS = Object.assign({}, window.URLS || {}, {
+    accountsPrefix: "{% url 'accounts:index' %}"
+  });
+</script>
+
 <!-- Adicione este script antes do fechamento do </body>, após todos os outros scripts -->
 <script>
   // Definir funções globalmente para garantir que estejam disponíveis

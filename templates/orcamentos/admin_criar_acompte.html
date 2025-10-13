@@ -1,0 +1,258 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Créer Acompte - Devis #{{ orcamento.numero }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="mb-4">
+            <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Retour aux acomptes
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                        <i class="fas fa-plus-circle text-green-600"></i>
+                        Créer un acompte
+                    </h1>
+                    <p class="text-gray-600 mb-4">Devis #{{ orcamento.numero }} - {{ orcamento.titulo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations du devis -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-invoice-dollar text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Total du devis</h3>
+                    <p class="text-gray-600 text-sm">Montant TTC</p>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-blue-600">
+                {{ orcamento.total_ttc|floatformat:2 }}€
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-percentage text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Pourcentage disponible</h3>
+                    <p class="text-gray-600 text-sm">Utilisé: {{ total_percentual_usado|floatformat:1 }}%</p>
+                </div>
+            </div>
+            <div class="text-3xl font-bold text-yellow-600">
+                {{ percentual_disponivel|floatformat:1 }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-edit text-blue-600"></i>
+                Informations de l'acompte
+            </h2>
+        </div>
+        
+        <div class="p-6">
+            <form method="post" id="acompteForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="tipo" class="block text-sm font-medium text-gray-700">Type d'acompte</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                id="tipo" name="tipo" required>
+                            <option value="inicial">Acompte initial</option>
+                            <option value="intermediario">Acompte intermédiaire</option>
+                            <option value="final">Solde final</option>
+                            <option value="personalizado">Personnalisé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="percentual" class="block text-sm font-medium text-gray-700">Pourcentage (%)</label>
+                        <input type="number"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               id="percentual" name="percentual"
+                               min="0.01" max="{{ percentual_disponivel }}" step="0.01"
+                               value="20" required>
+                        <p class="text-sm text-gray-500">
+                            Maximum disponible: {{ percentual_disponivel|floatformat:1 }}%
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="descricao" class="block text-sm font-medium text-gray-700">Description</label>
+                    <input type="text"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           id="descricao" name="descricao"
+                           placeholder="Ex: Acompte initial pour démarrage des travaux" required>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="data_vencimento" class="block text-sm font-medium text-gray-700">Date d'échéance</label>
+                        <input type="date"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               id="data_vencimento" name="data_vencimento" required>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="tipo_pagamento" class="block text-sm font-medium text-gray-700">Type de paiement</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                id="tipo_pagamento" name="tipo_pagamento">
+                            <option value="virement">Virement bancaire</option>
+                            <option value="cheque">Chèque</option>
+                            <option value="espece">Espèce</option>
+                            <option value="carte_bancaire">Carte bancaire</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="observacoes" class="block text-sm font-medium text-gray-700">Observations (optionnel)</label>
+                    <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              id="observacoes" name="observacoes" rows="3"
+                              placeholder="Observations ou notes complémentaires..."></textarea>
+                </div>
+
+                <!-- Preview des montants -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calculator text-green-600"></i>
+                        Aperçu des montants
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">Montant HT</div>
+                            <div id="preview-ht" class="text-xl font-bold text-gray-900">0,00€</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">TVA</div>
+                            <div id="preview-tva" class="text-xl font-bold text-blue-600">0,00€</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">Montant TTC</div>
+                            <div id="preview-ttc" class="text-xl font-bold text-green-600">0,00€</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-save"></i>
+                        Créer l'acompte
+                    </button>
+                    <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const totalHT = {{ orcamento.total|default:0 }};
+    const totalTTC = {{ orcamento.total_ttc|default:0 }};
+    const maxPercentual = {{ percentual_disponivel|default:0 }};
+
+    // Définir date minimum à aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    $('#data_vencimento').attr('min', today);
+    $('#data_vencimento').val(today);
+
+    // Calcul automatique des montants
+    function updatePreview() {
+        const percentual = parseFloat($('#percentual').val()) || 0;
+        
+        if (percentual > maxPercentual) {
+            $('#percentual').val(maxPercentual);
+            alert(`Le pourcentage maximum disponible est ${maxPercentual.toFixed(1)}%`);
+            return;
+        }
+        
+        const montantHT = (totalHT * percentual) / 100;
+        const montantTTC = (totalTTC * percentual) / 100;
+        const montantTVA = montantTTC - montantHT;
+        
+        $('#preview-ht').text(montantHT.toFixed(2) + '€');
+        $('#preview-tva').text(montantTVA.toFixed(2) + '€');
+        $('#preview-ttc').text(montantTTC.toFixed(2) + '€');
+    }
+
+    // Événements
+    $('#percentual').on('input change', updatePreview);
+    
+    // Suggestions de pourcentage selon le type
+    $('#tipo').on('change', function() {
+        const tipo = $(this).val();
+        let suggestedPercentual = 20;
+        
+        switch(tipo) {
+            case 'inicial':
+                suggestedPercentual = Math.min(30, maxPercentual);
+                break;
+            case 'intermediario':
+                suggestedPercentual = Math.min(40, maxPercentual);
+                break;
+            case 'final':
+                suggestedPercentual = Math.min(maxPercentual, 100);
+                break;
+            case 'personalizado':
+                suggestedPercentual = Math.min(20, maxPercentual);
+                break;
+        }
+        
+        $('#percentual').val(suggestedPercentual);
+        updatePreview();
+    });
+
+    // Calcul initial
+    updatePreview();
+
+    // Validation du formulaire
+    $('#acompteForm').on('submit', function(e) {
+        const percentual = parseFloat($('#percentual').val());
+        if (percentual <= 0 || percentual > maxPercentual) {
+            e.preventDefault();
+            alert(`Le pourcentage doit être entre 0.01 et ${maxPercentual.toFixed(1)}%`);
+            return false;
+        }
+        
+        const descricao = $('#descricao').val().trim();
+        if (!descricao) {
+            e.preventDefault();
+            alert('La description est obligatoire');
+            return false;
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock %}

@@ -141,7 +141,7 @@ def send_welcome_email(user, request):
             {
                 "user": user,
                 "site_name": "Lopes Peinture",
-                "login_url": request.build_absolute_uri("/accounts/login/"),
+                "login_url": request.build_absolute_uri(settings.LOGIN_URL),
             },
         )
         plain_message = strip_tags(html_message)

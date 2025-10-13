@@ -1,5 +1,5 @@
 import pytest
-from django.test import TestCase, Client
+from django.test import TestCase, Client, TransactionTestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core import mail
@@ -9,13 +9,18 @@ from orcamentos.services import NotificationService
 
 User = get_user_model()
 
-class AdminOrcamentosOrfaosViewsTestCase(TestCase):
+@pytest.mark.django_db(transaction=True)
+class AdminOrcamentosOrfaosViewsTestCase(TransactionTestCase):
     """
     Testes para as views administrativas de gestão de orçamentos órfãos
     """
 
     def setUp(self):
         """Configurar dados para os testes"""
+        # Limpar todos os dados antes de cada teste
+        SolicitacaoOrcamento.objects.all().delete()
+        User.objects.all().delete()
+        
         self.client = Client()
 
         # Criar admin
@@ -142,30 +147,45 @@ class AdminOrcamentosOrfaosViewsTestCase(TestCase):
         # Login como admin
         self.client.login(username='admin', password='adminpass123')
 
-        # Fazer requisição AJAX
+        # Fazer requisição AJAX com o header correto
         response = self.client.post(
             reverse('orcamentos:admin_vincular_orcamentos_orfaos'),
             {'email': 'cliente@exemplo.com'},
-            content_type='application/x-www-form-urlencoded'
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'  # Importante para ser reconhecido como AJAX
         )
 
         # Verificar resposta
         self.assertEqual(response.status_code, 200)
+        
+        # Verificar que é JSON
+        self.assertEqual(response['Content-Type'], 'application/json')
+        
         data = response.json()
 
-        self.assertTrue(data['success'])
-        self.assertIn('2 demande', data['message'])
-        self.assertEqual(len(data['vinculadas']), 2)
-        self.assertIn(self.solicitacao_orfa_1.numero, data['vinculadas'])
-        self.assertIn(self.solicitacao_orfa_2.numero, data['vinculadas'])
-        self.assertIn('Cliente Teste', data['usuario'])
+        # Verificar estrutura da resposta
+        self.assertIn('success', data)
+        
+        # Se teve sucesso, verificar os dados
+        if data.get('success'):
+            self.assertIn('message', data)
+            self.assertIn('vinculadas', data)
+            self.assertIn('usuario', data)
+            
+            self.assertIn('2 demande', data['message'])
+            self.assertEqual(len(data['vinculadas']), 2)
+            self.assertIn(self.solicitacao_orfa_1.numero, data['vinculadas'])
+            self.assertIn(self.solicitacao_orfa_2.numero, data['vinculadas'])
+            self.assertIn('Cliente Teste', data['usuario'])
 
-        # Verificar vinculações no banco
-        self.solicitacao_orfa_1.refresh_from_db()
-        self.solicitacao_orfa_2.refresh_from_db()
+            # Verificar vinculações no banco
+            self.solicitacao_orfa_1.refresh_from_db()
+            self.solicitacao_orfa_2.refresh_from_db()
 
-        self.assertEqual(self.solicitacao_orfa_1.cliente, self.user)
-        self.assertEqual(self.solicitacao_orfa_2.cliente, self.user)
+            self.assertEqual(self.solicitacao_orfa_1.cliente, self.user)
+            self.assertEqual(self.solicitacao_orfa_2.cliente, self.user)
+        else:
+            # Se falhou, mostrar o erro para debug
+            self.fail(f"A vinculação falhou: {data.get('error', 'Erro desconhecido')}")
 
     def test_admin_vincular_orcamentos_orfaos_ajax_email_inexistente(self):
         """Testar AJAX com email que não tem usuário correspondente"""
@@ -354,12 +374,17 @@ class AdminOrcamentosOrfaosViewsTestCase(TestCase):
         self.assertEqual(len(solicitacoes_exibidas), 20)
 
 
-class NotificationServiceOrcamentosOrfaosTestCase(TestCase):
+@pytest.mark.django_db(transaction=True)
+class NotificationServiceOrcamentosOrfaosTestCase(TransactionTestCase):
     """
     Testes para o serviço de notificações relacionado a orçamentos órfãos
     """
 
     def setUp(self):
+        # Limpar dados antes de cada teste
+        SolicitacaoOrcamento.objects.all().delete()
+        User.objects.all().delete()
+        
         self.user = User.objects.create_user(
             username='testuser',
             email='test@exemplo.com',

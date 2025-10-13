@@ -1,0 +1,120 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Supprimer Acompte - {{ acompte.numero }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-2xl mx-auto">
+    <div class="mb-6">
+      <a href="{% url 'orcamentos:admin_orcamento_acomptes' acompte.orcamento.numero %}"
+         class="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition-colors mb-4">
+        <i class="fas fa-arrow-left"></i>
+        Retour aux acomptes
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-red-200 overflow-hidden">
+      <div class="bg-red-500 p-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-white">Supprimer l'acompte</h1>
+            <p class="text-red-100 mt-1">Cette action est irréversible</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Informations de l'acompte</h2>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Numéro:</span>
+              <span class="font-bold text-gray-900">{{ acompte.numero }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Devis:</span>
+              <span class="font-medium text-gray-900">{{ acompte.orcamento.numero }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Type:</span>
+              <span class="font-medium text-gray-900">{{ acompte.get_tipo_display }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Pourcentage:</span>
+              <span class="font-bold text-gray-900">{{ acompte.percentual }}%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Montant TTC:</span>
+              <span class="font-bold text-green-600">{{ acompte.valor_ttc|floatformat:2 }}€</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Statut:</span>
+              <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
+                {% if acompte.status == 'pago' %}bg-green-100 text-green-800
+                {% elif acompte.status == 'vencido' %}bg-red-100 text-red-800
+                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                {{ acompte.get_status_display }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <div class="flex items-start">
+            <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+            <div>
+              <h3 class="text-sm font-medium text-red-800 mb-1">Attention!</h3>
+              <p class="text-sm text-red-700">
+                La suppression de cet acompte est définitive et ne peut pas être annulée.
+              </p>
+              {% if acompte.status == 'pago' %}
+              <p class="text-sm text-red-700 mt-2 font-semibold">
+                ⚠️ Cet acompte est marqué comme payé. Êtes-vous sûr de vouloir le supprimer?
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-6">
+            <label class="flex items-center">
+              <input type="checkbox" id="confirm-delete" class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500">
+              <span class="ml-3 text-sm text-gray-700">Je confirme vouloir supprimer définitivement cet acompte</span>
+            </label>
+          </div>
+
+          <div class="flex gap-4">
+            <a href="{% url 'orcamentos:admin_orcamento_acomptes' acompte.orcamento.numero %}"
+               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium text-center transition-colors">
+              <i class="fas fa-times mr-2"></i>
+              Annuler
+            </a>
+            <button type="submit" id="btn-delete" disabled
+                    class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-trash mr-2"></i>
+              Supprimer l'acompte
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirm-delete');
+    const btnDelete = document.getElementById('btn-delete');
+    checkbox.addEventListener('change', function() {
+      btnDelete.disabled = !this.checked;
+    });
+  });
+</script>
+{% endblock %}
+

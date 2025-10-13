@@ -1,4 +1,6 @@
 let currentProjectId = null;
+// Sinaliza que este módulo gerencia o submit do formulário de projetos
+window.PROJECTS_CRUD_HANDLES_SUBMIT = true;
 
 // Criar projeto
 function openCreateProjectModal() {
@@ -13,20 +15,16 @@ function openCreateProjectModal() {
 function editProject(projectId) {
     currentProjectId = projectId;
 
-    fetch(`/accounts/projects/${projectId}/`, {
+    fetch(`/projects/${projectId}/`, {
         method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            populateProjectForm(data.project);
-            document.getElementById('modal-title').textContent = 'Modifier Projet';
-            document.getElementById('projectModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+    .then(project => {
+        applyProjetoToForm(project);
+        document.getElementById('modal-title').textContent = 'Modifier Projet';
+        document.getElementById('projectModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     })
     .catch(error => {
         console.error('Erro ao carregar projeto:', error);
@@ -36,17 +34,40 @@ function editProject(projectId) {
 
 // Visualizar projeto
 function viewProject(projectId) {
-    fetch(`/accounts/projects/${projectId}/view/`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
+    fetch(`/projects/${projectId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' }})
     .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            displayProjectDetails(data.project);
-                        document.getElementById('viewProjectModal').classList.remove('hidden');
+    .then(project => {
+        currentProjectId = project.id;
+        const titleEl = document.getElementById('view-project-title');
+        if (titleEl) titleEl.textContent = project.titre;
+        const detailsHtml = `
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Informations générales</h4>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">Type:</span> ${TYPE_LABELS[project.type_projet] || project.type_projet || '—'}</div>
+                            <div><span class="font-medium">Statut:</span>
+                                <span class="status-badge">${STATUS_LABELS[project.status] || project.status || '—'}</span>
+                            </div>
+                            <div><span class="font-medium">Date de création:</span> ${new Date(project.date_creation).toLocaleDateString('fr-FR')}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Détails financiers</h4>
+                        <div class="space-y-2 text-sm">
+                            ${project.prix_estime ? `<div><span class="font-medium">Budget estimé:</span> ${project.prix_estime} €</div>` : '<div class="text-gray-500">Budget non spécifié</div>'}
+                        </div>
+                    </div>
+                </div>
+                ${project.description ? `<div><h4 class="font-semibold text-gray-900 mb-2">Description</h4><p class="text-gray-700 text-sm leading-relaxed">${project.description}</p></div>` : ''}
+                ${project.adresse ? `<div><h4 class="font-semibold text-gray-900 mb-2">Adresse du projet</h4><p class="text-gray-700 text-sm">${project.adresse}</p></div>` : ''}
+            </div>`;
+        const container = document.getElementById('project-details') || document.getElementById('projectDetails');
+        if (container) container.innerHTML = detailsHtml;
+        const modal = document.getElementById('viewProjectModal');
+        if (modal) {
+            modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
     })
@@ -58,60 +79,101 @@ function viewProject(projectId) {
 
 // Deletar projeto
 function deleteProject(projectId) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
-        fetch(`/accounts/projects/${projectId}/delete/`, {
-            method: 'DELETE',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': getCsrfToken(),
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Projet supprimé avec succès', 'success');
-                loadSectionContent('mes-projets');
-            } else {
-                showNotification(data.message || 'Erreur lors de la suppression', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao deletar projeto:', error);
-            showNotification('Erreur lors de la suppression', 'error');
-        });
-    }
-}
-
-// Submeter formulário
-document.getElementById('projectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const projectId = document.getElementById('project-id').value;
-    const url = projectId ? `/accounts/projects/${projectId}/update/` : '/accounts/projects/create/';
-    const method = projectId ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: method,
-        body: formData,
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) return;
+    fetch(`/projects/${projectId}/`, {
+        method: 'DELETE',
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(data.message || 'Projet enregistré avec succès', 'success');
-            closeProjectModal();
-            loadSectionContent('mes-projets');
+    .then(resp => {
+        if (resp.status === 204 || resp.status === 200) {
+            showNotification('Projet supprimé avec succès', 'success');
+            if (typeof loadSectionContent === 'function') loadSectionContent('mes-projets');
+            else window.location.reload();
         } else {
-            showNotification(data.message || 'Erreur lors de l\'enregistrement', 'error');
+            showNotification('Erreur lors de la suppression', 'error');
         }
     })
     .catch(error => {
-        console.error('Erro ao salvar projeto:', error);
-        showNotification('Erreur lors de l\'enregistrement', 'error');
+        console.error('Erro ao deletar projeto:', error);
+        showNotification('Erreur lors de la suppression', 'error');
+    });
+}
+
+// Validação do formulário
+function validateProjectForm() {
+    const titreEl = document.getElementById('titre');
+    const typeEl = document.getElementById('type_projet') || document.getElementById('type_service');
+    const villeEl = document.getElementById('ville');
+
+    if (!titreEl || !titreEl.value.trim()) {
+        showNotification('Le titre du projet est obligatoire', 'error');
+        if (titreEl) titreEl.focus();
+        return false;
+    }
+    if (!typeEl || !typeEl.value) {
+        showNotification('Le type de projet est obligatoire', 'error');
+        if (typeEl) typeEl.focus();
+        return false;
+    }
+    if (!villeEl || !villeEl.value.trim()) {
+        showNotification('La ville est obligatoire', 'error');
+        if (villeEl) villeEl.focus();
+        return false;
+    }
+    return true;
+}
+
+// Submeter formulário (JSON)
+document.getElementById('projectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!validateProjectForm()) return;
+
+    const projectId = document.getElementById('project-id').value;
+    const url = projectId ? `/projects/${projectId}/` : '/projects/';
+    const method = projectId ? 'PATCH' : 'POST';
+    const payload = buildProjetoPayloadFromForm(this);
+
+    // Mostrar loading
+    const submitBtn = this.querySelector('button[type="submit"]') || document.querySelector('.btn-primary[form="projectForm"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enregistrement...';
+        submitBtn.disabled = true;
+    }
+
+    fetch(url, {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && (data.id || data.titre)) {
+            showNotification('Projet enregistré avec succès', 'success');
+            closeProjectModal();
+            if (typeof loadSectionContent === 'function') loadSectionContent('mes-projets');
+            else window.location.reload();
+        } else {
+            showNotification("Erreur lors de l'enregistrement", 'error');
+        }
+    })
+    .catch(err => {
+        console.error('Erro ao salvar projeto:', err);
+        showNotification("Erreur lors de l'enregistrement", 'error');
+    })
+    .finally(() => {
+        if (submitBtn) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     });
 });
 
@@ -135,22 +197,99 @@ function editProjectFromView() {
     }
 }
 
-// Preencher formulário com dados do projeto
+// Preencher formulário com dados do projeto (alinhado ao serializer)
 function populateProjectForm(project) {
     document.getElementById('project-id').value = project.id;
     document.getElementById('titre').value = project.titre || '';
     document.getElementById('description').value = project.description || '';
-    document.getElementById('type_service').value = project.type_service || '';
-    document.getElementById('statut').value = project.statut || '';
-    document.getElementById('budget_estime').value = project.budget_estime || '';
-    document.getElementById('date_souhaite').value = project.date_souhaite || '';
+    const typeSelect = document.getElementById('type_projet') || document.getElementById('type_service');
+    if (typeSelect) typeSelect.value = project.type_projet || '';
+    const statusSelect = document.getElementById('status') || document.getElementById('statut');
+    if (statusSelect) statusSelect.value = project.status || '';
+    const budgetField = document.getElementById('budget_estime') || document.getElementById('prix_estime');
+    if (budgetField) budgetField.value = project.prix_estime ?? '';
+    const dateField = document.getElementById('date_debut') || document.getElementById('date_souhaite') || document.getElementById('date_souhaitee');
+    if (dateField) dateField.value = project.date_debut || '';
+    const villeField = document.getElementById('ville');
+    if (villeField) villeField.value = project.ville || '';
     document.getElementById('adresse').value = project.adresse || '';
+}
+
+// Mapeamentos helper para campos UI <-> API
+const STATUS_LABELS = {
+    nouveau: 'Nouveau',
+    en_cours: 'En cours',
+    termine: 'Terminé',
+    suspendu: 'Suspendu'
+};
+const TYPE_LABELS = {
+    interieur: 'Peinture Intérieure',
+    exterieur: 'Peinture Extérieure',
+    renovation: 'Rénovation',
+    decoration: 'Décoration'
+};
+
+function normalizeStatusFromUI(val) {
+    // Converte valores herdados da UI para os válidos do modelo
+    const map = {
+        en_attente: 'nouveau',
+        en_cours: 'en_cours',
+        termine: 'termine',
+        annule: 'suspendu',
+        nouveau: 'nouveau',
+        suspendu: 'suspendu'
+    };
+    return map[val] || 'nouveau';
+}
+
+function normalizeTypeFromUI(val) {
+    // Mapeia 'autre' para uma opção válida
+    const allowed = ['interieur', 'exterieur', 'renovation', 'decoration'];
+    if (allowed.includes(val)) return val;
+    if (val === 'autre' || !val) return 'decoration';
+    return 'decoration';
+}
+
+function buildProjetoPayloadFromForm(formEl) {
+    const fd = new FormData(formEl);
+    const titre = fd.get('titre') || '';
+    const description = fd.get('description') || '';
+    const type_projet = normalizeTypeFromUI(fd.get('type_projet') || fd.get('type_service') || '');
+    const status = normalizeStatusFromUI(fd.get('status') || fd.get('statut') || 'nouveau');
+    const adresse = fd.get('adresse') || '';
+    const ville = fd.get('ville') || '';
+    const prix_estime_raw = fd.get('prix_estime') || fd.get('budget_estime') || '';
+    const date_debut = fd.get('date_debut') || fd.get('date_souhaite') || fd.get('date_souhaitee') || '';
+
+    // Parsing robusto para valores monetários: aceita vírgula decimal e remove separadores
+    let prix_estime = null;
+    if (prix_estime_raw) {
+        const norm = String(prix_estime_raw)
+            .replace(/\s/g, '')
+            .replace(/\.(?=\d{3}(\D|$))/g, '')
+            .replace(',', '.');
+        const parsed = parseFloat(norm);
+        prix_estime = isNaN(parsed) ? null : parsed;
+    }
+
+    const payload = {
+        titre,
+        description,
+        type_projet: type_projet || null,
+        status,
+        adresse,
+        ville,
+        prix_estime,
+    };
+    if (date_debut) payload.date_debut = date_debut;
+    return payload;
 }
 
 // Exibir detalhes do projeto
 function displayProjectDetails(project) {
     currentProjectId = project.id;
-    document.getElementById('view-project-title').textContent = project.titre;
+    const titleEl = document.getElementById('view-project-title');
+    if (titleEl) titleEl.textContent = project.titre;
 
     const detailsHtml = `
         <div class="space-y-6">
@@ -158,19 +297,19 @@ function displayProjectDetails(project) {
                 <div>
                     <h4 class="font-semibold text-gray-900 mb-2">Informations générales</h4>
                     <div class="space-y-2 text-sm">
-                        <div><span class="font-medium">Type:</span> ${project.type_service_display || 'Non spécifié'}</div>
-                        <div><span class="font-medium">Statut:</span> 
-                            <span class="status-badge status-${project.statut}">${project.statut_display}</span>
+                        <div><span class="font-medium">Type:</span> ${TYPE_LABELS[project.type_projet] || 'Non spécifié'}</div>
+                        <div><span class="font-medium">Statut:</span>
+                            <span class="status-badge status-${project.status}">${STATUS_LABELS[project.status] || project.status}</span>
                         </div>
                         <div><span class="font-medium">Date de création:</span> ${formatDate(project.date_creation)}</div>
-                        ${project.date_souhaite ? `<div><span class="font-medium">Date souhaitée:</span> ${formatDate(project.date_souhaite)}</div>` : ''}
+                        ${project.date_debut ? `<div><span class="font-medium">Date de début:</span> ${formatDate(project.date_debut)}</div>` : ''}
                     </div>
                 </div>
                 
                 <div>
                     <h4 class="font-semibold text-gray-900 mb-2">Détails financiers</h4>
                     <div class="space-y-2 text-sm">
-                        ${project.budget_estime ? `<div><span class="font-medium">Budget estimé:</span> ${project.budget_estime} €</div>` : '<div class="text-gray-500">Budget non spécifié</div>'}
+                        ${project.prix_estime ? `<div><span class="font-medium">Budget estimé:</span> ${project.prix_estime} €</div>` : '<div class="text-gray-500">Budget non spécifié</div>'}
                     </div>
                 </div>
             </div>
@@ -191,42 +330,45 @@ function displayProjectDetails(project) {
         </div>
     `;
 
-    document.getElementById('project-details').innerHTML = detailsHtml;
+    const container = document.getElementById('project-details') || document.getElementById('projectDetails');
+    if (container) container.innerHTML = detailsHtml;
 }
 
 // Filtros e busca
-document.getElementById('search-projects').addEventListener('input', function() {
-    filterProjects();
-});
-
-document.getElementById('filter-status').addEventListener('change', function() {
-    filterProjects();
-});
+(function attachFilters() {
+    const searchEl = document.getElementById('search-projects') || document.getElementById('searchProjects');
+    const statusEl = document.getElementById('filter-status') || document.getElementById('statusFilter');
+    if (searchEl) searchEl.addEventListener('input', filterProjects);
+    if (statusEl) statusEl.addEventListener('change', filterProjects);
+})();
 
 function filterProjects() {
-    const searchTerm = document.getElementById('search-projects').value.toLowerCase();
-    const statusFilter = document.getElementById('filter-status').value;
+    const searchEl = document.getElementById('search-projects') || document.getElementById('searchProjects');
+    const statusEl = document.getElementById('filter-status') || document.getElementById('statusFilter');
+    const searchTerm = (searchEl && searchEl.value || '').toLowerCase();
+    const statusFilter = statusEl ? statusEl.value : '';
     const projectCards = document.querySelectorAll('.project-card');
 
     projectCards.forEach(card => {
-        const title = card.querySelector('h3').textContent.toLowerCase();
-        const description = card.querySelector('p').textContent.toLowerCase();
-        const status = card.querySelector('.status-badge').classList.toString();
+        const titleEl = card.querySelector('h3');
+        const descEl = card.querySelector('p');
+        const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+        const description = descEl ? descEl.textContent.toLowerCase() : '';
+        const statusClass = (card.querySelector('.status-badge') || { classList: { toString: () => '' } }).classList.toString();
+        const dataStatus = card.dataset.status || '';
 
         const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
-        const matchesStatus = !statusFilter || status.includes(`status-${statusFilter}`);
+        const matchesStatus = !statusFilter || statusClass.includes(`status-${statusFilter}`) || dataStatus === statusFilter;
 
-        if (matchesSearch && matchesStatus) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = (matchesSearch && matchesStatus) ? 'block' : 'none';
     });
 }
 
 function resetFilters() {
-    document.getElementById('search-projects').value = '';
-    document.getElementById('filter-status').value = '';
+    const searchEl = document.getElementById('search-projects') || document.getElementById('searchProjects');
+    const statusEl = document.getElementById('filter-status') || document.getElementById('statusFilter');
+    if (searchEl) searchEl.value = '';
+    if (statusEl) statusEl.value = '';
     filterProjects();
 }
 
@@ -238,206 +380,13 @@ function formatDate(dateString) {
 }
 
 function getCsrfToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
 }
 
 function showNotification(message, type = 'info') {
-    // Implementar sistema de notificações
+    // Implementar sistema de notificações real ou usar console
     console.log(`${type.toUpperCase()}: ${message}`);
-}
-
-function displayProjectDetails(project) {
-    const detailsContainer = document.getElementById('project-details');
-    const title = document.getElementById('view-project-title');
-
-    title.textContent = project.titre;
-
-    const statusColors = {
-        'en_attente': 'bg-yellow-100 text-yellow-800',
-        'en_cours': 'bg-blue-100 text-blue-800',
-        'termine': 'bg-green-100 text-green-800',
-        'annule': 'bg-red-100 text-red-800'
-    };
-
-    const statusColor = statusColors[project.statut] || 'bg-gray-100 text-gray-800';
-
-    detailsContainer.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Informações Principais -->
-            <div class="space-y-4">
-                <div>
-                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Informations générales</h4>
-                    <div class="mt-2 space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Statut:</span>
-                            <span class="px-2 py-1 text-xs font-medium rounded-full ${statusColor}">
-                                ${project.statut_display || project.statut}
-                            </span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Type de service:</span>
-                            <span class="font-medium">${project.type_service_display || project.type_service}</span>
-                        </div>
-                        ${project.budget_estime ? `
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Budget estimé:</span>
-                            <span class="font-medium">${formatCurrency(project.budget_estime)}</span>
-                        </div>
-                        ` : ''}
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Date de création:</span>
-                            <span class="font-medium">${formatDate(project.date_creation)}</span>
-                        </div>
-                        ${project.date_souhaite ? `
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Date souhaitée:</span>
-                            <span class="font-medium">${formatDate(project.date_souhaite)}</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                ${project.adresse ? `
-                <div>
-                    <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Localisation</h4>
-                    <div class="mt-2">
-                        <div class="flex items-start">
-                            <i class="fas fa-map-marker-alt text-gray-400 mt-1 mr-2"></i>
-                            <span class="text-gray-900">${project.adresse}</span>
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-            
-            <!-- Descrição -->
-            <div>
-                <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Description du projet</h4>
-                <div class="mt-2">
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-gray-900 whitespace-pre-wrap">${project.description || 'Aucune description fournie.'}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Actions rapides -->
-        <div class="mt-6 pt-6 border-t border-gray-200">
-            <div class="flex flex-wrap gap-3">
-                <button onclick="editProjectFromView()" class="btn-primary">
-                    <i class="fas fa-edit mr-2"></i>
-                    Modifier
-                </button>
-                <button onclick="generateQuote(${project.id})" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium">
-                    <i class="fas fa-file-invoice-dollar mr-2"></i>
-                    Demander un devis
-                </button>
-                <button onclick="deleteProject(${project.id})" class="btn-danger">
-                    <i class="fas fa-trash mr-2"></i>
-                    Supprimer
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// Funções auxiliares para formatação
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR'
-    }).format(amount);
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('fr-FR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    }).format(date);
-}
-
-// Função para gerar orçamento (placeholder)
-function generateQuote(projectId) {
-    showNotification('Redirection vers la demande de devis...', 'info');
-    // Implementar redirecionamento para página de orçamento
-    // window.location.href = `/orcamentos/solicitar/${projectId}/`;
-}
-
-// Função para validar formulário
-function validateProjectForm() {
-    const titre = document.getElementById('titre').value.trim();
-    const typeService = document.getElementById('type_service').value;
-
-    if (!titre) {
-        showNotification('Le titre du projet est obligatoire', 'error');
-        document.getElementById('titre').focus();
-        return false;
-    }
-
-    if (!typeService) {
-        showNotification('Le type de service est obligatoire', 'error');
-        document.getElementById('type_service').focus();
-        return false;
-    }
-
-    return true;
-}
-
-// Atualizar o event listener do formulário para incluir validação
-document.getElementById('projectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    if (!validateProjectForm()) {
-        return;
-    }
-
-    const formData = new FormData(this);
-    const projectId = document.getElementById('project-id').value;
-    const url = projectId ? `/accounts/projects/${projectId}/update/` : '/accounts/projects/create/';
-    const method = projectId ? 'PUT' : 'POST';
-
-    // Mostrar loading
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enregistrement...';
-    submitBtn.disabled = true;
-
-    fetch(url, {
-        method: method,
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': getCsrfToken(),
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(data.message || 'Projet enregistré avec succès', 'success');
-            closeProjectModal();
-            loadSectionContent('mes-projets');
-        } else {
-            showNotification(data.message || 'Erreur lors de l\'enregistrement', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao salvar projeto:', error);
-        showNotification('Erreur lors de l\'enregistrement', 'error');
-    })
-    .finally(() => {
-        // Restaurar botão
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
-
-// Função para limpar formulário
-function clearProjectForm() {
-    document.getElementById('projectForm').reset();
-    document.getElementById('project-id').value = '';
-    document.getElementById('modal-title').textContent = 'Nouveau Projet';
 }
 
 // Event listeners para fechar modais com ESC

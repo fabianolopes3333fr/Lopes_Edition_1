@@ -65,9 +65,6 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- CORREÇÃO: Sempre renderizar o campo cliente hidden -->
-                {{ form.cliente }}
-
                 {% if not cliente %}
                 <!-- CENÁRIO 1: Sem cliente pré-definido - renderizar campos normais -->
                 <div class="field-container md:col-span-2">
@@ -76,6 +73,7 @@
                         {{ form.cliente_search }}
                         <div id="cliente-suggestions" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden max-h-60 overflow-y-auto"></div>
                     </div>
+                    <!-- Campo hidden do form para armazenar o ID do cliente -->
                     {{ form.cliente }}
                     {% if form.cliente_search.errors %}
                         <div class="text-red-500 text-sm mt-1">{{ form.cliente_search.errors.0 }}</div>
@@ -99,9 +97,8 @@
                     </div>
                 </div>
 
-                <!-- CORREÇÃO CRÍTICA: Campos hidden obrigatórios -->
-                <input type="hidden" name="cliente" value="{{ cliente.id }}" id="id_cliente">
-                <input type="hidden" name="cliente_search" value="{{ cliente.first_name }} {{ cliente.last_name }}" id="id_cliente_search">
+                <!-- Renderizar apenas o campo hidden oficial do form para cliente -->
+                {{ form.cliente }}
                 {% endif %}
 
                 <div class="field-container md:col-span-2">
@@ -169,6 +166,66 @@
                 </div>
             </div>
         </div>
+
+        <!-- Informações de Acomptes (se vier de um devis) -->
+        {% if orcamento and acomptes_list %}
+        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl shadow-sm border-2 border-yellow-300 p-4 sm:p-6 mb-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-coins text-yellow-600"></i>
+                Acomptes du Devis {{ orcamento.numero }}
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Total Devis TTC</div>
+                    <div class="text-2xl font-bold text-purple-600">{{ orcamento.total_ttc|floatformat:2 }}€</div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Acomptes Payés</div>
+                    <div class="text-2xl font-bold text-green-600">{{ total_acomptes_pagos|floatformat:2 }}€</div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="text-xs font-semibold text-gray-500 uppercase mb-2">Solde à Facturer</div>
+                    <div class="text-2xl font-bold text-orange-600">{{ saldo_a_faturar|floatformat:2 }}€</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+                <h3 class="font-semibold text-gray-900 mb-3">Détail des Acomptes</h3>
+                <div class="space-y-2">
+                    {% for acompte in acomptes_list %}
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-medium text-gray-900">{{ acompte.descricao }}</div>
+                            <div class="text-sm text-gray-600">{{ acompte.numero }} - {{ acompte.percentual }}%</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-gray-900">{{ acompte.valor_ttc|floatformat:2 }}€</div>
+                            {% if acompte.status_code == 'pago' %}
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{{ acompte.status }}</span>
+                            {% elif acompte.status_code == 'pendente' %}
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">{{ acompte.status }}</span>
+                            {% else %}
+                                <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{{ acompte.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if total_acomptes_pendentes > 0 %}
+                <div class="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Attention:</strong> Il y a {{ total_acomptes_pendentes|floatformat:2 }}€ d'acomptes en attente de paiement.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Itens da Fatura -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
@@ -660,8 +717,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="text-sm text-gray-600">${produto.descricao}</div>
                     </div>
                     <div class="text-right ml-4">
-                        <div class="font-bold text-purple-600">${parseFloat(produto.preco_venda_ht).toFixed(2)}€</div>
-                        <div class="text-xs text-gray-500">HT</div>
+                        <div class="font-bold text-green-600">${parseFloat(produto.preco_venda_ht).toFixed(2)}€ HT</div>
+                        <div class="text-xs text-purple-500">${parseFloat(produto.preco_venda_ttc).toFixed(2)}€ TTC</div>
                     </div>
                 </div>
             </div>
@@ -684,9 +741,9 @@ document.addEventListener('DOMContentLoaded', function() {
         inputReferencia.value = produto.referencia;
         inputDescricao.value = produto.descricao;
         inputUnidade.value = produto.unidade;
-        inputAtividade.value = produto.atividade;
-        inputPrecoHt.value = parseFloat(produto.preco_venda_ht).toFixed(2);
-        inputTaxaTva.value = produto.taxa_tva;
+        inputAtividade.value = produto.atividade || 'marchandise';
+        inputPrecoHt.value = parseFloat(produto.preco_venda_ttc).toFixed(2);  // Usar preço TTC (COM IVA) - preço final para o cliente
+        inputTaxaTva.value = produto.taxa_tva || '20';  // Carregar taxa de IVA do produto
         calculateModalTotals();
     }
 

@@ -221,7 +221,7 @@ class MonitorOrcamentos:
         logs_hoje = LogAuditoria.objects.filter(
             timestamp__gte=inicio_dia,
             timestamp__lte=fim_dia
-        )
+        ).select_related('usuario', 'content_type')
 
         relatorio = {
             'data': hoje.isoformat(),
@@ -233,27 +233,37 @@ class MonitorOrcamentos:
         }
 
         for log in logs_hoje:
-            # Contar por tipo de ação
-            acao = log.get_acao_display()
-            relatorio['atividades_por_tipo'][acao] = relatorio['atividades_por_tipo'].get(acao, 0) + 1
+            try:
+                # Contar por tipo de ação
+                acao = log.get_acao_display()
+                relatorio['atividades_por_tipo'][acao] = relatorio['atividades_por_tipo'].get(acao, 0) + 1
 
-            # Usuários ativos
-            if log.usuario:
-                relatorio['usuarios_ativos'].add(log.usuario.get_full_name())
+                # Usuários ativos
+                if log.usuario:
+                    relatorio['usuarios_ativos'].add(log.usuario.get_full_name())
 
-            # Modelos afetados
-            modelo = log.content_type.model
-            relatorio['modelos_afetados'][modelo] = relatorio['modelos_afetados'].get(modelo, 0) + 1
+                # Modelos afetados - com tratamento de erro
+                if log.content_type:
+                    modelo = log.content_type.model
+                    relatorio['modelos_afetados'][modelo] = relatorio['modelos_afetados'].get(modelo, 0) + 1
 
-            # Detalhes da atividade
-            relatorio['atividades_detalhadas'].append({
-                'timestamp': log.timestamp.isoformat(),
-                'usuario': log.usuario.get_full_name() if log.usuario else 'Anonyme',
-                'acao': acao,
-                'objeto': str(log.objeto_afetado) if log.objeto_afetado else 'N/A',
-                'descricao': log.descricao,
-                'alteracoes': log.resumo_alteracao
-            })
+                # Detalhes da atividade - com tratamento de erro
+                try:
+                    objeto_str = str(log.objeto_afetado) if log.objeto_afetado else 'N/A'
+                except Exception:
+                    objeto_str = f"Objeto deletado (ID: {log.object_id})"
+
+                relatorio['atividades_detalhadas'].append({
+                    'timestamp': log.timestamp.isoformat(),
+                    'usuario': log.usuario.get_full_name() if log.usuario else 'Anonyme',
+                    'acao': acao,
+                    'objeto': objeto_str,
+                    'descricao': log.descricao,
+                    'alteracoes': log.resumo_alteracao
+                })
+            except Exception as e:
+                logger.error(f"Erro ao processar log {log.id}: {e}")
+                continue
 
         # Converter set para list para JSON
         relatorio['usuarios_ativos'] = list(relatorio['usuarios_ativos'])

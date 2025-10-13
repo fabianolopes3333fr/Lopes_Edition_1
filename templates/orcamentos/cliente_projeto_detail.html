@@ -340,16 +340,21 @@ function closeModal() {
 
 function deleteAnexo(anexoId) {
     if (confirm('Supprimer ce fichier?')) {
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
         fetch(`{% url 'orcamentos:excluir_anexo_projeto' projeto.uuid 0 %}`.replace('0', anexoId), {
-            method: 'DELETE',
+            method: 'POST',
+            body: formData,
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 location.reload();
+            } else {
+                alert(data.error || 'Erreur lors de la suppression');
             }
         })
         .catch(error => {

@@ -1,0 +1,306 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Modifier Acompte #{{ acompte.numero }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="mb-4">
+            <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Retour aux acomptes
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                        <i class="fas fa-edit text-blue-600"></i>
+                        Modifier Acompte #{{ acompte.numero }}
+                    </h1>
+                    <p class="text-gray-600 mb-4">Devis #{{ orcamento.numero }} - {{ orcamento.titulo }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations actuelles -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-coins text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Montant actuel</h3>
+                    <p class="text-gray-600 text-sm">TTC</p>
+                </div>
+            </div>
+            <div class="text-2xl font-bold text-blue-600">
+                {{ acompte.valor_ttc|floatformat:2 }}€
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-invoice-dollar text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Total du devis</h3>
+                    <p class="text-gray-600 text-sm">TTC</p>
+                </div>
+            </div>
+            <div class="text-2xl font-bold text-purple-600">
+                {{ orcamento.total_ttc|floatformat:2 }}€
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 {% if acompte.status == 'pago' %}bg-green-500{% elif acompte.status == 'vencido' %}bg-red-500{% else %}bg-yellow-500{% endif %} rounded-lg flex items-center justify-center">
+                    <i class="fas fa-info-circle text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Statut</h3>
+                    <p class="text-gray-600 text-sm">Actuel</p>
+                </div>
+            </div>
+            <div class="text-lg font-bold {% if acompte.status == 'pago' %}text-green-600{% elif acompte.status == 'vencido' %}text-red-600{% else %}text-yellow-600{% endif %}">
+                {{ acompte.get_status_display }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire de modification -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-edit text-blue-600"></i>
+                {% if acompte.status == 'pago' %}
+                Informations de l'acompte (lecture seule)
+                {% else %}
+                Modifier les informations
+                {% endif %}
+            </h2>
+        </div>
+        
+        <div class="p-6">
+            {% if acompte.status == 'pago' %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-info-circle text-blue-600"></i>
+                    <p class="text-blue-800 font-medium">
+                        Cet acompte est déjà payé et ne peut pas être modifié.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Affichage en lecture seule -->
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Type d'acompte</label>
+                        <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                            {{ acompte.get_tipo_display }}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Pourcentage</label>
+                        <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                            {{ acompte.percentual }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                        {{ acompte.descricao }}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Date d'échéance</label>
+                        <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                            {{ acompte.data_vencimento|date:"d/m/Y" }}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Date de paiement</label>
+                        <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+                            {{ acompte.data_pagamento|date:"d/m/Y"|default:"Non payé" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            
+            <form method="post" id="editAcompteForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="tipo" class="block text-sm font-medium text-gray-700">Type d'acompte</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                id="tipo" name="tipo" required>
+                            <option value="inicial" {% if acompte.tipo == 'inicial' %}selected{% endif %}>Acompte initial</option>
+                            <option value="intermediario" {% if acompte.tipo == 'intermediario' %}selected{% endif %}>Acompte intermédiaire</option>
+                            <option value="final" {% if acompte.tipo == 'final' %}selected{% endif %}>Solde final</option>
+                            <option value="personalizado" {% if acompte.tipo == 'personalizado' %}selected{% endif %}>Personnalisé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="percentual" class="block text-sm font-medium text-gray-700">Pourcentage (%)</label>
+                        <input type="number"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               id="percentual" name="percentual"
+                               min="0.01" max="100" step="0.01"
+                               value="{{ acompte.percentual }}" required>
+                        <p class="text-sm text-gray-500" id="percentual-help">
+                            Vérification des limites en cours...
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="descricao" class="block text-sm font-medium text-gray-700">Description</label>
+                    <input type="text"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           id="descricao" name="descricao"
+                           value="{{ acompte.descricao }}" required>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="data_vencimento" class="block text-sm font-medium text-gray-700">Date d'échéance</label>
+                        <input type="date"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               id="data_vencimento" name="data_vencimento"
+                               value="{{ acompte.data_vencimento|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="tipo_pagamento" class="block text-sm font-medium text-gray-700">Type de paiement</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                id="tipo_pagamento" name="tipo_pagamento">
+                            <option value="virement" {% if acompte.tipo_pagamento == 'virement' %}selected{% endif %}>Virement bancaire</option>
+                            <option value="cheque" {% if acompte.tipo_pagamento == 'cheque' %}selected{% endif %}>Chèque</option>
+                            <option value="espece" {% if acompte.tipo_pagamento == 'espece' %}selected{% endif %}>Espèce</option>
+                            <option value="carte_bancaire" {% if acompte.tipo_pagamento == 'carte_bancaire' %}selected{% endif %}>Carte bancaire</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="observacoes" class="block text-sm font-medium text-gray-700">Observations</label>
+                    <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              id="observacoes" name="observacoes" rows="3">{{ acompte.observacoes }}</textarea>
+                </div>
+
+                <!-- Preview des nouveaux montants -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calculator text-green-600"></i>
+                        Aperçu des nouveaux montants
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">Montant HT</div>
+                            <div id="preview-ht" class="text-xl font-bold text-gray-900">{{ acompte.valor_ht|floatformat:2 }}€</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">TVA</div>
+                            <div id="preview-tva" class="text-xl font-bold text-blue-600">{{ acompte.valor_tva|floatformat:2 }}€</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <div class="text-sm font-medium text-gray-600 mb-1">Montant TTC</div>
+                            <div id="preview-ttc" class="text-xl font-bold text-green-600">{{ acompte.valor_ttc|floatformat:2 }}€</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-save"></i>
+                        Enregistrer les modifications
+                    </button>
+                    <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times"></i>
+                        Annuler
+                    </a>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const totalHT = {{ orcamento.total|default:0 }};
+    const totalTTC = {{ orcamento.total_ttc|default:0 }};
+    const acompteAtualPercentual = {{ acompte.percentual|default:0 }};
+    const outrosAcomptesPercentual = {{ total_percentual_outros|default:0 }};
+    
+    // Calcul automatique des montants
+    function updatePreview() {
+        const percentual = parseFloat($('#percentual').val()) || 0;
+        
+        // Vérifier les limites
+        const maxPercentual = 100 - outrosAcomptesPercentual;
+        
+        if (percentual > maxPercentual) {
+            $('#percentual').val(maxPercentual);
+            $('#percentual-help').html(`<span class="text-red-600">Maximum possible: ${maxPercentual.toFixed(1)}%</span>`);
+            return;
+        } else {
+            $('#percentual-help').html(`Maximum possible: ${maxPercentual.toFixed(1)}%`);
+        }
+        
+        const montantHT = (totalHT * percentual) / 100;
+        const montantTTC = (totalTTC * percentual) / 100;
+        const montantTVA = montantTTC - montantHT;
+        
+        $('#preview-ht').text(montantHT.toFixed(2) + '€');
+        $('#preview-tva').text(montantTVA.toFixed(2) + '€');
+        $('#preview-ttc').text(montantTTC.toFixed(2) + '€');
+    }
+
+    // Événements
+    $('#percentual').on('input change', updatePreview);
+
+    // Validation du formulaire
+    $('#editAcompteForm').on('submit', function(e) {
+        const percentual = parseFloat($('#percentual').val());
+        const maxPercentual = 100 - outrosAcomptesPercentual;
+        
+        if (percentual <= 0 || percentual > maxPercentual) {
+            e.preventDefault();
+            alert(`Le pourcentage doit être entre 0.01 et ${maxPercentual.toFixed(1)}%`);
+            return false;
+        }
+        
+        const descricao = $('#descricao').val().trim();
+        if (!descricao) {
+            e.preventDefault();
+            alert('La description est obligatoire');
+            return false;
+        }
+        
+        return true;
+    });
+});
+</script>
+{% endblock %}

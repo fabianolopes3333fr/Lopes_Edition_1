@@ -15,9 +15,9 @@ def pytest_configure(config):
 
     try:
         django.setup()
-        print("✅ Django configurado com sucesso para testes")
+        print("Django configurado com sucesso para testes")
     except Exception as e:
-        print(f"❌ Erro ao configurar Django: {e}")
+        print(f"Erro ao configurar Django: {e}")
         raise
 
 
@@ -30,7 +30,7 @@ def django_db_setup():
     settings.DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": ":memory:",
-        "ATOMIC_REQUESTS": False,  # ✅ ADICIONAR esta linha
+        "ATOMIC_REQUESTS": False,
         "OPTIONS": {},
         "TIME_ZONE": None,
         "CONN_MAX_AGE": 0,
@@ -42,6 +42,17 @@ def django_db_setup():
             "MIRROR": None,
         },
     }
+
+
+@pytest.fixture(autouse=True)
+def clear_contenttype_cache(db):
+    """Limpar cache do ContentType antes de cada teste"""
+    from django.contrib.contenttypes.models import ContentType
+
+    ContentType.objects.clear_cache()
+    yield
+    # Limpar novamente após o teste
+    ContentType.objects.clear_cache()
 
 
 @pytest.fixture

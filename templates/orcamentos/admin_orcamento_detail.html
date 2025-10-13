@@ -241,7 +241,7 @@
                                 </tr>
                                 {% if orcamento.desconto %}
                                 <tr>
-                                    <td colspan="7" class="py-2 px-4 text-right font-medium text-red-600">Remise ({{ orcamento.desconto }}%):</td>
+                                    <td colspan="7" class="py-2 px-4 text-right text-red-600">Remise ({{ orcamento.desconto }}%):</td>
                                     <td class="py-2 px-4 text-right font-bold text-red-600">-{{ orcamento.valor_desconto|floatformat:2 }}€</td>
                                     <td class="py-2 px-4 text-right font-bold text-red-600">-{{ orcamento.valor_desconto_ttc|floatformat:2 }}€</td>
                                 </tr>
@@ -256,6 +256,23 @@
                                     <td class="py-4 px-4 text-right font-bold text-xl text-green-600">{{ orcamento.total|floatformat:2 }}€</td>
                                     <td class="py-4 px-4 text-right font-bold text-xl text-purple-600">{{ orcamento.total_ttc|floatformat:2 }}€</td>
                                 </tr>
+                                {% if orcamento.acomptes.exists %}
+                                <tr class="bg-orange-50">
+                                    <td colspan="7" class="py-3 px-4 text-right font-semibold text-orange-700">Acomptes payés (TTC):</td>
+                                    <td class="py-3 px-4 text-right font-bold text-orange-600">-{{ orcamento.total_acomptes_pagos|floatformat:2 }}€</td>
+                                    <td class="py-3 px-4 text-right font-bold text-orange-600">-{{ orcamento.total_acomptes_pagos|floatformat:2 }}€</td>
+                                </tr>
+                                <tr class="bg-yellow-50">
+                                    <td colspan="7" class="py-3 px-4 text-right font-semibold text-yellow-700">Acomptes en attente (TTC):</td>
+                                    <td class="py-3 px-4 text-right font-bold text-yellow-600">-{{ orcamento.total_acomptes_pendentes|floatformat:2 }}€</td>
+                                    <td class="py-3 px-4 text-right font-bold text-yellow-600">-{{ orcamento.total_acomptes_pendentes|floatformat:2 }}€</td>
+                                </tr>
+                                <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-500">
+                                    <td colspan="7" class="py-4 px-4 text-right font-bold text-xl text-green-800">SOLDE À PAYER (TTC):</td>
+                                    <td class="py-4 px-4 text-right font-bold text-xl text-green-600">{{ orcamento.saldo_em_aberto|floatformat:2 }}€</td>
+                                    <td class="py-4 px-4 text-right font-bold text-xl text-green-600">{{ orcamento.saldo_em_aberto|floatformat:2 }}€</td>
+                                </tr>
+                                {% endif %}
                             </tfoot>
                         </table>
                     </div>
@@ -266,6 +283,67 @@
                         </div>
                         <p class="text-gray-600">Aucun item dans ce devis.</p>
                     </div>
+                {% endif %}
+            </div>
+
+            <!-- Rendez-vous liés -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <div class="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-900">Rendez-vous</h2>
+                </div>
+
+                {% if orcamento.agendamentos.all %}
+                    <div class="space-y-4">
+                        {% for a in orcamento.agendamentos.all %}
+                        <div class="border rounded-lg p-4">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ a.data_horario|date:'d/m/Y H:i' }} • {{ a.get_tipo_display }}</div>
+                                    <div class="text-sm text-gray-600">Client: {{ a.cliente.first_name }} {{ a.cliente.last_name }}</div>
+                                    {% if a.mensagem %}
+                                    <div class="text-sm text-gray-600 mt-1">Message: {{ a.mensagem }}</div>
+                                    {% endif %}
+                                    {% if a.resposta_admin %}
+                                    <div class="text-xs text-gray-500 mt-1">Réponse: {{ a.resposta_admin }}</div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if a.status == 'pendente' %}
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">En attente</span>
+                                    {% elif a.status == 'confirmado' %}
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Confirmé</span>
+                                    {% elif a.status == 'recusado' %}
+                                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Refusé</span>
+                                    {% elif a.status == 'cancelado' %}
+                                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Annulé</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if a.status == 'pendente' %}
+                            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <form method="post" action="{% url 'orcamentos:admin_confirmar_agendamento' a.id %}" class="space-y-2">
+                                    {% csrf_token %}
+                                    <input type="text" name="resposta_admin" class="w-full border rounded px-3 py-2" placeholder="Message au client (optionnel)">
+                                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded">Confirmer</button>
+                                </form>
+                                <form method="post" action="{% url 'orcamentos:admin_recusar_agendamento' a.id %}" class="space-y-2">
+                                    {% csrf_token %}
+                                    <input type="text" name="resposta_admin" class="w-full border rounded px-3 py-2" placeholder="Motif du refus (optionnel)">
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded">Refuser</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="text-sm text-gray-500">Aucun rendez-vous pour ce devis.</div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-sm text-gray-500">Aucun rendez-vous pour ce devis.</div>
                 {% endif %}
             </div>
 
@@ -325,7 +403,7 @@
 
                 <div class="space-y-3">
                     <!-- Editar Orçamento -->
-                    {% if orcamento.status in 'em_elaboracao,pendente' %}
+                    {% if orcamento.status in 'em_elaboracao,pendente,enviado' %}
                     <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
                        class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
                         <i class="fas fa-edit mr-2"></i>
@@ -348,6 +426,13 @@
                        target="_blank">
                         <i class="fas fa-file-pdf mr-2"></i>
                         Télécharger PDF
+                    </a>
+
+                    <!-- GESTÃO DE ACOMPTES - FUNCIONALIDADE SEMPRE DISPONÍVEL -->
+                    <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+                       class="w-full inline-flex items-center justify-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-coins mr-2"></i>
+                        Gérer les acomptes
                     </a>
 
                     <!-- BOTÃO CRIAR FACTURA - AQUI ESTAVA O PROBLEMA! -->
@@ -413,49 +498,39 @@
                 </div>
             </div>
 
-            <!-- Histórico -->
+            <!-- Resumo de Acomptes e Saldo -->
             <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-history text-blue-600"></i>
-                    Historique
+                    <i class="fas fa-coins text-yellow-600"></i>
+                    Acomptes et Solde
                 </h3>
-
-                <div class="space-y-3">
-                    <div class="flex items-center gap-3 text-sm">
-                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <div>
-                            <div class="font-medium">Devis créé</div>
-                            <div class="text-gray-500">{{ orcamento.data_elaboracao|date:"d/m/Y H:i" }}</div>
-                        </div>
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Acomptes payés</span>
+                        <span class="font-semibold text-green-700">{{ orcamento.total_acomptes_pagos|floatformat:2 }}€</span>
                     </div>
-
-                    {% if orcamento.data_envio %}
-                    <div class="flex items-center gap-3 text-sm">
-                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <div>
-                            <div class="font-medium">Devis envoyé</div>
-                            <div class="text-gray-500">{{ orcamento.data_envio|date:"d/m/Y H:i" }}</div>
-                        </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Acomptes en attente</span>
+                        <span class="font-semibold text-yellow-700">{{ orcamento.total_acomptes_pendentes|floatformat:2 }}€</span>
                     </div>
-                    {% endif %}
-
-                    {% if orcamento.data_resposta_cliente %}
-                    <div class="flex items-center gap-3 text-sm">
-                        {% if orcamento.status == 'aceito' %}
-                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            <div>
-                                <div class="font-medium">Devis accepté</div>
-                                <div class="text-gray-500">{{ orcamento.data_resposta_cliente|date:"d/m/Y H:i" }}</div>
-                            </div>
-                        {% elif orcamento.status == 'recusado' %}
-                            <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-                            <div>
-                                <div class="font-medium">Devis refusé</div>
-                                <div class="text-gray-500">{{ orcamento.data_resposta_cliente|date:"d/m/Y H:i" }}</div>
-                            </div>
-                        {% endif %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Total acomptes</span>
+                        <span class="font-semibold text-gray-900">{{ orcamento.total_acomptes_pagos|add:orcamento.total_acomptes_pendentes|floatformat:2 }}€</span>
                     </div>
-                    {% endif %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Solde TTC à payer</span>
+                        <span class="font-bold text-purple-700">{{ orcamento.saldo_em_aberto|floatformat:2 }}€</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">% payé</span>
+                        <span class="font-medium text-blue-700">{{ orcamento.percentual_pago|floatformat:2 }}%</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'orcamentos:admin_orcamento_acomptes' orcamento.numero %}"
+                       class="inline-flex items-center px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors">
+                        <i class="fas fa-sliders-h mr-2"></i> Gérer les acomptes
+                    </a>
                 </div>
             </div>
         </div>

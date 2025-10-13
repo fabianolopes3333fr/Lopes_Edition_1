@@ -13,8 +13,8 @@ class Command(BaseCommand):
         google_client_secret = config('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
 
         # Obter credenciais do Microsoft OAuth do .env
-        microsoft_client_id = config('MICROSOFT_CLIENT_ID', default='')
-        microsoft_client_secret = config('MICROSOFT_CLIENT_SECRET', default='')
+        microsoft_client_id = config('MICROSOFT_OAUTH2_CLIENT_ID', default='')
+        microsoft_client_secret = config('MICROSOFT_OAUTH2_CLIENT_SECRET', default='')
 
         # Obter ou criar o site
         site = Site.objects.get_or_create(
@@ -95,7 +95,7 @@ class Command(BaseCommand):
             )
             self.stdout.write('   1. Vá para https://portal.azure.com/')
             self.stdout.write('   2. Registre uma nova aplicação')
-            self.stdout.write('   3. Configure a URI de redirecionamento: http://localhost:8000/accounts/microsoft/login/callback/')
-            self.stdout.write('   4. Adicione MICROSOFT_CLIENT_ID e MICROSOFT_CLIENT_SECRET no .env')
+            self.stdout.write('   3. Configure a URI de redirecionamento: http://localhost:8000/auth/microsoft/login/callback/')
+            self.stdout.write('   4. Adicione MICROSOFT_OAUTH2_CLIENT_ID e MICROSOFT_OAUTH2_CLIENT_SECRET no .env')
 
         self.stdout.write(f'📍 Site configurado: {site.domain}')

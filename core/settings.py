@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import tempfile
 from decouple import config
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,7 +32,11 @@ SECRET_KEY = config(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"], cast=lambda v: [s.strip() for s in v.split(",")])
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)
 
 
 # Application definition
@@ -57,6 +62,7 @@ THIRD_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.microsoft",
     'num2words',
+	
 ]
 
 PROJECT_APPS = [
@@ -90,8 +96,8 @@ ROOT_URLCONF = 'core.urls'
 AUTH_USER_MODEL = "accounts.User"
 
 # URLs de redirecionamento após login/logout
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "accounts/dashboard/"
+LOGIN_URL = "/comptes/login/"
+LOGIN_REDIRECT_URL = "/comptes/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
 # Configurações do allauth
@@ -271,6 +277,23 @@ DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL", default="contact@lopespeinture.fr"
 )
 SERVER_EMAIL = config("SERVER_EMAIL", default="contact@lopespeinture.fr")
+
+
+# Emails de contato
+CONTACT_EMAIL = config("CONTACT_EMAIL", default="contact@lopespeinture.fr")
+QUOTES_EMAIL = config("QUOTES_EMAIL", default="devis@lopespeinture.fr")
+
+# URL base do site para gerar links absolutos em emails (dev/prod)
+SITE_URL = config("SITE_URL", default="http://localhost:8000")
+
+# Validade dos tokens públicos (links de aceitar/recusar/PDF)
+# Configure em segundos ou em dias conforme preferência
+PUBLIC_LINK_TOKEN_MAX_AGE_DAYS = config("PUBLIC_LINK_TOKEN_MAX_AGE_DAYS", default=90, cast=int)
+PUBLIC_LINK_TOKEN_MAX_AGE_SECONDS = config(
+    "PUBLIC_LINK_TOKEN_MAX_AGE_SECONDS",
+    default=60 * 60 * 24 * PUBLIC_LINK_TOKEN_MAX_AGE_DAYS,
+    cast=int,
+)
 
 
 # Configurações de upload de arquivos

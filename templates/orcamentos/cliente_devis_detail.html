@@ -254,6 +254,74 @@
             </div>
             {% endif %}
 
+            <!-- Rendez-vous: Proposer et lister -->
+            <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-calendar-check text-emerald-600"></i>
+                    Proposer un rendez-vous
+                </h3>
+
+                {% if orcamento.status in 'enviado,aceito' %}
+                <form method="post" action="{% url 'orcamentos:cliente_devis_agendar' orcamento.numero %}" class="space-y-3">
+                    {% csrf_token %}
+                    <label class="block text-sm text-gray-700">Date et heure souhaitées</label>
+                    <input type="datetime-local" name="data_horario" class="w-full border rounded px-3 py-2" required>
+
+                    <label class="block text-sm text-gray-700">Type</label>
+                    <select name="tipo" class="w-full border rounded px-3 py-2">
+                        <option value="visita">Visite technique sur site</option>
+                        <option value="appel">Appel téléphonique</option>
+                        <option value="visio">Visioconférence</option>
+                    </select>
+
+                    <label class="block text-sm text-gray-700">Message (optionnel)</label>
+                    <textarea name="mensagem" rows="3" class="w-full border rounded px-3 py-2" placeholder="Informations complémentaires..."></textarea>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium">
+                        Envoyer la proposition
+                    </button>
+                </form>
+                {% else %}
+                    <div class="text-sm text-gray-600">Vous pourrez proposer un rendez-vous lorsque le devis sera envoyé ou accepté.</div>
+                {% endif %}
+
+                {% if orcamento.agendamentos.all %}
+                <div class="mt-6">
+                    <h4 class="text-sm font-semibold text-gray-900 mb-2">Vos rendez-vous</h4>
+                    <div class="space-y-2">
+                        {% for a in orcamento.agendamentos.all %}
+                        <div class="border rounded p-3 flex items-start justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ a.data_horario|date:'d/m/Y H:i' }} • {{ a.get_tipo_display }}
+                                </div>
+                                {% if a.mensagem %}
+                                    <div class="text-xs text-gray-600 mt-1">{{ a.mensagem }}</div>
+                                {% endif %}
+                                {% if a.resposta_admin %}
+                                    <div class="text-xs text-gray-500 mt-1">Réponse: {{ a.resposta_admin }}</div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if a.status == 'pendente' %}
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">En attente</span>
+                                {% elif a.status == 'confirmado' %}
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Confirmé</span>
+                                {% elif a.status == 'recusado' %}
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Refusé</span>
+                                {% elif a.status == 'cancelado' %}
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Annulé</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-xs text-gray-500">Aucun rendez-vous pour le moment.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
             <!-- Autres Actions -->
             <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -282,7 +350,7 @@
                 </div>
             </div>
 
-            <!-- Informações do Devis -->
+            <!-- Informations du Devis -->
             <div class="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <i class="fas fa-info-circle text-blue-500"></i>

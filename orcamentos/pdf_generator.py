@@ -396,32 +396,48 @@ class OrcamentoPDFGenerator:
         return elements
 
     def _build_totals(self, orcamento):
-        """Construir seção de totais"""
+        """Construir seção de totais com acomptes e saldo"""
         elements = []
 
-        # Calcular totais se não existirem nos campos do modelo
-        subtotal_ht = orcamento.subtotal if hasattr(orcamento, 'subtotal') else orcamento.total
-        total_final = orcamento.total
+        # Calcular totais baseando-se no modelo
+        try:
+            subtotal_ht = orcamento.subtotal
+        except Exception:
+            subtotal_ht = orcamento.total
+
+        total_ht = orcamento.total
+        total_ttc = getattr(orcamento, 'total_ttc', total_ht)
+        valor_tva = getattr(orcamento, 'valor_tva', total_ttc - total_ht)
+
+        # Acomptes
+        try:
+            from decimal import Decimal
+            total_acomptes_ttc = sum((a.valor_ttc for a in orcamento.acomptes.all()), Decimal('0.00'))
+        except Exception:
+            total_acomptes_ttc = 0
+        solde_ttc = max(0, float(total_ttc) - float(total_acomptes_ttc))
 
         # Tabela de totais
         data = [
             [
                 Paragraph("<b>Sous-total HT:</b>", self.styles["CustomNormal"]),
-                Paragraph(
-                    f"<b>{subtotal_ht:.2f} €</b>", self.styles["CustomNormal"]
-                ),
+                Paragraph(f"<b>{float(subtotal_ht):.2f} €</b>", self.styles["CustomNormal"]),
             ],
             [
-                Paragraph("<b>TVA (20%):</b>", self.styles["CustomNormal"]),
-                Paragraph(
-                    f"<b>{(total_final - subtotal_ht):.2f} €</b>", self.styles["CustomNormal"]
-                ),
+                Paragraph("<b>TVA:</b>", self.styles["CustomNormal"]),
+                Paragraph(f"<b>{float(valor_tva):.2f} €</b>", self.styles["CustomNormal"]),
             ],
             [
                 Paragraph("<b>TOTAL TTC:</b>", self.styles["CustomNormal"]),
-                Paragraph(
-                    f"<b>{total_final:.2f} €</b>", self.styles["CustomNormal"]
-                ),
+                Paragraph(f"<b>{float(total_ttc):.2f} €</b>", self.styles["CustomNormal"]),
+            ],
+            [
+                Paragraph("<b>Acomptes:</b>", self.styles["CustomNormal"]),
+                Paragraph(f"<b>-{float(total_acomptes_ttc):.2f} €</b>", self.styles["CustomNormal"]),
+            ],
+            [
+                Paragraph("<b>Solde TTC à payer:</b>", self.styles["CustomNormal"]),
+                Paragraph(f"<b>{float(solde_ttc):.2f} €</b>", self.styles["CustomNormal"]),
             ],
         ]
 
@@ -431,11 +447,11 @@ class OrcamentoPDFGenerator:
                 [
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica"),
                     ("FONTSIZE", (0, 0), (-1, 1), 10),
-                    ("FONTSIZE", (0, 2), (-1, 2), 12),
-                    ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 2), (-1, 4), 12),
+                    ("FONTNAME", (0, 2), (-1, 4), "Helvetica-Bold"),
                     ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-                    ("BACKGROUND", (0, 2), (-1, 2), colors.HexColor("#2c5aa0")),
-                    ("TEXTCOLOR", (0, 2), (-1, 2), colors.whitesmoke),
+                    ("BACKGROUND", (0, 4), (-1, 4), colors.HexColor("#2c5aa0")),
+                    ("TEXTCOLOR", (0, 4), (-1, 4), colors.whitesmoke),
                     ("GRID", (0, 0), (-1, -1), 1, colors.black),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("LEFTPADDING", (0, 0), (-1, -1), 10),
@@ -565,6 +581,7 @@ class OrcamentoPDFGenerator:
         )
 
         elements.append(footer)
+        elements.append(Spacer(1, 20))
 
         # Mensagem de agradecimento
         elements.append(Spacer(1, 10))

@@ -42,8 +42,10 @@ function loadSectionContent(section) {
         </div>
     `;
 
+    const base = (window.URLS && window.URLS.accountsPrefix) ? window.URLS.accountsPrefix : '/comptes/';
+
     // Carregar conteúdo via AJAX
-    fetch(`/accounts/profile/${section}/`, {
+    fetch(`${base}profile/${section}/`, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',

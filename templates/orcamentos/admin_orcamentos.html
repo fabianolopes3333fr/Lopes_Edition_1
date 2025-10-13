@@ -105,18 +105,21 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
+	                                    
                                         <a href="{% url 'orcamentos:admin_orcamento_detail' orcamento.numero %}"
                                            class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-medium transition-colors inline-flex items-center gap-1"
                                            title="Voir le devis">
                                             <i class="fas fa-eye"></i>
                                             Voir
                                         </a>
+	                                    {% if orcamento.status in 'em_elaboracao,pendente,enviado' %}
                                         <a href="{% url 'orcamentos:admin_editar_orcamento' orcamento.numero %}"
                                            class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs font-medium transition-colors inline-flex items-center gap-1"
                                            title="Éditer le devis">
                                             <i class="fas fa-edit"></i>
                                             Éditer
                                         </a>
+	                                    {% endif %}
                                     </div>
                                 </td>
                             </tr>

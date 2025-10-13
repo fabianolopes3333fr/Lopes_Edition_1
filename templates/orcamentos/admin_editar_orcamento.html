@@ -48,6 +48,7 @@
     <form method="POST" id="form-orcamento">
         {% csrf_token %}
         <input type="hidden" name="itens_json" id="itens-json">
+        <input type="hidden" name="acomptes_json" id="acomptes-json">
 
         <!-- Informações do orçamento -->
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6">
@@ -106,7 +107,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Conditions de paiement</label>
-                        <select name="{{ form.condicoes_pagamento.name }}"
+                        <select name="{{ form.condicoes_pagamento.name }}" id="condicoes-pagamento"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="comptant" {% if form.condicoes_pagamento.value == 'comptant' %}selected{% endif %}>Comptant</option>
                             <option value="acompte_30" {% if form.condicoes_pagamento.value == 'acompte_30' %}selected{% endif %}>30% d'acompte, solde à la fin</option>
@@ -115,6 +116,66 @@
                             <option value="echeance_60" {% if form.condicoes_pagamento.value == 'echeance_60' %}selected{% endif %}>Paiement à 60 jours</option>
                             <option value="personnalise" {% if form.condicoes_pagamento.value == 'personnalise' %}selected{% endif %}>Conditions personnalisées</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOVA SEÇÃO: Gestão de Acomptes -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6" id="acomptes-section" style="display: none;">
+            <div class="flex justify-between items-center p-6 bg-gradient-to-r from-orange-50 to-yellow-50 border-b border-gray-200 rounded-t-2xl">
+                <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-euro-sign text-orange-600"></i>
+                    Gestion des Acomptes
+                </h2>
+                <button type="button" id="btn-add-acompte"
+                        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+                    <i class="fas fa-plus"></i>
+                    Ajouter un acompte
+                </button>
+            </div>
+
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="acomptes-table">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">%</th>
+                                <th class="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase">Montant TTC</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Échéance</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Statut</th>
+                                <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acomptes-body" class="divide-y divide-gray-100">
+                            <!-- Acomptes will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center py-8 hidden" id="empty-acomptes-message">
+                    <div class="text-gray-400 mb-4">
+                        <i class="fas fa-wallet text-4xl"></i>
+                    </div>
+                    <p class="text-gray-600">Aucun acompte configuré. Ajoutez des acomptes pour faciliter le paiement échelonné.</p>
+                </div>
+
+                <div class="mt-6 bg-orange-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm text-gray-600">Total des acomptes</p>
+                            <p class="text-lg font-bold text-orange-600" id="total-acomptes-ttc">0,00 €</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">% du devis</p>
+                            <p class="text-lg font-bold text-orange-600" id="percentual-acomptes">0%</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Solde restant</p>
+                            <p class="text-lg font-bold text-green-600" id="solde-restant-ttc">0,00 €</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -151,7 +212,7 @@
                         </tr>
                     </thead>
                     <tbody id="items-body" class="divide-y divide-gray-100">
-                        <!-- Items will be added here dynamically -->
+                        <!-- Itens serão carregados aqui pelo script -->
                     </tbody>
                     <tfoot class="bg-gray-50">
                         <tr class="border-t-2 border-gray-300">
@@ -167,16 +228,30 @@
                             <td></td>
                         </tr>
                         <tr class="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-500">
-                            <td colspan="7" class="py-4 px-4 text-right font-bold text-xl text-blue-800">TOTAL:</td>
-                            <td class="py-4 px-4 text-right font-bold text-xl text-blue-600" id="total-final-ht">0,00 €</td>
+                            <td colspan="7" class="py-4 px-4 text-right font-bold text-xl text-blue-800">TOTAL TTC:</td>
+	                        <td class="py-4 px-4 text-right font-bold text-xl text-green-600" id="total-final-ht">0,00 €</td>
                             <td class="py-4 px-4 text-right font-bold text-xl text-blue-600" id="total-final-ttc">0,00 €</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <!-- Linhas adicionais: Acomptes e Solde -->
+                        <tr>
+                            <td colspan="8"></td>
+                            <td class="py-3 px-4 text-right font-semibold text-orange-700">Acomptes TTC:</td>
+                            <td class="py-3 px-4 text-right font-bold text-orange-600" id="sum-acomptes-ttc">0,00 €</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="8"></td>
+                            <td class="py-3 px-4 text-right font-semibold text-green-700">Solde TTC:</td>
+                            <td class="py-3 px-4 text-right font-bold text-green-600" id="solde-ttc">0,00 €</td>
                             <td></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
 
-            <div class="text-center py-12 hidden" id="empty-items-message">
+            <div class="text-center py-12" id="empty-items-message">
                 <div class="text-gray-400 mb-4">
                     <i class="fas fa-inbox text-5xl"></i>
                 </div>
@@ -217,6 +292,78 @@
     </form>
 </div>
 
+<!-- Modal para adicionar acompte -->
+<div id="modal-add-acompte" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-euro-sign text-orange-600"></i>
+                    <span id="acompte-modal-title">Ajouter un Acompte</span>
+                </h3>
+                <button type="button" id="btn-close-acompte-modal" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Type d'acompte</label>
+                    <select id="acompte-tipo" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <option value="inicial">Acompte initial</option>
+                        <option value="intermediario">Acompte intermédiaire</option>
+                        <option value="final">Solde final</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pourcentage (%)</label>
+                    <input type="number" id="acompte-percentual" value="30" step="0.01" min="0" max="100"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <input type="text" id="acompte-descricao" placeholder="Ex: Acompte initial pour commencer les travaux"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date d'échéance</label>
+                    <input type="date" id="acompte-data-vencimento"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Type de paiement</label>
+                    <select id="acompte-tipo-pagamento" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <option value="virement">Virement bancaire</option>
+                        <option value="cheque">Chèque</option>
+                        <option value="espece">Espèce</option>
+                        <option value="carte_bancaire">Carte bancaire</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-orange-50 p-4 rounded-lg">
+                <div class="flex justify-between items-center text-lg">
+                    <span class="font-medium text-gray-700">Montant TTC (calculé):</span>
+                    <span class="font-bold text-orange-600" id="modal-acompte-ttc">0,00€</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button type="button" id="btn-cancel-acompte" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">
+                    Annuler
+                </button>
+                <button type="button" id="btn-confirm-acompte" class="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors">
+                    Ajouter
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal para adicionar item -->
 <div id="modal-add-item" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -232,7 +379,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
+                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Référence (rechercher un produit)</label>
                     <div class="relative">
                         <input type="text" id="item-referencia"
@@ -245,12 +392,12 @@
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Désignation *</label>
-                    <textarea id="item-descricao" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Description détaillée du produit ou service..."></textarea>
+                    <textarea id="item-descricao" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Unité</label>
-                    <select id="item-unidade" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select id="item-unidade" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                         <option value="unite">Unité</option>
                         <option value="piece">Pièce</option>
                         <option value="m2">M²</option>
@@ -261,9 +408,9 @@
                     </select>
                 </div>
 
-                <div>
+                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Activité</label>
-                    <select id="item-atividade" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select id="item-atividade" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                         <option value="marchandise">Marchandise</option>
                         <option value="service">Service</option>
                     </select>
@@ -271,31 +418,31 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Quantité *</label>
-                    <input type="number" id="item-quantidade" value="1" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="number" id="item-quantidade" value="1" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Prix Unitaire HT (€) *</label>
-                    <input type="number" id="item-preco-ht" value="0" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="number" id="item-preco-ht" value="0" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Remise (%)</label>
+                    <input type="number" id="item-remise" value="0" step="0.01" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">TVA (%)</label>
-                    <select id="item-taxa-tva" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select id="item-taxa-tva" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                         <option value="20">20%</option>
                         <option value="10">10%</option>
                         <option value="5.5">5,5%</option>
                         <option value="0">Exonérée (0%)</option>
                     </select>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Remise (%)</label>
-                    <input type="number" id="item-remise" value="0" step="0.01" min="0" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
             </div>
 
-            <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+             <div class="mt-6 bg-gray-50 p-4 rounded-lg">
                 <div class="flex justify-between items-center text-lg">
                     <span class="font-medium text-gray-700">Total HT:</span>
                     <span class="font-bold text-blue-600" id="modal-total-ht">0,00€</span>
@@ -307,11 +454,11 @@
             </div>
 
             <div class="flex gap-3 mt-6">
-                <button type="button" id="btn-cancel-item" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">
+                <button type="button" id="btn-cancel-item" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg">
                     Annuler
                 </button>
-                <button type="button" id="btn-confirm-item" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                    <span id="btn-confirm-text">Ajouter</span>
+                <button type="button" id="btn-confirm-item" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                    Ajouter
                 </button>
             </div>
         </div>
@@ -320,19 +467,35 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // --- State Management ---
     let items = [];
+    let acomptes = [];
     let editingIndex = -1;
+    let editingAcompteIndex = -1;
 
-    // Modal controls
-    const modal = document.getElementById('modal-add-item');
+    // --- Element Selectors ---
+    // Modals
+    const modalItem = document.getElementById('modal-add-item');
+    const modalAcompte = document.getElementById('modal-add-acompte');
+
+    // Buttons
     const btnAddItem = document.getElementById('btn-add-item');
+    const btnAddAcompte = document.getElementById('btn-add-acompte');
     const btnCloseModal = document.getElementById('btn-close-modal');
     const btnCancelItem = document.getElementById('btn-cancel-item');
     const btnConfirmItem = document.getElementById('btn-confirm-item');
-    const modalTitle = document.getElementById('modal-title');
-    const btnConfirmText = document.getElementById('btn-confirm-text');
+    const btnCloseAcompteModal = document.getElementById('btn-close-acompte-modal');
+    const btnCancelAcompte = document.getElementById('btn-cancel-acompte');
+    const btnConfirmAcompte = document.getElementById('btn-confirm-acompte');
 
-    // Form inputs
+    // Form and hidden inputs
+    const formOrcamento = document.getElementById('form-orcamento');
+    const itemsJsonInput = document.getElementById('itens-json');
+    const acomptesJsonInput = document.getElementById('acomptes-json');
+    const descontoGlobalInput = document.getElementById('desconto-global');
+
+    // Item Modal Fields
+    const itemModalTitle = document.getElementById('modal-title');
     const inputReferencia = document.getElementById('item-referencia');
     const inputDescricao = document.getElementById('item-descricao');
     const inputUnidade = document.getElementById('item-unidade');
@@ -342,87 +505,211 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputTaxaTva = document.getElementById('item-taxa-tva');
     const inputRemise = document.getElementById('item-remise');
 
-    // Carregar dados existentes PRIMEIRO
-    loadExistingItems();
+    // Acompte Modal Fields
+    const acompteModalTitle = document.getElementById('acompte-modal-title');
+    const inputAcompteTipo = document.getElementById('acompte-tipo');
+    const inputAcomptePercentual = document.getElementById('acompte-percentual');
+    const inputAcompteDescricao = document.getElementById('acompte-descricao');
+    const inputAcompteDataVencimento = document.getElementById('acompte-data-vencimento');
+    const inputAcompteTipoPagamento = document.getElementById('acompte-tipo-pagamento');
 
-    // Open modal para adicionar
-    btnAddItem.addEventListener('click', function() {
-        clearModalInputs();
-        editingIndex = -1;
-        modalTitle.textContent = 'Ajouter un Item';
-        btnConfirmText.textContent = 'Ajouter';
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    });
+    // Acomptes Section
+    const condicoesPagamento = document.getElementById('condicoes-pagamento');
+    const acomptesSection = document.getElementById('acomptes-section');
 
-    // Close modal
-    function closeModal() {
-        modal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    [btnCloseModal, btnCancelItem].forEach(btn => {
-        btn.addEventListener('click', closeModal);
-    });
-
-    // Close modal on backdrop click
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-
-    // Calculate totals in modal
-    [inputQuantidade, inputPrecoHt, inputTaxaTva, inputRemise].forEach(input => {
-        input.addEventListener('input', calculateModalTotals);
-    });
-
-    function calculateModalTotals() {
-        const quantidade = parseFloat(inputQuantidade.value) || 0;
-        const precoHt = parseFloat(inputPrecoHt.value) || 0;
-        const taxaTva = parseFloat(inputTaxaTva.value) || 0;
-        const remise = parseFloat(inputRemise.value) || 0;
-
-        const totalBrutoHt = quantidade * precoHt;
-        const valorRemise = (totalBrutoHt * remise) / 100;
-        const totalHt = totalBrutoHt - valorRemise;
-        const valorTva = (totalHt * taxaTva) / 100;
-        const totalTtc = totalHt + valorTva;
-
-        document.getElementById('modal-total-ht').textContent = totalHt.toFixed(2) + '€';
-        document.getElementById('modal-total-ttc').textContent = totalTtc.toFixed(2) + '€';
-    }
-
-    // Confirm item
-    btnConfirmItem.addEventListener('click', function() {
-        const descricao = inputDescricao.value.trim();
-        if (!descricao) {
-            alert('La désignation est obligatoire');
-            return;
+    // --- Initialization ---
+    function initialize() {
+        try {
+            const initialItemsData = JSON.parse('{{ itens_json|escapejs }}' || '[]');
+            items = initialItemsData.map(item => ({
+                ...item,
+                quantidade: parseFloat(item.quantidade) || 0,
+                preco_unitario_ht: parseFloat(item.preco_unitario_ht) || 0,
+                remise_percentual: parseFloat(item.remise_percentual) || 0,
+            }));
+        } catch (e) {
+            console.error("Error parsing initial items JSON:", e);
+            items = [];
         }
 
-        const item = {
-            referencia: inputReferencia.value.trim(),
-            descricao: descricao,
-            unidade: inputUnidade.value,
-            atividade: inputAtividade.value,
-            quantidade: parseFloat(inputQuantidade.value) || 1,
-            preco_unitario_ht: parseFloat(inputPrecoHt.value) || 0,
-            taxa_tva: inputTaxaTva.value,
-            remise_percentual: parseFloat(inputRemise.value) || 0
-        };
-
-        if (editingIndex >= 0) {
-            items[editingIndex] = item;
-        } else {
-            items.push(item);
+        try {
+            const initialAcomptesData = JSON.parse('{{ acomptes_json|escapejs }}' || '[]');
+            acomptes = initialAcomptesData.map(acompte => ({
+                ...acompte,
+                percentual: parseFloat(acompte.percentual) || 0,
+            }));
+        } catch (e) {
+            console.error("Error parsing initial acomptes JSON:", e);
+            acomptes = [];
         }
 
         renderItems();
-        closeModal();
-    });
+        renderAcomptes();
+        toggleAcomptesSection();
+    }
 
-    function clearModalInputs() {
+    // --- Rendering ---
+    function renderItems() {
+        const tbody = document.getElementById('items-body');
+        const emptyMessage = document.getElementById('empty-items-message');
+        tbody.innerHTML = '';
+
+        if (items.length === 0) {
+            emptyMessage.style.display = 'block';
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center p-8 text-gray-500">Aucun item pour le moment.</td></tr>`;
+        } else {
+            emptyMessage.classList.add('hidden');
+            
+            items.forEach((item, index) => {
+                const totalBrutoHt = item.quantidade * item.preco_unitario_ht;
+                const valorRemise = (totalBrutoHt * item.remise_percentual) / 100;
+                const totalHt = totalBrutoHt - valorRemise;
+                const taxaTvaDecimal = parseFloat(item.taxa_tva) / 100;
+                const valorTva = totalHt * taxaTvaDecimal;
+                const totalTtc = totalHt + valorTva;
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm">${item.referencia || '-'}</td>
+                    <td class="py-3 px-4 text-sm">${item.descricao}</td>
+                    <td class="py-3 px-4 text-center text-sm">${getUnidadeLabel(item.unidade)}</td>
+                    <td class="py-3 px-4 text-center text-sm font-medium">${item.quantidade}</td>
+                    <td class="py-3 px-4 text-right text-sm font-medium">${item.preco_unitario_ht.toFixed(2)}€</td>
+                    <td class="py-3 px-4 text-center text-xs"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${item.taxa_tva}%</span></td>
+                    <td class="py-3 px-4 text-center text-xs">${item.remise_percentual > 0 ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded">' + item.remise_percentual + '%</span>' : '-'}</td>
+                    <td class="py-3 px-4 text-right font-bold text-blue-600">${totalHt.toFixed(2)}€</td>
+                    <td class="py-3 px-4 text-right font-bold text-blue-600">${totalTtc.toFixed(2)}€</td>
+                    <td class="py-3 px-4 text-center">
+                        <button type="button" class="btn-edit-item text-blue-600 hover:text-blue-800 mr-2" data-index="${index}" title="Éditer"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn-delete-item text-red-600 hover:text-red-800" data-index="${index}" title="Supprimer"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+        updateTotals();
+        attachItemActionListeners();
+    }
+
+    function renderAcomptes() {
+        const tbody = document.getElementById('acomptes-body');
+        const emptyMessage = document.getElementById('empty-acomptes-message');
+        tbody.innerHTML = '';
+
+        if (acomptes.length === 0) {
+            emptyMessage.classList.remove('hidden');
+        } else {
+            emptyMessage.classList.add('hidden');
+            const { ttcAfterDiscount } = calculateTotals();
+
+            acomptes.forEach((acompte, index) => {
+                const acompteTtc = (ttcAfterDiscount * (parseFloat(acompte.percentual) || 0)) / 100;
+                const row = document.createElement('tr');
+                row.className = `hover:bg-gray-50 ${acompte.status === 'pago' ? 'bg-green-50 text-gray-500' : ''}`;
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm"><span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">${getTipoAcompteLabel(acompte.tipo)}</span></td>
+                    <td class="py-3 px-4 text-sm">${acompte.descricao || ''}</td>
+                    <td class="py-3 px-4 text-center text-sm font-medium">${(parseFloat(acompte.percentual) || 0)}%</td>
+                    <td class="py-3 px-4 text-right text-sm font-bold text-orange-600">${acompteTtc.toFixed(2)}€</td>
+                    <td class="py-3 px-4 text-center text-sm">${acompte.data_vencimento ? new Date(acompte.data_vencimento + 'T00:00:00').toLocaleDateString('fr-FR') : '-'}</td>
+                    <td class="py-3 px-4 text-center text-sm">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${acompte.status === 'pago' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${acompte.status || 'pendente'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${acompte.status !== 'pago' ? `
+                        <button type="button" class="btn-edit-acompte text-blue-600 hover:text-blue-800 mr-2" data-index="${index}" title="Éditer"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn-delete-acompte text-red-600 hover:text-red-800" data-index="${index}" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        ` : '<span class="text-xs text-gray-400">Payé</span>'}
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+        updateAcomptesSummary();
+        attachAcompteActionListeners();
+    }
+
+    // --- Calculations ---
+    function calculateTotals() {
+        // Somar totais por item (já considerando remise por item)
+        let sumHt = 0;
+        let sumTtc = 0;
+
+        items.forEach(item => {
+            const itemHt = (item.quantidade * item.preco_unitario_ht) * (1 - (parseFloat(item.remise_percentual) || 0) / 100);
+            const itemTva = itemHt * ((parseFloat(item.taxa_tva) || 0) / 100);
+            const itemTtc = itemHt + itemTva;
+            sumHt += itemHt;
+            sumTtc += itemTtc;
+        });
+
+        const descontoGlobal = parseFloat(descontoGlobalInput.value) || 0;
+        const valorDescontoHt = sumHt * (descontoGlobal / 100);
+        const htAfterDiscount = sumHt - valorDescontoHt;
+
+        const valorDescontoTtc = sumTtc * (descontoGlobal / 100);
+        const ttcAfterDiscount = sumTtc - valorDescontoTtc;
+
+        const totalTvaAfter = Math.max(0, ttcAfterDiscount - htAfterDiscount);
+
+        // Atualizar UI
+        const elSubtotalHt = document.getElementById('subtotal-ht');
+        const elSubtotalTtc = document.getElementById('subtotal-ttc');
+        const elTotalTva = document.getElementById('total-tva');
+        const elTotalFinalHt = document.getElementById('total-final-ht');
+        const elTotalFinalTtc = document.getElementById('total-final-ttc');
+
+        if (elSubtotalHt) elSubtotalHt.textContent = `${htAfterDiscount.toFixed(2)} €`;
+        if (elSubtotalTtc) elSubtotalTtc.textContent = `${ttcAfterDiscount.toFixed(2)} €`;
+        if (elTotalTva) elTotalTva.textContent = `${totalTvaAfter.toFixed(2)} €`;
+        if (elTotalFinalHt) elTotalFinalHt.textContent = `${htAfterDiscount.toFixed(2)} €`;
+        if (elTotalFinalTtc) elTotalFinalTtc.textContent = `${ttcAfterDiscount.toFixed(2)} €`;
+
+        return { sumHt, sumTtc, htAfterDiscount, ttcAfterDiscount, totalTvaAfter, descontoGlobal };
+    }
+
+    // Helper to parse numbers typed with comma or dot
+    function parseLocaleNumber(val) {
+        if (val == null) return 0;
+        if (typeof val === 'number') return isNaN(val) ? 0 : val;
+        const s = String(val).replace(',', '.');
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function updateTotals() {
+        calculateTotals();
+        renderAcomptes(); // Recalculate acompte values when item totals change
+    }
+
+    function updateAcomptesSummary() {
+        const { ttcAfterDiscount } = calculateTotals();
+        let totalAcomptesValor = 0;
+        let totalAcomptesPercentual = 0;
+
+        acomptes.forEach(acompte => {
+            totalAcomptesValor += (ttcAfterDiscount * (parseFloat(acompte.percentual) || 0)) / 100;
+            totalAcomptesPercentual += (parseFloat(acompte.percentual) || 0);
+        });
+
+        const soldeRestant = Math.max(0, ttcAfterDiscount - totalAcomptesValor);
+
+        const elTotalAcomptesTtc = document.getElementById('total-acomptes-ttc');
+        const elPercentualAcomptes = document.getElementById('percentual-acomptes');
+        const elSoldeRestantTtc = document.getElementById('solde-restant-ttc');
+        const sumAcomptesTtcEl = document.getElementById('sum-acomptes-ttc');
+        const soldeTtcEl = document.getElementById('solde-ttc');
+
+        if (elTotalAcomptesTtc) elTotalAcomptesTtc.textContent = `${totalAcomptesValor.toFixed(2)} €`;
+        if (elPercentualAcomptes) elPercentualAcomptes.textContent = `${totalAcomptesPercentual.toFixed(2)}%`;
+        if (elSoldeRestantTtc) elSoldeRestantTtc.textContent = `${soldeRestant.toFixed(2)} €`;
+        if (sumAcomptesTtcEl) sumAcomptesTtcEl.textContent = `${totalAcomptesValor.toFixed(2)} €`;
+        if (soldeTtcEl) soldeTtcEl.textContent = `${soldeRestant.toFixed(2)} €`;
+    }
+
+    // --- Modal helpers ---
+    function clearItemModalFields() {
         inputReferencia.value = '';
         inputDescricao.value = '';
         inputUnidade.value = 'unite';
@@ -431,242 +718,249 @@ document.addEventListener('DOMContentLoaded', function() {
         inputPrecoHt.value = '0';
         inputTaxaTva.value = '20';
         inputRemise.value = '0';
-        calculateModalTotals();
+        calculateModalItemTotals();
     }
 
-    function loadExistingItems() {
-        // Carregar itens existentes do orçamento via AJAX
-        const numeroOrcamento = '{{ orcamento.numero }}';
-        fetch(`/devis/ajax/orcamento-items/${numeroOrcamento}/`)
+    // --- Confirm actions (missing before) ---
+    function confirmItem() {
+        const descricao = (inputDescricao.value || '').trim();
+        const quantidade = parseFloat(inputQuantidade.value) || 0;
+        const precoHt = parseFloat(inputPrecoHt.value) || 0;
+        const remise = parseFloat(inputRemise.value) || 0;
+        const tva = parseFloat(inputTaxaTva.value) || 0;
+
+        if (!descricao) { alert("Veuillez renseigner la désignation de l'item."); return; }
+        if (quantidade <= 0) { alert("La quantité doit être supérieure à 0."); return; }
+        if (precoHt < 0) { alert("Le prix unitaire HT ne peut pas être négatif."); return; }
+        if (remise < 0 || remise > 100) { alert("La remise doit être entre 0 et 100%."); return; }
+        if (tva < 0 || tva > 100) { alert("La TVA doit être entre 0 et 100%."); return; }
+
+        const newItem = {
+            referencia: inputReferencia.value || '',
+            descricao: descricao,
+            unidade: inputUnidade.value || 'unite',
+            atividade: inputAtividade.value || 'marchandise',
+            quantidade: quantidade,
+            preco_unitario_ht: precoHt,
+            taxa_tva: String(tva),
+            remise_percentual: remise
+        };
+
+        if (editingIndex >= 0) {
+            items[editingIndex] = newItem;
+        } else {
+            items.push(newItem);
+        }
+        editingIndex = -1;
+        closeModal(modalItem);
+        renderItems();
+    }
+
+    function confirmAcompte() {
+        const percentual = parseLocaleNumber(inputAcomptePercentual.value) || 0;
+        const tipo = inputAcompteTipo.value || 'inicial';
+        const descricao = (inputAcompteDescricao.value || '').trim();
+        const data_vencimento = inputAcompteDataVencimento.value || '';
+        const tipo_pagamento = inputAcompteTipoPagamento.value || 'virement';
+
+        if (percentual <= 0 || percentual > 100) { alert("Le pourcentage de l'acompte doit être entre 0 et 100%."); return; }
+
+        const acompte = { tipo, descricao, percentual, data_vencimento, tipo_pagamento, status: 'pendente' };
+
+        if (editingAcompteIndex >= 0) {
+            acomptes[editingAcompteIndex] = acompte;
+        } else {
+            acomptes.push(acompte);
+        }
+        editingAcompteIndex = -1;
+        closeModal(modalAcompte);
+        renderAcomptes();
+    }
+
+    // --- Modal Management ---
+    function openItemModal(index = -1) {
+        editingIndex = index;
+        if (index >= 0) {
+            const item = items[index];
+            itemModalTitle.textContent = "Éditer l'Item";
+            btnConfirmItem.textContent = "Sauvegarder";
+            inputReferencia.value = item.referencia || '';
+            inputDescricao.value = item.descricao || '';
+            inputUnidade.value = item.unidade || 'unite';
+            inputAtividade.value = item.atividade || 'marchandise';
+            inputQuantidade.value = item.quantidade;
+            inputPrecoHt.value = item.preco_unitario_ht;
+            inputTaxaTva.value = item.taxa_tva;
+            inputRemise.value = item.remise_percentual;
+        } else {
+            itemModalTitle.textContent = "Ajouter un Item";
+            btnConfirmItem.textContent = "Ajouter";
+            clearItemModalFields();
+        }
+        calculateModalItemTotals();
+        modalItem.classList.remove('hidden');
+    }
+    
+    function openAcompteModal(index = -1) {
+        editingAcompteIndex = index;
+        if (index >= 0) {
+            const acompte = acomptes[index];
+            acompteModalTitle.textContent = "Éditer l'Acompte";
+            btnConfirmAcompte.textContent = "Sauvegarder";
+            inputAcompteTipo.value = acompte.tipo || 'inicial';
+            inputAcomptePercentual.value = acompte.percentual || 0;
+            inputAcompteDescricao.value = acompte.descricao || '';
+            inputAcompteDataVencimento.value = acompte.data_vencimento || '';
+            inputAcompteTipoPagamento.value = acompte.tipo_pagamento || 'virement';
+        } else {
+            acompteModalTitle.textContent = "Ajouter un Acompte";
+            btnConfirmAcompte.textContent = "Ajouter";
+            // Reset campos
+            inputAcompteTipo.value = 'inicial';
+            inputAcomptePercentual.value = 30;
+            inputAcompteDescricao.value = '';
+            inputAcompteDataVencimento.value = '';
+            inputAcompteTipoPagamento.value = 'virement';
+        }
+        calculateModalAcompteTotals();
+        modalAcompte.classList.remove('hidden');
+    }
+
+    function closeModal(modal) { modal.classList.add('hidden'); }
+
+    // --- Event Listeners ---
+    function attachItemActionListeners() {
+        document.querySelectorAll('.btn-edit-item').forEach(btn => btn.addEventListener('click', (e) => openItemModal(parseInt(e.currentTarget.dataset.index))));
+        document.querySelectorAll('.btn-delete-item').forEach(btn => btn.addEventListener('click', (e) => {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet item ?')) {
+                items.splice(parseInt(e.currentTarget.dataset.index), 1);
+                renderItems();
+            }
+        }));
+    }
+
+    function attachAcompteActionListeners() {
+        document.querySelectorAll('.btn-edit-acompte').forEach(btn => btn.addEventListener('click', (e) => openAcompteModal(parseInt(e.currentTarget.dataset.index))));
+        document.querySelectorAll('.btn-delete-acompte').forEach(btn => btn.addEventListener('click', (e) => {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cet acompte ?')) {
+                acomptes.splice(parseInt(e.currentTarget.dataset.index), 1);
+                renderAcomptes();
+            }
+        }));
+    }
+
+    // Abrir/fechar modais
+    btnAddItem.addEventListener('click', () => openItemModal());
+    [btnCloseModal, btnCancelItem].forEach(btn => btn.addEventListener('click', () => closeModal(modalItem)));
+
+    btnAddAcompte.addEventListener('click', () => openAcompteModal());
+    [btnCloseAcompteModal, btnCancelAcompte].forEach(btn => btn.addEventListener('click', () => closeModal(modalAcompte)));
+
+    // Bind confirm buttons
+    if (btnConfirmItem) btnConfirmItem.addEventListener('click', confirmItem);
+    if (btnConfirmAcompte) btnConfirmAcompte.addEventListener('click', confirmAcompte);
+
+    // Fechar modais clicando no overlay
+    modalItem.addEventListener('click', (e) => { if (e.target === modalItem) closeModal(modalItem); });
+    modalAcompte.addEventListener('click', (e) => { if (e.target === modalAcompte) closeModal(modalAcompte); });
+
+    // Fechar modais com tecla Esc
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (!modalItem.classList.contains('hidden')) closeModal(modalItem);
+            if (!modalAcompte.classList.contains('hidden')) closeModal(modalAcompte);
+        }
+    });
+
+    // Global listeners
+    descontoGlobalInput.addEventListener('input', updateTotals);
+    condicoesPagamento.addEventListener('change', toggleAcomptesSection);
+    [inputQuantidade, inputPrecoHt, inputTaxaTva, inputRemise].forEach(input => input.addEventListener('input', calculateModalItemTotals));
+    inputAcomptePercentual.addEventListener('input', calculateModalAcompteTotals);
+
+    formOrcamento.addEventListener('submit', function() {
+        itemsJsonInput.value = JSON.stringify(items);
+        acomptesJsonInput.value = JSON.stringify(acomptes);
+    });
+
+    // --- Helper Functions ---
+    function toggleAcomptesSection() {
+        const value = condicoesPagamento.value;
+        if (value.includes('acompte') || value === 'personnalise') {
+            acomptesSection.style.display = 'block';
+        } else {
+            acomptesSection.style.display = 'none';
+            if (acomptes.length > 0 && confirm("Changer les conditions de paiement effacera les acomptes configurés. Continuer?")) {
+                acomptes = [];
+                renderAcomptes();
+            }
+        }
+    }
+
+    function calculateModalItemTotals() {
+        const qte = parseFloat(inputQuantidade.value) || 0;
+        const pu = parseFloat(inputPrecoHt.value) || 0;
+        const tva = parseFloat(inputTaxaTva.value) || 0;
+        const remise = parseFloat(inputRemise.value) || 0;
+        const totalHt = (qte * pu) * (1 - remise / 100);
+        const totalTtc = totalHt * (1 + tva / 100);
+        document.getElementById('modal-total-ht').textContent = `${totalHt.toFixed(2)}€`;
+        document.getElementById('modal-total-ttc').textContent = `${totalTtc.toFixed(2)}€`;
+    }
+
+    function calculateModalAcompteTotals() {
+        const percentual = parseLocaleNumber(inputAcomptePercentual.value);
+        const { ttcAfterDiscount } = calculateTotals();
+        const acompteTtc = (ttcAfterDiscount * percentual) / 100;
+        document.getElementById('modal-acompte-ttc').textContent = `${acompteTtc.toFixed(2)}€`;
+    }
+
+    function getUnidadeLabel(key) { return {'unite': 'Unité', 'piece': 'Pièce', 'm2': 'M²', 'ml': 'ML', 'kg': 'Kg', 'heure': 'Heure', 'forfait': 'Forfait'}[key] || key; }
+    function getTipoAcompteLabel(key) { return {'inicial': 'Initial', 'intermediario': 'Intermédiaire', 'final': 'Solde'}[key] || key; }
+
+    // --- Search Logic ---
+    const suggestionsDiv = document.getElementById('produto-suggestions');
+    inputReferencia.addEventListener('keyup', function() {
+        const query = this.value;
+        if (query.length < 2) {
+            suggestionsDiv.classList.add('hidden');
+            return;
+        }
+        fetch(`/devis/ajax/buscar-produtos/?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.items) {
-                    items = data.items.map(item => ({
-                        referencia: item.referencia || '',
-                        descricao: item.descricao || '',
-                        unidade: item.unidade || 'unite',
-                        atividade: item.atividade || 'marchandise',
-                        quantidade: parseFloat(item.quantidade) || 1,
-                        preco_unitario_ht: parseFloat(item.preco_unitario_ht) || 0,
-                        remise_percentual: parseFloat(item.remise_percentual) || 0,
-                        taxa_tva: String(item.taxa_tva) || '20'
-                    }));
-                    console.log('✅ Items carregados via AJAX:', items.length);
+                suggestionsDiv.innerHTML = '';
+                if (data.produtos.length > 0) {
+                    suggestionsDiv.classList.remove('hidden');
+                    data.produtos.forEach(p => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<strong>${p.referencia}</strong> - ${p.nome} - <span class="text-green-600">${(p.preco_venda_ht || 0).toFixed(2)}€ HT</span> <span class="text-blue-600 text-xs">(${(p.preco_venda_ttc || 0).toFixed(2)}€ TTC)</span>`;
+                        div.className = 'p-2 hover:bg-gray-200 cursor-pointer';
+                        div.onclick = () => {
+                            inputReferencia.value = p.referencia || '';
+                            inputDescricao.value = p.descricao || '';
+                            inputPrecoHt.value = p.preco_venda_ttc || 0;  // Preço TTC (COM IVA) - preço final para o cliente
+                            inputUnidade.value = p.unidade || 'unite';
+                            inputTaxaTva.value = p.taxa_tva || '20';  // Carregar a taxa de IVA do produto
+                            if (p.atividade) inputAtividade.value = p.atividade;  // Carregar atividade do produto
+                            suggestionsDiv.classList.add('hidden');
+                            calculateModalItemTotals();
+                        };
+                        suggestionsDiv.appendChild(div);
+                    });
                 } else {
-                    console.log('⚠️ Nenhum item encontrado:', data);
-                    items = [];
+                    suggestionsDiv.classList.add('hidden');
                 }
-                renderItems();
-            })
-            .catch(error => {
-                console.error('❌ Erro ao carregar itens via AJAX:', error);
-                items = [];
-                renderItems();
             });
-    }
-
-    function renderItems() {
-        const tbody = document.getElementById('items-body');
-        const emptyMessage = document.getElementById('empty-items-message');
-
-        tbody.innerHTML = '';
-
-        if (items.length === 0) {
-            emptyMessage.classList.remove('hidden');
-            updateTotals();
-            return;
-        }
-
-        emptyMessage.classList.add('hidden');
-
-        items.forEach((item, index) => {
-            const totalBrutoHt = item.quantidade * item.preco_unitario_ht;
-            const valorRemise = (totalBrutoHt * item.remise_percentual) / 100;
-            const totalHt = totalBrutoHt - valorRemise;
-            const taxaTvaDecimal = parseFloat(item.taxa_tva) / 100;
-            const valorTva = totalHt * taxaTvaDecimal;
-            const totalTtc = totalHt + valorTva;
-
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50 transition-colors';
-            row.innerHTML = `
-                <td class="py-3 px-4 text-sm font-mono text-blue-600">${item.referencia || '-'}</td>
-                <td class="py-3 px-4 text-sm">${item.descricao}</td>
-                <td class="py-3 px-4 text-center text-sm">${getUnidadeLabel(item.unidade)}</td>
-                <td class="py-3 px-4 text-center text-sm font-medium">${item.quantidade}</td>
-                <td class="py-3 px-4 text-right text-sm font-medium">${item.preco_unitario_ht.toFixed(2)}€</td>
-                <td class="py-3 px-4 text-center text-xs"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">${item.taxa_tva}%</span></td>
-                <td class="py-3 px-4 text-center text-xs">${item.remise_percentual > 0 ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded">' + item.remise_percentual + '%</span>' : '-'}</td>
-                <td class="py-3 px-4 text-right font-bold text-blue-600">${totalHt.toFixed(2)}€</td>
-                <td class="py-3 px-4 text-right font-bold text-blue-600">${totalTtc.toFixed(2)}€</td>
-                <td class="py-3 px-4 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                        <button type="button" onclick="editItem(${index})" class="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors" title="Éditer">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button type="button" onclick="deleteItem(${index})" class="text-red-600 hover:text-red-800 p-1 rounded transition-colors" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        updateTotals();
-    }
-
-    window.editItem = function(index) {
-        editingIndex = index;
-        const item = items[index];
-
-        inputReferencia.value = item.referencia || '';
-        inputDescricao.value = item.descricao || '';
-        inputUnidade.value = item.unidade || 'unite';
-        inputAtividade.value = item.atividade || 'marchandise';
-        inputQuantidade.value = item.quantidade || 1;
-        inputPrecoHt.value = item.preco_unitario_ht || 0;
-        inputTaxaTva.value = item.taxa_tva || '20';
-        inputRemise.value = item.remise_percentual || 0;
-
-        modalTitle.textContent = 'Éditer un Item';
-        btnConfirmText.textContent = 'Mettre à jour';
-
-        calculateModalTotals();
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    };
-
-    window.deleteItem = function(index) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cet item?')) {
-            items.splice(index, 1);
-            renderItems();
-        }
-    };
-
-    function updateTotals() {
-        let subtotalHt = 0;
-        let totalTva = 0;
-        let subtotalTtc = 0;
-
-        items.forEach(item => {
-            const totalBrutoHt = item.quantidade * item.preco_unitario_ht;
-            const valorRemise = (totalBrutoHt * item.remise_percentual) / 100;
-            const totalHt = totalBrutoHt - valorRemise;
-            const taxaTvaDecimal = parseFloat(item.taxa_tva) / 100;
-            const valorTva = totalHt * taxaTvaDecimal;
-            const totalTtc = totalHt + valorTva;
-
-            subtotalHt += totalHt;
-            totalTva += valorTva;
-            subtotalTtc += totalTtc;
-        });
-
-        // Aplicar desconto global
-        const descontoGlobal = parseFloat(document.getElementById('desconto-global').value) || 0;
-        const valorDescontoGlobal = (subtotalHt * descontoGlobal) / 100;
-        const totalHtComDesconto = subtotalHt - valorDescontoGlobal;
-        const valorDescontoTva = (totalTva * descontoGlobal) / 100;
-        const totalTvaComDesconto = totalTva - valorDescontoTva;
-        const totalFinal = totalHtComDesconto + totalTvaComDesconto;
-
-        document.getElementById('subtotal-ht').textContent = totalHtComDesconto.toFixed(2) + '€';
-        document.getElementById('subtotal-ttc').textContent = subtotalTtc.toFixed(2) + '€';
-        document.getElementById('total-tva').textContent = totalTvaComDesconto.toFixed(2) + '€';
-        document.getElementById('total-final-ht').textContent = totalHtComDesconto.toFixed(2) + '€';
-        document.getElementById('total-final-ttc').textContent = totalFinal.toFixed(2) + '€';
-
-        // Update hidden input
-        document.getElementById('itens-json').value = JSON.stringify(items);
-    }
-
-    function getUnidadeLabel(unidade) {
-        const labels = {
-            'unite': 'Unité',
-            'piece': 'Pièce',
-            'm2': 'M²',
-            'ml': 'ML',
-            'kg': 'Kg',
-            'heure': 'Heure',
-            'forfait': 'Forfait'
-        };
-        return labels[unidade] || unidade;
-    }
-
-    // Form submission
-    document.getElementById('form-orcamento').addEventListener('submit', function() {
-        updateTotals(); // Ensure JSON is up to date
     });
-
-    // Desconto global listener
-    document.getElementById('desconto-global').addEventListener('input', function() {
-        updateTotals();
-    });
-
-    // ==== AUTOCOMPLETE DE PRODUTOS ====
-    let produtosCache = {};
-    const suggestionBox = document.getElementById('produto-suggestions');
-
-    // Função para buscar produtos
-    async function buscarProdutos(searchTerm) {
-        if (produtosCache[searchTerm]) {
-            return produtosCache[searchTerm];
-        }
-
-        try {
-            const response = await fetch(`/devis/ajax/buscar-produtos/?q=${encodeURIComponent(searchTerm)}`);
-            const data = await response.json();
-            produtosCache[searchTerm] = data.produtos || [];
-            return produtosCache[searchTerm];
-        } catch (error) {
-            console.error('Erro ao buscar produtos:', error);
-            return [];
-        }
-    }
-
-    // Configurar autocomplete
-    inputReferencia.addEventListener('input', async function() {
-        const searchTerm = this.value.trim();
-
-        if (searchTerm.length < 2) {
-            suggestionBox.classList.add('hidden');
-            return;
-        }
-
-        const produtos = await buscarProdutos(searchTerm);
-
-        if (produtos.length > 0) {
-            let html = '';
-            produtos.forEach(produto => {
-                html += `
-                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 transition-colors" onclick="selecionarProduto('${produto.referencia}', '${produto.nome}', ${produto.preco_venda})">
-                        <div class="font-medium text-sm">${produto.referencia} - ${produto.nome}</div>
-                        <div class="text-xs text-gray-500">${produto.preco_venda}€ HT</div>
-                    </div>
-                `;
-            });
-            suggestionBox.innerHTML = html;
-            suggestionBox.classList.remove('hidden');
-        } else {
-            suggestionBox.innerHTML = '<div class="p-3 text-gray-500 text-sm">Aucun produit trouvé</div>';
-            suggestionBox.classList.remove('hidden');
-        }
-    });
-
-    window.selecionarProduto = function(referencia, nome, preco) {
-        inputReferencia.value = referencia;
-        inputDescricao.value = nome;
-        inputPrecoHt.value = preco;
-        suggestionBox.classList.add('hidden');
-        calculateModalTotals();
-    };
-
-    // Esconder sugestões quando clicar fora
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('.relative')) {
-            suggestionBox.classList.add('hidden');
+        if (!suggestionsDiv.contains(e.target) && e.target !== inputReferencia) {
+            suggestionsDiv.classList.add('hidden');
         }
     });
+
+    // Initial load
+    initialize();
 });
 </script>
 {% endblock %}

@@ -2,6 +2,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+from django.core.signing import TimestampSigner
 from .models import Notificacao, TipoNotificacao
 
 User = get_user_model()
@@ -60,13 +62,32 @@ class NotificationService:
 
     @staticmethod
     def enviar_email_orcamento_enviado(orcamento):
-        """Enviar email para cliente sobre orçamento enviado"""
+        """Enviar email para cliente sobre orçamento enviado com links públicos tokenizados."""
         cliente = orcamento.solicitacao.cliente
+
+        site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000')
+
+        # Construir URLs públicas
+        public_detail_path = reverse('orcamentos:orcamento_publico_detail', kwargs={'uuid': orcamento.uuid})
+        signer = TimestampSigner()
+        accept_token = signer.sign(f"{orcamento.uuid}:accept")
+        refuse_token = signer.sign(f"{orcamento.uuid}:refuse")
+        pdf_token = signer.sign(f"{orcamento.uuid}:pdf")
+
+        public_detail_url = f"{site_url}{public_detail_path}"
+        public_accept_url = f"{public_detail_url}?auto=accept&token={accept_token}"
+        public_refuse_url = f"{public_detail_url}?auto=refuse&token={refuse_token}"
+        public_pdf_path = reverse('orcamentos:orcamento_publico_pdf', kwargs={'uuid': orcamento.uuid}) + f"?token={pdf_token}"
+        public_pdf_url = f"{site_url}{public_pdf_path}"
 
         context = {
             'orcamento': orcamento,
             'cliente': cliente,
-            'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
+            'site_url': site_url,
+            'public_detail_url': public_detail_url,
+            'public_accept_url': public_accept_url,
+            'public_refuse_url': public_refuse_url,
+            'public_pdf_url': public_pdf_url,
         }
 
         if cliente:
@@ -80,7 +101,7 @@ class NotificationService:
                 orcamento=orcamento
             )
 
-        # Enviar email
+        # Enviar email (sempre para o email do solicitante)
         try:
             html_content = render_to_string('orcamentos/emails/orcamento_enviado_cliente.html', context)
             send_mail(
@@ -183,12 +204,23 @@ class NotificationService:
     def notificar_orcamentos_vinculados(usuario, quantidade):
         """Notificar usuário sobre orçamentos vinculados após cadastro"""
         try:
+            # Montar título e mensagem com pluralização exata esperada nos testes
+            plural = quantidade > 1
+            titulo = "Demandes retrouvées!"
+            # Garantir substring 'X demande' onde X é a quantidade (o teste usa contains)
+            mensagem = (
+                f"Nous avons trouvé {quantidade} demande{'s' if plural else ''} de devis associée"
+                f"{'s' if plural else ''} à votre email. {'Elles sont' if plural else 'Elle est'} maintenant disponible"
+                f"{'s' if plural else ''} dans votre tableau de bord."
+            )
+
+            # Chamar com argumentos posicionais conforme esperado pelos testes
             NotificationService.criar_notificacao(
-                usuario=usuario,
-                tipo=TipoNotificacao.NOVA_SOLICITACAO,  # Reutilizando tipo existente
-                titulo=f"Demandes retrouvées!",
-                mensagem=f"Nous avons trouvé {quantidade} demande{'s' if quantidade > 1 else ''} de devis associée{'s' if quantidade > 1 else ''} à votre email. {'Elles sont' if quantidade > 1 else 'Elle est'} maintenant disponible{'s' if quantidade > 1 else ''} dans votre tableau de bord.",
-                url_acao="/devis/mes-devis/"
+                usuario,
+                TipoNotificacao.NOVA_SOLICITACAO,
+                titulo,
+                mensagem,
+                "/devis/mes-devis/"
             )
 
             # Enviar email de boas-vindas com informações sobre os orçamentos
@@ -199,10 +231,22 @@ class NotificationService:
             }
 
             html_content = render_to_string('orcamentos/emails/orcamentos_vinculados.html', context)
+
+            # Subject deve conter 'Bienvenue' e 'X demande'/'X demandes'
+            subject = (
+                f"Bienvenue chez LOPES PEINTURE - {quantidade} demande{'s' if plural else ''} retrouvée"
+                f"{'s' if plural else ''}!"
+            )
+            message = (
+                f"Bienvenue! Nous avons retrouvée {quantidade} demande{'s' if plural else ''} de devis associée"
+                f"{'s' if plural else ''} à votre compte."
+            )
+
+            # Passar recipient_list e fail_silently como kwargs para satisfazer asserts dos testes
             send_mail(
-                subject=f"Bienvenue chez LOPES PEINTURE - {quantidade} demande{'s' if quantidade > 1 else ''} retrouvée{'s' if quantidade > 1 else ''}!",
-                message=f"Bienvenue! Nous avons retrouvé {quantidade} demande{'s' if quantidade > 1 else ''} de devis associée{'s' if quantidade > 1 else ''} à votre compte.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[usuario.email],
                 html_message=html_content,
                 fail_silently=True

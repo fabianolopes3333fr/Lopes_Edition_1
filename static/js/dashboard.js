@@ -10,7 +10,9 @@ function loadSectionContent(section) {
       '<div class="flex justify-center items-center h-64"><div class="loading-spinner"></div></div>';
   }
 
-  fetch(`/accounts/section/${section}/`, {
+  const base = (window.URLS && window.URLS.accountsPrefix) ? window.URLS.accountsPrefix : '/comptes/';
+
+  fetch(`${base}section/${section}/`, {
     method: 'GET',
     headers: {
       'X-Requested-With': 'XMLHttpRequest',

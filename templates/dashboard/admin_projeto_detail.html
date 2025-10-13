@@ -401,10 +401,14 @@
 
                 <div class="space-y-3">
                     {% if projeto.cliente %}
-                    <a href="{% url 'orcamentos:admin_criar_orcamento_cliente' projeto.cliente.id %}"
+                    <a href="{% url 'orcamentos:admin_criar_orcamento_projeto' projeto.uuid %}"
                        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center">
                         <i class="fas fa-file-invoice-dollar mr-2"></i>Créer Devis
                     </a>
+                    {% else %}
+                    <div class="w-full bg-gray-400 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center cursor-not-allowed" title="Aucun client associé au projet">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>Créer Devis
+                    </div>
                     {% endif %}
 
                     <button onclick="toggleStatusModal()"

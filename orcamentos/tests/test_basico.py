@@ -250,10 +250,8 @@ class TesteAuditoriaBasicoTestCase(TestCase):
         try:
             from orcamentos.auditoria import AuditoriaManager, LogAuditoria, TipoAcao
             print("✓ Imports de auditoria funcionando")
-            return True
         except ImportError as e:
-            print(f"❌ Erro ao importar auditoria: {e}")
-            return False
+            self.fail(f"Erro ao importar auditoria: {e}")
 
     def test_02_criar_log_auditoria(self):
         """Teste básico de criação de log de auditoria"""
@@ -288,8 +286,6 @@ class TesteAuditoriaBasicoTestCase(TestCase):
             self.assertEqual(log.acao, TipoAcao.CRIACAO)
 
             print(f"✓ Log de auditoria criado: {log}")
-            return True
 
         except Exception as e:
-            print(f"❌ Erro ao criar log de auditoria: {e}")
-            return False
+            self.fail(f"Erro ao criar log de auditoria: {e}")

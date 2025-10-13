@@ -576,7 +576,7 @@
             <div class="section-title">Conditions Générales</div>
             <div>
                 {% with acompte_value=orcamento.total|floatformat:2 %}
-                <p><strong>Acompte (30%):</strong>  <span>{% widthratio orcamento.total 10 3 %}€ HT</span></p>
+                <p><strong>Acompte (30%):</strong>  <span>{% widthratio orcamento.total_ttc 10 3 %}€ HT</span></p>
                 {% endwith %}
                 <p><strong>Validité du devis:</strong> {{ orcamento.validade_orcamento|date:"d/m/Y" }}</p>
                 <p><strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao|default:"À définir" }}</p>
@@ -613,7 +613,7 @@
            
            {% if orcamento.status == 'aceito' and orcamento.data_resposta_cliente %}
                <!-- Devis approuvé - informations remplies automatiquement -->
-               <p>Je soussigné(e) <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ HT.</p> <br>
+               <p>Je soussigné(e) <strong>{{ orcamento.solicitacao.nome_solicitante }}</strong>, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total_ttc|floatformat:2 }}€ TTC.</p> <br>
                
                <p>Fait à <strong>{{ orcamento.solicitacao.cidade }}</strong>, le <strong>{{ orcamento.data_resposta_cliente|date:"d/m/Y" }}</strong></p><br>
                
@@ -669,7 +669,7 @@
                
            {% else %}
                <!-- Devis en attente - champs à remplir -->
-               <p>Je soussigné(e) _____________________, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total|floatformat:2 }}€ TTC.</p> <br>
+               <p>Je soussigné(e) _____________________, accepte le devis n° {{ orcamento.numero }} établi le {{ orcamento.data_elaboracao|date:"d/m/Y" }} pour un montant total de {{ orcamento.total_ttc|floatformat:2 }}€ TTC.</p> <br>
                
                <p>Fait à _____________________, le _____________________</p><br>
                

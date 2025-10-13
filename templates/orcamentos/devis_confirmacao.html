@@ -341,15 +341,19 @@
                     </div>
                     <div class="detail-item">
                         <strong>Client</strong>
-                        {{ orcamento.cliente.nom_complet }}
+                        {% if orcamento.solicitacao.cliente %}
+                            {{ orcamento.solicitacao.cliente.get_full_name|default:orcamento.solicitacao.nome_solicitante }}
+                        {% else %}
+                            {{ orcamento.solicitacao.nome_solicitante }}
+                        {% endif %}
                     </div>
                     <div class="detail-item">
                         <strong>Projet</strong>
-                        {{ orcamento.titre }}
+                        {{ orcamento.titulo }}
                     </div>
                     <div class="detail-item">
                         <strong>Montant Total</strong>
-                        {{ orcamento.total }}€ TTC
+                        {{ orcamento.total_ttc|floatformat:2 }}€ TTC
                     </div>
                 </div>
                 
@@ -375,11 +379,19 @@
             <div class="pdf-section">
                 <h3>Télécharger votre Devis</h3>
                 <p style="margin-bottom: 25px; color: #555; font-size: 1.1em;">
-                    Vous pouvez télécharger une copie PDF de votre devis pour vos archives.
+                    Vous pouvez ouvrir votre devis public et utiliser la fonction d'impression du navigateur pour enregistrer en PDF.
                 </p>
-                <a href="{% url 'orcamentos:gerar_pdf_publico' orcamento.uuid %}" class="btn-pdf pulse">
-                    Télécharger le PDF
+                <a href="{% url 'orcamentos:orcamento_publico_detail' orcamento.uuid %}"
+                   class="btn-pdf pulse" target="_blank" rel="noopener noreferrer">
+                    Ouvrir le Devis (Imprimer en PDF)
                 </a>
+                {% if pdf_url %}
+                <div style="margin-top:15px;">
+                    <a href="{{ pdf_url }}" class="btn-pdf" rel="noopener noreferrer">
+                        Télécharger PDF (direct)
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
 

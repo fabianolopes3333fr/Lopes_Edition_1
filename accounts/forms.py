@@ -158,24 +158,22 @@ class EmailLoginForm(AuthenticationForm):
         return username
 
     def clean(self):
-        """✅ CORRIGIDO: Validação customizada para login por email"""
-        username = self.cleaned_data.get("username")  # Na verdade é o email
+        """Autentica o usuário e define mensagens claras para casos inválidos."""
+        username = self.cleaned_data.get("username")
         password = self.cleaned_data.get("password")
 
-        if username is not None and password:
-            # ✅ CORRIGIDO: Usar username=email (nosso backend espera isso)
-            self.user_cache = authenticate(
-                self.request,
-                username=username,  # Nosso backend vai processar isso como email
-                password=password,
-            )
+        if username and password:
+            user = authenticate(self.request, username=username, password=password)
+            if user is None:
+                raise ValidationError(_("Email ou mot de passe invalide"), code="invalid_login")
+            # Usuário encontrado, validar estado
+            if not user.is_active:
+                raise ValidationError(_("Ce compte est inactif."), code="inactive")
+            self.user_cache = user
+            return self.cleaned_data
 
-            if self.user_cache is None:
-                raise self.get_invalid_login_error()
-            else:
-                self.confirm_login_allowed(self.user_cache)
-
-        return self.cleaned_data
+        # Campos obrigatórios já são validados pelos fields; fallback
+        raise ValidationError({"__all__": _("Email et mot de passe requis")})
 
 
 # ✅ Para compatibilidade

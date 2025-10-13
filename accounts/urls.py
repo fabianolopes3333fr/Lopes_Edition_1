@@ -67,6 +67,7 @@ urlpatterns = [
         views.password_reset_confirm,
         name="password_reset_confirm",
     ),
+    path("password_reset/complete/", views.password_reset_complete, name="password_reset_complete"),
     path("password_change/", views.password_change, name="password_change"),
 
     # ==================== DASHBOARD ====================

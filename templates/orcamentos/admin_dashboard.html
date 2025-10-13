@@ -164,6 +164,84 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Rendez-vous (Agendamentos) -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Rendez-vous en attente</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if agendamentos_pendentes %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date/Heure</th>
+                                                <th>Client</th>
+                                                <th>Devis</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for a in agendamentos_pendentes %}
+                                            <tr>
+                                                <td>{{ a.data_horario|date:'d/m/Y H:i' }}</td>
+                                                <td>{{ a.cliente.first_name }} {{ a.cliente.last_name }}</td>
+                                                <td>{{ a.orcamento.numero }}</td>
+                                                <td>
+                                                    <a class="btn btn-sm btn-outline-primary" href="{% url 'orcamentos:admin_orcamento_detail' a.orcamento.numero %}">Voir</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Aucun rendez-vous en attente.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-success">Rendez-vous à venir</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if agendamentos_proximos %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date/Heure</th>
+                                                <th>Client</th>
+                                                <th>Devis</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for a in agendamentos_proximos %}
+                                            <tr>
+                                                <td>{{ a.data_horario|date:'d/m/Y H:i' }}</td>
+                                                <td>{{ a.cliente.first_name }} {{ a.cliente.last_name }}</td>
+                                                <td>{{ a.orcamento.numero }}</td>
+                                                <td>
+                                                    <a class="btn btn-sm btn-outline-success" href="{% url 'orcamentos:admin_orcamento_detail' a.orcamento.numero %}">Voir</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Aucun rendez-vous à venir.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

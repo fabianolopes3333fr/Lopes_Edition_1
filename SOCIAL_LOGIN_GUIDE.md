@@ -38,8 +38,8 @@ O fluxo completo dos botões de login social foi implementado com sucesso! Aqui 
 4. Vá em "Credenciais" > "Criar credenciais" > "ID do cliente OAuth 2.0"
 5. Configure as URLs de redirecionamento:
    ```
-   http://localhost:8000/accounts/google/login/callback/
-   https://seudominio.com/accounts/google/login/callback/
+   http://localhost:8000/auth/google/login/callback/
+   https://seudominio.com/auth/google/login/callback/
    ```
 
 #### Para Microsoft:
@@ -48,8 +48,8 @@ O fluxo completo dos botões de login social foi implementado com sucesso! Aqui 
 3. Clique em "Novo registro"
 4. Configure as URLs de redirecionamento:
    ```
-   http://localhost:8000/accounts/microsoft/login/callback/
-   https://seudominio.com/accounts/microsoft/login/callback/
+   http://localhost:8000/auth/microsoft/login/callback/
+   https://seudominio.com/auth/microsoft/login/callback/
    ```
 
 ### 2. **Configure o arquivo .env**

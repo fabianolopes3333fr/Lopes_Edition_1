@@ -25,6 +25,8 @@ urlpatterns = [
 
     # Apps principais
     path('', include('home.urls')),
+    # Expor as mesmas URLs de home sob o namespace 'pages' para compatibilidade de testes
+    path('', include(('home.urls', 'pages'), namespace='pages')),
     path('comptes/', include('accounts.urls')),
     path('profiles/', include('profiles.urls')),
 

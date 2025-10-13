@@ -348,8 +348,23 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.classList.remove('hidden');
     });
 
+    // Fechar por overlay
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Fechar por tecla Esc
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Garantir que botões também fechem
     [btnCloseModal, btnCancelItem].forEach(btn => {
-        btn.addEventListener('click', () => modal.classList.add('hidden'));
+        if (btn) btn.addEventListener('click', () => modal.classList.add('hidden'));
     });
 
     [inputQuantidade, inputPrecoHt, inputTaxaTva, inputRemise].forEach(input => {
@@ -414,7 +429,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderItems() {
         const tbody = document.getElementById('items-body');
+        const emptyMessage = document.getElementById('empty-items-message');
         tbody.innerHTML = '';
+
+        if (items.length === 0) {
+            if (emptyMessage) emptyMessage.classList.remove('hidden');
+            updateTotals();
+            return;
+        } else if (emptyMessage) {
+            emptyMessage.classList.add('hidden');
+        }
 
         items.forEach((item, index) => {
             const totalBrutoHt = item.quantidade * item.preco_unitario_ht;
@@ -532,6 +556,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnSubmitSend = document.getElementById('btn-submit-send');
     if (btnSubmitSend) {
         btnSubmitSend.addEventListener('click', function() {
+            if (items.length === 0) {
+                alert('Veuillez ajouter au moins un item avant d\'envoyer la facture.');
+                return;
+            }
             document.querySelector('input[name="action"]')?.remove();
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -593,8 +621,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="text-sm text-gray-600">${produto.descricao}</div>
                     </div>
                     <div class="text-right ml-4">
-                        <div class="font-bold text-purple-600">${parseFloat(produto.preco_venda_ht).toFixed(2)}€</div>
-                        <div class="text-xs text-gray-500">HT</div>
+                        <div class="font-bold text-green-600">${parseFloat(produto.preco_venda_ht).toFixed(2)}€ HT</div>
+                        <div class="text-xs text-purple-500">${parseFloat(produto.preco_venda_ttc).toFixed(2)}€ TTC</div>
                     </div>
                 </div>
             </div>
@@ -617,9 +645,9 @@ document.addEventListener('DOMContentLoaded', function() {
         inputReferencia.value = produto.referencia;
         inputDescricao.value = produto.descricao;
         inputUnidade.value = produto.unidade;
-        inputAtividade.value = produto.atividade;
-        inputPrecoHt.value = parseFloat(produto.preco_venda_ht).toFixed(2);
-        inputTaxaTva.value = produto.taxa_tva;
+        inputAtividade.value = produto.atividade || 'marchandise';
+        inputPrecoHt.value = parseFloat(produto.preco_venda_ttc).toFixed(2);  // Usar preço TTC (COM IVA) - preço final para o cliente
+        inputTaxaTva.value = produto.taxa_tva || '20';  // Carregar taxa de IVA do produto
         calculateModalTotals();
     }
 

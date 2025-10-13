@@ -257,27 +257,29 @@
 
           <div class="info-box">
             <h3>Informations Client</h3>
-            <strong>{{ orcamento.cliente.nom_complet }}</strong><br />
-            {% if orcamento.cliente.nom_entreprise %} {{ orcamento.cliente.nom_entreprise }}<br />
-            {% endif %} {{ orcamento.cliente.adresse }}<br />
-            {{ orcamento.cliente.code_postal }} {{ orcamento.cliente.ville }}<br />
-            Tél: {{ orcamento.cliente.telephone }}<br />
-            Email: {{ orcamento.cliente.email }}
+            <strong>
+              {% if orcamento.solicitacao.cliente %}
+                {{ orcamento.solicitacao.cliente.get_full_name|default:orcamento.solicitacao.nome_solicitante }}
+              {% else %}
+                {{ orcamento.solicitacao.nome_solicitante }}
+              {% endif %}
+            </strong><br />
+            {{ orcamento.solicitacao.endereco }}<br />
+            {{ orcamento.solicitacao.cep }} {{ orcamento.solicitacao.cidade }}<br />
+            Tél: {{ orcamento.solicitacao.telefone_solicitante }}<br />
+            Email: {{ orcamento.solicitacao.email_solicitante }}
           </div>
         </div>
 
         <div class="info-section project-info">
-          <h3>Détails du Projet: {{ orcamento.titre }}</h3>
-          <p><strong>Description:</strong> {{ orcamento.description }}</p>
-          <p>
-            <strong>Adresse du projet:</strong> {{ orcamento.adresse_projet }}, {{orcamento.ville_projet }}
-          </p>
+          <h3>Détails du Devis: {{ orcamento.titulo }}</h3>
+          {% if orcamento.descricao %}
+            <p><strong>Description:</strong> {{ orcamento.descricao }}</p>
+          {% endif %}
           <p><strong>Numéro de devis:</strong> {{ orcamento.numero }}</p>
-          <p><strong>Date:</strong> {{ orcamento.date_creation|date:"d/m/Y" }}</p>
-          <p>
-            <strong>Validité:</strong> {{ orcamento.validite }} jours (jusqu'au 
-            {{ orcamento.date_expiration|date:"d/m/Y" }})
-          </p>
+          <p><strong>Date d'élaboration:</strong> {{ orcamento.data_elaboracao|date:"d/m/Y" }}</p>
+          <p><strong>Délai d'exécution:</strong> {{ orcamento.prazo_execucao }} jours</p>
+          <p><strong>Validité du devis:</strong> jusqu'au {{ orcamento.validade_orcamento|date:"d/m/Y" }}</p>
           <p>
             <strong>Statut:</strong>
             <span class="status-badge status-{{ orcamento.status }}">
@@ -289,68 +291,82 @@
         <table>
           <thead>
             <tr>
-              <th>Service</th>
-              <th>Description</th>
+              <th>Désignation</th>
               <th>Qté</th>
               <th>Unité</th>
-              <th>Prix Unit.</th>
-              <th>Total</th>
+              <th>P.U HT</th>
+              <th>TVA</th>
+              <th>Total HT</th>
+              <th>Total TTC</th>
             </tr>
           </thead>
           <tbody>
             {% for item in orcamento.itens.all %}
             <tr>
-              <td>{{ item.get_type_service_display }}</td>
-              <td>
-                {{ item.description }} {% if item.details %}
-                <br /><small style="color: #666">{{ item.details }}</small>
-                {% endif %}
-              </td>
-              <td>{{ item.quantite }}</td>
-              <td>{{ item.unite }}</td>
-              <td>{{ item.prix_unitaire }}€</td>
-              <td><strong>{{ item.total }}€</strong></td>
+              <td>{{ item.descricao }}</td>
+              <td class="text-center">{{ item.quantidade }}</td>
+              <td class="text-center">{{ item.get_unidade_display }}</td>
+              <td class="text-right">{{ item.preco_unitario_ht|floatformat:2 }}€</td>
+              <td class="text-center">{{ item.taxa_tva }}%</td>
+              <td class="text-right"><strong>{{ item.total_ht|floatformat:2 }}€</strong></td>
+              <td class="text-right"><strong>{{ item.total_ttc|floatformat:2 }}€</strong></td>
             </tr>
             {% endfor %}
           </tbody>
           <tfoot class="totals">
             <tr>
               <td colspan="5"><strong>Sous-total HT:</strong></td>
-              <td><strong>{{ orcamento.sous_total }}€</strong></td>
+              <td class="text-right"><strong>{{ orcamento.subtotal|floatformat:2 }}€</strong></td>
+              <td>-</td>
             </tr>
+            {% if orcamento.desconto %}
             <tr>
-              <td colspan="5"><strong>TVA ({{ orcamento.taux_tva }}%):</strong></td>
-              <td><strong>{{ orcamento.montant_tva }}€</strong></td>
+              <td colspan="5"><strong>Remise globale ({{ orcamento.desconto }}%):</strong></td>
+              <td class="text-right"><strong>-{{ orcamento.valor_desconto|floatformat:2 }}€</strong></td>
+              <td>-</td>
+            </tr>
+            {% endif %}
+            <tr>
+              <td colspan="5"><strong>Total TVA:</strong></td>
+              <td class="text-right"><strong>{{ orcamento.valor_tva|floatformat:2 }}€</strong></td>
+              <td>-</td>
             </tr>
             <tr class="total-final">
               <td colspan="5"><strong>TOTAL TTC:</strong></td>
-              <td><strong>{{ orcamento.total }}€</strong></td>
+              <td class="text-right"><strong>{{ orcamento.total_ttc|floatformat:2 }}€</strong></td>
+              <td>-</td>
             </tr>
           </tfoot>
         </table>
 
         {% if orcamento.status == 'enviado' %}
         <div class="actions">
-          {f'<a href="/orcamentos/publico/{orcamento.uuid}/aceitar/" class="btn btn-success">✅ Accepter le Devis</a>' if orcamento.status == 'enviado' else ''}
-          {f'<a href="/orcamentos/publico/{orcamento.uuid}/recusar/" class="btn btn-danger">❌ Refuser le Devis</a>' if orcamento.status == 'enviado' else ''}
-          <a
-            href="{% url 'orcamento-publico-detail' orcamento.uuid %}pdf/"
-            class="btn btn-primary"
-            target="_blank"
-          >
-            📄 Télécharger PDF
-          </a>
+          <form id="form-accept" method="post" action="{% url 'orcamentos:orcamento_publico_aceitar' orcamento.uuid %}">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ accept_token }}" />
+            <button type="submit" class="btn btn-success">✅ Accepter le Devis</button>
+          </form>
+          <form id="form-refuse" method="post" action="{% url 'orcamentos:orcamento_publico_recusar' orcamento.uuid %}">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ refuse_token }}" />
+            <button type="submit" class="btn btn-danger">❌ Refuser le Devis</button>
+          </form>
+          <button class="btn btn-primary" onclick="window.print()">📄 Imprimer / PDF</button>
+        </div>
+        {% else %}
+        <div class="actions">
+          <button class="btn btn-primary" onclick="window.print()">📄 Imprimer / PDF</button>
         </div>
         {% endif %}
 
         <div class="info-section">
           <h3>Conditions de paiement:</h3>
-          <p>{{ orcamento.conditions_paiement }}</p>
+          <p>{{ orcamento.get_condicoes_pagamento_display }}</p>
 
           <h3>Conditions générales:</h3>
           <ul style="margin-left: 20px; margin-top: 10px">
             <li>
-              Ce devis est valable {{ orcamento.validite }} jours à compter de sa date d'émission.
+              Ce devis est valable jusqu'au {{ orcamento.validade_orcamento|date:"d/m/Y" }}.
             </li>
             <li>Les travaux seront réalisés selon les règles de l'art et les normes en vigueur.</li>
             <li>Fourniture et pose comprises sauf mention contraire.</li>
@@ -373,62 +389,58 @@
     </div>
 
     <script>
-      function aceitarOrcamento() {
-        if (confirm('Êtes-vous sûr de vouloir accepter ce devis ?')) {
-          fetch(`/orcamentos/publico/{{ orcamento.uuid }}/aceitar/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': getCookie('csrftoken'),
-            },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              alert('Devis accepté avec succès !');
-              location.reload();
-            })
-            .catch((error) => {
-              alert("Erreur lors de l'acceptation du devis");
-              console.error('Error:', error);
-            });
-        }
-      }
-
-      function recusarOrcamento() {
-        if (confirm('Êtes-vous sûr de vouloir refuser ce devis ?')) {
-          fetch(`/orcamentos/publico/{{ orcamento.uuid }}/recusar/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': getCookie('csrftoken'),
-            },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              alert('Devis refusé.');
-              location.reload();
-            })
-            .catch((error) => {
-              alert('Erreur lors du refus du devis');
-              console.error('Error:', error);
-            });
-        }
-      }
-
-      function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === name + '=') {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
+      // Copiar token da URL (?token=...) para os inputs hidden dos formulários, caso exista
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromUrl = params.get('token');
+        if (tokenFromUrl) {
+          const acceptForm = document.getElementById('form-accept');
+          const refuseForm = document.getElementById('form-refuse');
+          if (acceptForm) {
+            const input = acceptForm.querySelector('input[name="token"]');
+            if (input) input.value = tokenFromUrl;
+          }
+          if (refuseForm) {
+            const input = refuseForm.querySelector('input[name="token"]');
+            if (input) input.value = tokenFromUrl;
           }
         }
-        return cookieValue;
-      }
+      })();
+
+      // Auto-submit "um clique" quando há ?auto=accept/refuse e token válido.
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const auto = params.get('auto');
+        if (!auto) return;
+
+        // Só tentamos auto-submit quando o devis ainda está ENVIADO
+        const statusIsEnviado = '{{ orcamento.status }}' === 'enviado';
+        if (!statusIsEnviado) return;
+
+        // Escolher o formulário correspondente
+        const formId = auto === 'accept' ? 'form-accept' : (auto === 'refuse' ? 'form-refuse' : null);
+        if (!formId) return;
+
+        const form = document.getElementById(formId);
+        if (!form) return;
+
+        // Garanta que o token do parâmetro seja usado
+        const tokenFromUrl = params.get('token');
+        if (tokenFromUrl) {
+          const input = form.querySelector('input[name="token"]');
+          if (input) input.value = tokenFromUrl;
+        }
+
+        // Feedback visual simples
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+          btn.textContent = (auto === 'accept' ? 'Traitement de l\'acceptation…' : 'Traitement du refus…');
+          btn.disabled = true;
+        }
+
+        // Submeter após um pequeno delay para garantir renderização
+        setTimeout(() => form.submit(), 200);
+      })();
     </script>
   </body>
 </html>

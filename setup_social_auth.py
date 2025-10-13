@@ -107,10 +107,10 @@ def show_callback_urls():
 
     print("\n🔗 URLs de Callback para configurar nos provedores:")
     print("\n📍 GOOGLE OAuth2:")
-    print(f"   • {site_url}/accounts/google/login/callback/")
+    print(f"   • {site_url}/auth/google/login/callback/")
 
     print("\n📍 MICROSOFT OAuth2:")
-    print(f"   • {site_url}/accounts/microsoft/login/callback/")
+    print(f"   • {site_url}/auth/microsoft/login/callback/")
 
     print("\n💡 Configure estas URLs nos respectivos consoles de desenvolvedor!")
 

@@ -20,8 +20,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         Define para onde redirecionar após login
         """
         if hasattr(request.user, 'profile') and request.user.profile:
-            return reverse('profiles:dashboard')
-        return reverse('home:index')
+            return reverse('profiles:detail')
+        return reverse('home:home')
 
     def save_user(self, request, user, form, commit=True):
         """
@@ -130,7 +130,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             request,
             f"Sua conta {socialaccount.provider.title()} foi conectada com sucesso!"
         )
-        return reverse('profiles:dashboard')
+        return reverse('profiles:detail')
 
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
         """

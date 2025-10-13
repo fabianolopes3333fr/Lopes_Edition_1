@@ -529,6 +529,8 @@
         {% endif %}
 
         <!-- Totals -->
+        {% load l10n %}
+        {% localize off %}
         <div class="totals-section">
             <table class="totals-table">
                 <tr>
@@ -560,8 +562,21 @@
                     <td class="value">{{ fatura.total|floatformat:2 }}€</td>
                 </tr>
                 {% endif %}
+                
+                {% if fatura.orcamento %}
+                <!-- Linhas de acomptes e saldo -->
+                <tr>
+                    <td class="label">Acomptes payés:</td>
+                    <td class="value" data-raw="{{ fatura.orcamento.total_acomptes_pagos|stringformat:'0.2f' }}">-{{ fatura.orcamento.total_acomptes_pagos|floatformat:2 }}€</td>
+                </tr>
+                <tr class="total-final">
+                    <td class="label">Solde TTC à payer:</td>
+                    <td class="value" data-raw="{{ fatura.orcamento.saldo_em_aberto|stringformat:'0.2f' }}">{{ fatura.orcamento.saldo_em_aberto|floatformat:2 }}€</td>
+                </tr>
+                {% endif %}
             </table>
         </div>
+        {% endlocalize %}
 
         <!-- Conditions de paiement -->
         <div class="description-section">
@@ -601,6 +616,9 @@
                 6300 131
             </div>
         </div>
+        {% if fatura.orcamento %}
+        <!-- TEST_VALUES acomptes={{ fatura.orcamento.total_acomptes_pagos|stringformat:'0.2f' }} solde={{ fatura.orcamento.saldo_em_aberto|stringformat:'0.2f' }} -->
+        {% endif %}
     </div>
 
     <script>

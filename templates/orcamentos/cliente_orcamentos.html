@@ -181,7 +181,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <div class="text-3xl font-bold text-green-600">{{ orcamento.total|floatformat:2 }}€</div>
+                            <div class="text-3xl font-bold text-green-600">{{ orcamento.total_ttc|floatformat:2 }}€</div>
                             <div class="text-sm text-gray-500">
                                 Validité: {{ orcamento.validade_orcamento|date:"d/m/Y" }}
                             </div>
@@ -194,7 +194,7 @@
                             </a>
 
                             {% if orcamento.status == 'enviado' %}
-                                <button onclick="acceptDevis('{{ orcamento.numero }}')"
+                                <button onclick="acceptDevis('{{ orcamento.numero }}', this)"
                                         class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded text-sm font-medium text-center transition-colors">
                                     <i class="fas fa-check mr-1"></i>Accepter
                                 </button>
@@ -227,32 +227,368 @@
             </div>
         {% endif %}
     </div>
-</div>
 
+    <!-- Modal de Confirmation d'Acceptation du Devis -->
+    <div id="modal-accept-devis" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto scroll-hide">
+        <div class="flex items-center justify-center min-h-screen p-4 sm:p-6 md:p-8">
+            <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto scroll-hide border border-gray-200">
+                <!-- Header -->
+                <div class="sticky top-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-t-xl z-10">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold flex items-center gap-2">
+                                <i class="fas fa-file-signature"></i>
+                                Acceptation du Devis
+                            </h3>
+                            <p class="text-green-100 text-sm mt-1">Signature électronique - Valeur légale</p>
+                        </div>
+                        <button type="button" onclick="closeAcceptModal()" class="text-white hover:text-gray-200 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-6 pb-8">
+                    <!-- Resumo do Devis -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+                        <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-blue-600"></i>
+                            Résumé du Devis
+                        </h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-600">Numéro:</span>
+                                <span class="font-bold text-gray-900 ml-2" id="modal-devis-numero"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Date:</span>
+                                <span class="font-bold text-gray-900 ml-2" id="modal-devis-date"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Montant TTC:</span>
+                                <span class="font-bold text-green-600 text-xl ml-2" id="modal-devis-total"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Validité:</span>
+                                <span class="font-bold text-gray-900 ml-2" id="modal-devis-validite"></span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-gray-600">Conditions de paiement:</span>
+                                <span class="font-bold text-gray-900 ml-2" id="modal-devis-paiement"></span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-gray-600">Délai d'exécution:</span>
+                                <span class="font-bold text-gray-900 ml-2" id="modal-devis-delai"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action de Télécharger PDF -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="text-sm font-bold text-yellow-800">Important - Avant d'accepter</h3>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    Nous vous recommandons de télécharger et lire attentivement le devis complet avant de l'accepter.
+                                </p>
+                                <a href="#" id="modal-download-pdf-link" target="_blank"
+                                   class="inline-flex items-center mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                    <i class="fas fa-file-pdf mr-2"></i>
+                                    Télécharger le devis (PDF)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ce qui va se passer -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-6">
+                        <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <i class="fas fa-check-circle text-blue-600"></i>
+                            Que se passe-t-il après l'acceptation ?
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>Signature électronique:</strong> Votre acceptation a valeur de signature légale selon la loi française</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>Confirmation par email:</strong> Vous recevrez immédiatement un email de confirmation avec le devis signé en PDF</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>Engagement contractuel:</strong> Ce devis devient un contrat entre vous et Lopes Peinture</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>Début des travaux:</strong> Nos équipes seront informées pour planifier l'exécution dans les délais convenus</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fas fa-check text-green-600 mt-1"></i>
+                                <span><strong>Paiement:</strong> Les conditions de paiement indiquées dans le devis s'appliquent</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Termes et Conditions -->
+                    <div class="border-2 border-gray-300 rounded-lg p-5 mb-6 max-h-64 overflow-y-auto scroll-hide bg-gray-50">
+                        <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2 sticky top-0 bg-gray-50 pb-2">
+                            <i class="fas fa-file-contract text-gray-600"></i>
+                            Termes et Conditions
+                        </h4>
+                        <div class="text-sm text-gray-700 space-y-3">
+                            <p><strong>1. Acceptation du Devis</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                En acceptant ce devis, vous reconnaissez avoir lu et compris l'ensemble des prestations détaillées,
+                                ainsi que les conditions générales de vente de Lopes Peinture. Cette acceptation vaut signature électronique
+                                au sens de l'article 1366 du Code civil français.
+                            </p>
+
+                            <p><strong>2. Validité et Tarifs</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Ce devis est valable jusqu'à la date indiquée. Les prix mentionnés sont fermes et définitifs,
+                                exprimés en euros TTC. Toute modification des travaux pourra faire l'objet d'un devis complémentaire.
+                            </p>
+
+                            <p><strong>3. Conditions de Paiement</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Les modalités de paiement sont celles indiquées dans le devis. En cas d'acompte, celui-ci sera
+                                exigible dès l'acceptation du devis. Le solde sera payable selon les conditions convenues.
+                            </p>
+
+                            <p><strong>4. Délai d'Exécution</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Les travaux commenceront dans les délais convenus après réception de l'acompte éventuel.
+                                Le délai d'exécution est indicatif et peut être modifié en cas de force majeure.
+                            </p>
+
+                            <p><strong>5. Garanties</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Les travaux sont garantis selon les conditions légales en vigueur. Lopes Peinture dispose
+                                d'une assurance décennale et responsabilité civile professionnelle.
+                            </p>
+
+                            <p><strong>6. Droit de Rétractation</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Conformément à la législation française, vous disposez d'un délai de rétractation de 14 jours
+                                à compter de l'acceptation du devis, sauf si les travaux sont commencés avant l'expiration de ce délai
+                                avec votre accord express.
+                            </p>
+
+                            <p><strong>7. Protection des Données</strong></p>
+                            <p class="text-xs leading-relaxed">
+                                Vos données personnelles sont traitées conformément au RGPD. Vous disposez d'un droit d'accès,
+                                de rectification et de suppression de vos données.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Checkboxes de Confirmation -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-start gap-3 p-4 bg-white border-2 border-gray-300 rounded-lg hover:border-green-500 transition-colors">
+                            <input type="checkbox" id="confirm-read"
+                                   class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                            <label for="confirm-read" class="text-sm text-gray-700 cursor-pointer flex-1">
+                                <strong class="text-gray-900">J'ai lu et compris</strong> l'intégralité du devis et des conditions générales
+                            </label>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-4 bg-white border-2 border-gray-300 rounded-lg hover:border-green-500 transition-colors">
+                            <input type="checkbox" id="confirm-accept"
+                                   class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                            <label for="confirm-accept" class="text-sm text-gray-700 cursor-pointer flex-1">
+                                <strong class="text-gray-900">J'accepte</strong> les conditions de paiement et les délais d'exécution mentionnés dans le devis
+                            </label>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-4 bg-white border-2 border-gray-300 rounded-lg hover:border-green-500 transition-colors">
+                            <input type="checkbox" id="confirm-signature"
+                                   class="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                            <label for="confirm-signature" class="text-sm text-gray-700 cursor-pointer flex-1">
+                                <strong class="text-gray-900">Je confirme</strong> que cette acceptation vaut signature électronique avec valeur légale
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-4">
+                        <i class="fas fa-shield-alt text-blue-600"></i> Informations sur la signature électronique
+                    </p>
+                    <p class="leading-relaxed">
+                        Conformément à la loi n°2000-230 du 13 mars 2000 et au règlement européen eIDAS,
+                        votre acceptation en ligne a la même valeur juridique qu'une signature manuscrite.
+                        L'horodatage et votre adresse IP seront enregistrés comme preuve de signature.
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="sticky bottom-0 bg-white p-4 flex gap-3 border-t border-gray-200 rounded-b-xl z-10">
+                    <button type="button" onclick="closeAcceptModal()"
+                            class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Annuler
+                    </button>
+                    <button type="button" id="btn-confirm-accept" onclick="confirmAcceptDevis()" disabled
+                            class="flex-1 px-6 py-3 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed transition-all">
+                        <i class="fas fa-lock mr-2"></i>
+                        Cochez toutes les cases pour accepter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-function acceptDevis(numero) {
-    if (confirm('Voulez-vous vraiment accepter ce devis?')) {
-        fetch(`/devis/devis/${numero}/accepter/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Devis accepté avec succès!');
-                location.reload();
-            } else {
-                alert('Erreur: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Une erreur est survenue');
-        });
+let currentDevisNumero = null;
+
+// Ouvrir modal de acceptation
+function acceptDevis(numero, el) {
+    currentDevisNumero = numero;
+    
+    // Garantir que o modal está no <body> para cobrir a tela toda
+    const modalEl = document.getElementById('modal-accept-devis');
+    if (modalEl && modalEl.parentElement !== document.body) {
+        document.body.appendChild(modalEl);
     }
+
+    // Buscar dados do devis via DOM do card
+    const card = el ? el.closest('.bg-white') : null;
+    const numeroDevis = (card?.querySelector('h3')?.textContent || String(numero)).trim();
+    const total = (card?.querySelector('.text-3xl')?.textContent || '').trim();
+    const validiteTextEl = card?.querySelector('.text-sm.text-gray-500');
+    const validite = validiteTextEl ? validiteTextEl.textContent.replace('Validité: ', '').trim() : '';
+    
+    // Preencher modal
+    document.getElementById('modal-devis-numero').textContent = numeroDevis;
+    document.getElementById('modal-devis-date').textContent = new Date().toLocaleDateString('fr-FR');
+    document.getElementById('modal-devis-total').textContent = total;
+    document.getElementById('modal-devis-validite').textContent = validite;
+    document.getElementById('modal-devis-paiement').textContent = 'Selon conditions du devis';
+    document.getElementById('modal-devis-delai').textContent = 'Selon devis';
+    
+    // Link para PDF
+    document.getElementById('modal-download-pdf-link').href = `/devis/devis/${numero}/pdf/`;
+    
+    // Resetar checkboxes
+    document.getElementById('confirm-read').checked = false;
+    document.getElementById('confirm-accept').checked = false;
+    document.getElementById('confirm-signature').checked = false;
+    updateAcceptButton();
+    
+    // Mostrar modal e travar scroll do body
+    modalEl.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    // Fechar ao clicar fora do conteúdo (overlay)
+    if (modalEl && !modalEl.dataset.boundClickOutside) {
+        modalEl.addEventListener('click', function(e) {
+            if (e.target === modalEl) {
+                closeAcceptModal();
+            }
+        });
+        modalEl.dataset.boundClickOutside = '1';
+    }
+}
+
+function closeAcceptModal() {
+    const modalEl = document.getElementById('modal-accept-devis');
+    if (modalEl) modalEl.classList.add('hidden');
+    document.body.style.overflow = '';
+    currentDevisNumero = null;
+}
+
+// Atualizar estado do botão baseado nos checkboxes
+function updateAcceptButton() {
+    const checkbox1 = document.getElementById('confirm-read').checked;
+    const checkbox2 = document.getElementById('confirm-accept').checked;
+    const checkbox3 = document.getElementById('confirm-signature').checked;
+    const button = document.getElementById('btn-confirm-accept');
+    
+    if (checkbox1 && checkbox2 && checkbox3) {
+        button.disabled = false;
+        button.className = 'flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all shadow-lg';
+        button.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Accepter et Signer le Devis';
+    } else {
+        button.disabled = true;
+        button.className = 'flex-1 px-6 py-3 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed transition-all';
+        button.innerHTML = '<i class="fas fa-lock mr-2"></i>Cochez toutes les cases pour accepter';
+    }
+}
+
+// Adicionar listeners aos checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    ['confirm-read', 'confirm-accept', 'confirm-signature'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', updateAcceptButton);
+        }
+    });
+});
+
+// Confirmar aceitação
+function confirmAcceptDevis() {
+    if (!currentDevisNumero) return;
+    
+    // Mostrar loading
+    const button = document.getElementById('btn-confirm-accept');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Traitement en cours...';
+    
+    fetch(`/devis/devis/${currentDevisNumero}/accepter/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            accepted_terms: true,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar mensagem de sucesso
+            closeAcceptModal();
+            
+            // Alert customizado
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl z-50 animate-slide-in';
+            alertDiv.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                    <div>
+                        <div class="font-bold">Devis accepté avec succès!</div>
+                        <div class="text-sm">Un email de confirmation vous a été envoyé</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Remover após 5 segundos e recarregar
+            setTimeout(() => {
+                alertDiv.remove();
+                location.reload();
+            }, 3000);
+        } else {
+            alert('Erreur: ' + (data.error || 'Une erreur est survenue'));
+            button.disabled = false;
+            updateAcceptButton();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Une erreur est survenue lors de l\'acceptation du devis');
+        button.disabled = false;
+        updateAcceptButton();
+    });
 }
 
 function refuseDevis(numero) {
@@ -279,5 +615,62 @@ function refuseDevis(numero) {
         });
     }
 }
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('modal-accept-devis');
+        if (modal && !modal.classList.contains('hidden')) {
+            closeAcceptModal();
+        }
+    }
+});
 </script>
+
+<style>
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+}
+
+/* Scroll suave no modal */
+#modal-accept-devis {
+    position: fixed !important; /* garantir fixo na viewport */
+    inset: 0; /* top/right/bottom/left: 0 */
+    width: 100vw;
+    height: 100vh;
+    scroll-behavior: smooth;
+    z-index: 2000; /* above header/sidebar */
+}
+
+/* Estilo para checkboxes maiores e mais visíveis */
+input[type="checkbox"]:checked {
+    background-color: #16a34a;
+    border-color: #16a34a;
+}
+
+/* Animação de hover nos cards de checkbox */
+.hover\:border-green-500:hover {
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Utilitário para esconder scrollbar mantendo rolagem (cross-browser) */
+.scroll-hide {
+    -ms-overflow-style: none; /* IE e Edge Legacy */
+    scrollbar-width: none; /* Firefox */
+}
+.scroll-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari e Opera */
+}
+</style>
 {% endblock %}
