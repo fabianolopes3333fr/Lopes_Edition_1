@@ -74,6 +74,7 @@ PROJECT_APPS = [
     "home",
     "accounts",
     "clientes",
+    "system_config",  # novo app de configuração do sistema
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_APPS + PROJECT_APPS

@@ -1,0 +1,638 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Société - Configuration{% endblock %}
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+  <span class="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 text-indigo-600 shadow-inner"><i class="fas fa-building"></i></span>
+  <span>Informations / Coordonnées Société</span>
+</h1>
+<div class="bg-white border border-gray-200 rounded-2xl shadow-sm mb-10">
+  <div class="flex gap-2 px-6 pt-4 flex-wrap" id="societe-tabs">
+    <button data-tab="coord" class="tab-societe px-5 py-2 rounded-t-lg bg-blue-600 text-white text-sm font-medium shadow">Coordonnées</button>
+    <button data-tab="infos" class="tab-societe px-5 py-2 rounded-t-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">Infos Complémentaires</button>
+    <button data-tab="resp" class="tab-societe px-5 py-2 rounded-t-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">Responsable</button>
+    <button data-tab="expert" class="tab-societe px-5 py-2 rounded-t-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">Expert Comptable</button>
+  </div>
+  <form method="post" class="p-6 space-y-10" id="societe-form">
+    {% csrf_token %}
+
+    <!-- Coordonnées -->
+    <div id="tab-coord" class="space-y-8">
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-lg font-semibold text-blue-700 flex items-center gap-2">
+          <i class="fas fa-address-card"></i> Coordonnées
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-600 font-medium">Obligatoire</span>
+      </div>
+
+      <!-- Identification Société -->
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-building text-gray-600"></i>
+          Identification de la Société
+        </h3>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-info-circle text-blue-600 mt-0.5"></i>
+            <p class="text-xs text-gray-700">
+              Ces informations apparaîtront sur tous vos documents officiels (devis, factures, etc.)
+            </p>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="{{ form.raison_sociale.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-briefcase text-gray-500 mr-1"></i>
+              {{ form.raison_sociale.label }}
+            </label>
+            {{ form.raison_sociale }}
+            {% if form.raison_sociale.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.raison_sociale.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Nom commercial ou raison sociale de votre entreprise</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Adresse -->
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-map-marker-alt text-gray-600"></i>
+          Adresse du Siège Social
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="{{ form.adresse.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-home text-gray-500 mr-1"></i>
+              {{ form.adresse.label }}
+            </label>
+            {{ form.adresse }}
+            {% if form.adresse.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.adresse.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Rue, numéro, bâtiment, etc.</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.code_postal.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-mail-bulk text-gray-500 mr-1"></i>
+              {{ form.code_postal.label }}
+            </label>
+            {{ form.code_postal }}
+            {% if form.code_postal.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.code_postal.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.ville.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-city text-gray-500 mr-1"></i>
+              {{ form.ville.label }}
+            </label>
+            {{ form.ville }}
+            {% if form.ville.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.ville.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="{{ form.pays.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-globe text-gray-500 mr-1"></i>
+              {{ form.pays.label }}
+            </label>
+            {{ form.pays }}
+            {% if form.pays.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.pays.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations Légales -->
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-file-contract text-gray-600"></i>
+          Informations Légales
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="{{ form.siret.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-id-card text-gray-500 mr-1"></i>
+              {{ form.siret.label }}
+            </label>
+            {{ form.siret }}
+            {% if form.siret.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.siret.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">14 chiffres - Obligatoire pour facturation</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.code_ape.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-industry text-gray-500 mr-1"></i>
+              {{ form.code_ape.label }}
+            </label>
+            {{ form.code_ape }}
+            {% if form.code_ape.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.code_ape.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Code activité INSEE (ex: 4334Z)</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.code_rcs.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-certificate text-gray-500 mr-1"></i>
+              {{ form.code_rcs.label }}
+            </label>
+            {{ form.code_rcs }}
+            {% if form.code_rcs.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.code_rcs.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Numéro d'immatriculation RCS</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.tva_intra.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-percentage text-gray-500 mr-1"></i>
+              {{ form.tva_intra.label }}
+            </label>
+            {{ form.tva_intra }}
+            {% if form.tva_intra.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.tva_intra.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Format: FR 12 345678901</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-phone text-gray-600"></i>
+          Contact
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div>
+            <label for="{{ form.tel.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-phone-alt text-gray-500 mr-1"></i>
+              {{ form.tel.label }}
+            </label>
+            {{ form.tel }}
+            {% if form.tel.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.tel.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Ligne fixe principale</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.mobile.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-mobile-alt text-gray-500 mr-1"></i>
+              {{ form.mobile.label }}
+            </label>
+            {{ form.mobile }}
+            {% if form.mobile.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.mobile.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Téléphone portable</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.fax.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-fax text-gray-500 mr-1"></i>
+              {{ form.fax.label }}
+            </label>
+            {{ form.fax }}
+            {% if form.fax.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.fax.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div class="md:col-span-3">
+            <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-envelope text-gray-500 mr-1"></i>
+              {{ form.email.label }}
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.email.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Email de contact principal de l'entreprise</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infos Complémentaires -->
+    <div id="tab-infos" class="hidden space-y-8">
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-lg font-semibold text-indigo-700 flex items-center gap-2">
+          <i class="fas fa-info-circle"></i> Informations complémentaires
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-600 font-medium">Optionnel</span>
+      </div>
+
+      <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-info-circle text-indigo-600 mt-0.5"></i>
+          <p class="text-xs text-gray-700">
+            Ces informations complémentaires permettent d'enrichir votre profil d'entreprise et peuvent être utilisées dans certains documents.
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-globe text-gray-600"></i>
+          Présence en Ligne
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="{{ form.site_internet.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-link text-gray-500 mr-1"></i>
+              {{ form.site_internet.label }}
+            </label>
+            {{ form.site_internet }}
+            {% if form.site_internet.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.site_internet.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">URL complète de votre site web (ex: https://www.exemple.fr)</p>
+            {% endif %}
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="{{ form.activite.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-briefcase text-gray-500 mr-1"></i>
+              {{ form.activite.label }}
+            </label>
+            {{ form.activite }}
+            {% if form.activite.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.activite.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Description de votre activité principale</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-landmark text-gray-600"></i>
+          Structure Juridique
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label for="{{ form.forme_juridique.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-balance-scale text-gray-500 mr-1"></i>
+              {{ form.forme_juridique.label }}
+            </label>
+            {{ form.forme_juridique }}
+            {% if form.forme_juridique.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.forme_juridique.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">SARL, SAS, EI, Auto-Entrepreneur, etc.</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.type_entreprise.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-building text-gray-500 mr-1"></i>
+              {{ form.type_entreprise.label }}
+            </label>
+            {{ form.type_entreprise }}
+            {% if form.type_entreprise.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.type_entreprise.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Type ou catégorie d'entreprise</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.capital.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-euro-sign text-gray-500 mr-1"></i>
+              {{ form.capital.label }}
+            </label>
+            {{ form.capital }}
+            {% if form.capital.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.capital.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Capital social de l'entreprise en euros</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Responsable -->
+    <div id="tab-resp" class="hidden space-y-8">
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-lg font-semibold text-purple-700 flex items-center gap-2">
+          <i class="fas fa-user-tie"></i> Responsable
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-600 font-medium">Gérant / Dirigeant</span>
+      </div>
+
+      <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-info-circle text-purple-600 mt-0.5"></i>
+          <p class="text-xs text-gray-700">
+            Informations du gérant, dirigeant ou responsable légal de l'entreprise. Ces données peuvent apparaître sur certains documents officiels.
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-user-circle text-gray-600"></i>
+          Identité du Responsable
+        </h3>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div>
+            <label for="{{ form.responsable_civilite.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user-tag text-gray-500 mr-1"></i>
+              {{ form.responsable_civilite.label }}
+            </label>
+            {{ form.responsable_civilite }}
+            {% if form.responsable_civilite.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.responsable_civilite.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">M., Mme, etc.</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.responsable_nom.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user text-gray-500 mr-1"></i>
+              {{ form.responsable_nom.label }}
+            </label>
+            {{ form.responsable_nom }}
+            {% if form.responsable_nom.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.responsable_nom.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Nom de famille</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.responsable_prenom.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user text-gray-500 mr-1"></i>
+              {{ form.responsable_prenom.label }}
+            </label>
+            {{ form.responsable_prenom }}
+            {% if form.responsable_prenom.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.responsable_prenom.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Prénom</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Aperçu -->
+        <div class="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-6">
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-user-tie text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">
+                  <span id="preview-responsable">
+                    {% if form.instance.responsable_civilite or form.instance.responsable_prenom or form.instance.responsable_nom %}
+                      {{ form.instance.responsable_civilite }} {{ form.instance.responsable_prenom }} {{ form.instance.responsable_nom }}
+                    {% else %}
+                      [Nom du Responsable]
+                    {% endif %}
+                  </span>
+                </p>
+                <p class="text-xs text-gray-500">Gérant de l'entreprise</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expert Comptable -->
+    <div id="tab-expert" class="hidden space-y-8">
+      <div class="flex items-center gap-2 mb-6">
+        <h2 class="text-lg font-semibold text-green-700 flex items-center gap-2">
+          <i class="fas fa-user-check"></i> Expert Comptable
+        </h2>
+        <span class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-600 font-medium">Partenaire</span>
+      </div>
+
+      <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-info-circle text-green-600 mt-0.5"></i>
+          <p class="text-xs text-gray-700">
+            Coordonnées de votre expert-comptable ou cabinet comptable. Ces informations peuvent être mentionnées sur vos documents officiels.
+          </p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-building text-gray-600"></i>
+          Cabinet Comptable
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="{{ form.expert_raison_sociale.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-briefcase text-gray-500 mr-1"></i>
+              {{ form.expert_raison_sociale.label }}
+            </label>
+            {{ form.expert_raison_sociale }}
+            {% if form.expert_raison_sociale.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_raison_sociale.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Nom du cabinet ou de l'expert-comptable</p>
+            {% endif %}
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="{{ form.expert_adresse.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-map-marker-alt text-gray-500 mr-1"></i>
+              {{ form.expert_adresse.label }}
+            </label>
+            {{ form.expert_adresse }}
+            {% if form.expert_adresse.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_adresse.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.expert_code_postal.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-mail-bulk text-gray-500 mr-1"></i>
+              {{ form.expert_code_postal.label }}
+            </label>
+            {{ form.expert_code_postal }}
+            {% if form.expert_code_postal.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_code_postal.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.expert_ville.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-city text-gray-500 mr-1"></i>
+              {{ form.expert_ville.label }}
+            </label>
+            {{ form.expert_ville }}
+            {% if form.expert_ville.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_ville.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2 pb-2 border-b border-gray-200">
+          <i class="fas fa-address-book text-gray-600"></i>
+          Contact Expert
+        </h3>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="{{ form.expert_nom_prenom.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-user text-gray-500 mr-1"></i>
+              {{ form.expert_nom_prenom.label }}
+            </label>
+            {{ form.expert_nom_prenom }}
+            {% if form.expert_nom_prenom.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_nom_prenom.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Nom et prénom de votre interlocuteur</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.expert_tel.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-phone-alt text-gray-500 mr-1"></i>
+              {{ form.expert_tel.label }}
+            </label>
+            {{ form.expert_tel }}
+            {% if form.expert_tel.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_tel.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.expert_mobile.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-mobile-alt text-gray-500 mr-1"></i>
+              {{ form.expert_mobile.label }}
+            </label>
+            {{ form.expert_mobile }}
+            {% if form.expert_mobile.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_mobile.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label for="{{ form.expert_fax.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-fax text-gray-500 mr-1"></i>
+              {{ form.expert_fax.label }}
+            </label>
+            {{ form.expert_fax }}
+            {% if form.expert_fax.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_fax.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div class="md:col-span-2">
+            <label for="{{ form.expert_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-envelope text-gray-500 mr-1"></i>
+              {{ form.expert_email.label }}
+            </label>
+            {{ form.expert_email }}
+            {% if form.expert_email.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.expert_email.errors.0 }}</p>
+            {% else %}
+              <p class="mt-1 text-xs text-gray-500">Email de contact du cabinet</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boutons Footer -->
+    <div class="pt-6 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <i class="fas fa-clock"></i>
+        <span>Dernière mise à jour:
+          {% if form.instance.updated_at %}
+            {{ form.instance.updated_at|date:"d/m/Y à H:i" }}
+          {% else %}
+            --
+          {% endif %}
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'system_config:configuration_home' %}" class="px-5 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium transition">
+          <i class="fas fa-arrow-left mr-1"></i> Retour
+        </a>
+        <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg font-medium shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+          <i class="fas fa-save mr-1"></i>
+          Sauvegarder
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  const tabButtons = document.querySelectorAll('.tab-societe');
+  const tabSections = {
+    coord: document.getElementById('tab-coord'),
+    infos: document.getElementById('tab-infos'),
+    resp: document.getElementById('tab-resp'),
+    expert: document.getElementById('tab-expert')
+  };
+  
+  tabButtons.forEach(btn => btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    tabButtons.forEach(b => b.classList.remove('bg-blue-600','text-white','shadow'));
+    tabButtons.forEach(b => b.classList.add('bg-gray-100','text-gray-700'));
+    btn.classList.add('bg-blue-600','text-white','shadow');
+    btn.classList.remove('bg-gray-100','text-gray-700');
+    Object.entries(tabSections).forEach(([k, el]) => {
+      if(k === target) el.classList.remove('hidden'); else el.classList.add('hidden');
+    });
+  }));
+
+  // Preview dinâmico do nome do responsable
+  const respInputs = ['responsable_civilite', 'responsable_prenom', 'responsable_nom'];
+  respInputs.forEach(inputName => {
+    const input = document.querySelector(`[name="${inputName}"]`);
+    if(input) {
+      input.addEventListener('input', updateResponsablePreview);
+      input.addEventListener('change', updateResponsablePreview);
+    }
+  });
+
+  function updateResponsablePreview() {
+    const civilite = document.querySelector('[name="responsable_civilite"]')?.value || '';
+    const prenom = document.querySelector('[name="responsable_prenom"]')?.value || '';
+    const nom = document.querySelector('[name="responsable_nom"]')?.value || '';
+    const preview = document.getElementById('preview-responsable');
+    
+    if(preview) {
+      const fullName = [civilite, prenom, nom].filter(v => v.trim()).join(' ');
+      preview.textContent = fullName || '[Nom du Responsable]';
+    }
+  }
+</script>
+{% endblock %}

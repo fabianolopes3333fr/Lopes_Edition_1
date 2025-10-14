@@ -38,6 +38,8 @@ urlpatterns = [
     path('contact/', include('contato.urls')),
     path('conseil-et-inspiration/', include('blog.urls')),
     path('projects/', include('projetos.urls')),
+    # Novo: configurações do sistema
+    path('system-config/', include('system_config.urls')),
 
     # Allauth URLs
     path('auth/', include('allauth.urls')),
