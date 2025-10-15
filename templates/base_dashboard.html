@@ -589,7 +589,7 @@
 
 
 
-                <a href="#" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                <a href="{% url 'accounts:users_list' %}" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
                     <i class="sidebar-icon fas fa-user-shield text-gray-500"></i>
                     <span class="sidebar-text">Utilisateurs</span>
                     <div class="sidebar-tooltip">Utilisateurs</div>
@@ -601,7 +601,7 @@
                     <div class="sidebar-tooltip">Produits</div>
                 </a>
 
-                <a href="#" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
+                <a href="{% url 'system_config:configuration_home' %}" class="sidebar-item text-gray-700 hover:text-red-700 hover:bg-red-50">
                     <i class="sidebar-icon fas fa-cogs text-gray-500"></i>
                     <span class="sidebar-text">Configuration</span>
                     <div class="sidebar-tooltip">Configuration</div>

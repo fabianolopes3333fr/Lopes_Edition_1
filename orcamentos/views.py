@@ -960,7 +960,7 @@ def admin_criar_acompte(request, numero):
         'percentual_disponivel': percentual_disponivel,
         # Adição: informar ao template quanto já foi utilizado
         'total_percentual_usado': total_percentual,
-        'page_title': f'Créer Acompte - Devis #{numero}',
+        'page_title': f'Criar Acompte - Devis #{numero}',
     }
     
     return render(request, 'orcamentos/admin_criar_acompte.html', context)
@@ -1155,23 +1155,49 @@ def admin_deletar_acompte(request, acompte_id):
 
 # ==================== ESTATÍSTICAS PARA DASHBOARD ====================
 def get_cliente_stats(user):
-    """Retorna estatísticas básicas para o dashboard do cliente."""
+    """Retorna estatísticas básicas para o dashboard do cliente.
+
+    Adiciona também listas recentes de projetos e solicitações de orçamento
+    para que o template dashboard exiba corretamente sem cair sempre no estado vazio.
+    """
     try:
+        # Importes locais para evitar ciclos (caso views seja importado em outros locais)
+        from .models import Projeto, SolicitacaoOrcamento, Orcamento, StatusOrcamento
+        from django.db.models import Sum
+
         total_projects = Projeto.objects.filter(cliente=user).count()
         total_quotes = SolicitacaoOrcamento.objects.filter(cliente=user).count()
         pending_requests = SolicitacaoOrcamento.objects.filter(cliente=user, status=StatusOrcamento.PENDENTE).count()
+
+        # Projetos e orçamentos recentes (limitados a 5)
+        recent_projects = list(Projeto.objects.filter(cliente=user).order_by('-created_at')[:5])
+        recent_quotes = list(SolicitacaoOrcamento.objects.filter(cliente=user).order_by('-created_at')[:5])
+
+        # Investimento do cliente: soma de orçamentos aceitos vinculados às suas solicitações
+        client_investment = (
+            Orcamento.objects.filter(
+                solicitacao__cliente=user,
+                status=StatusOrcamento.ACEITO
+            ).aggregate(Sum('total')).get('total__sum') or 0
+        )
+
         return {
             'client_projects': total_projects,
             'client_quotes': total_quotes,
             'pending_requests': pending_requests,
-            'client_investment': 0,
+            'client_investment': client_investment,
+            'recent_projects': recent_projects,
+            'recent_quotes': recent_quotes,
         }
     except Exception:
+        # Em caso de falha (ex.: migrações pendentes), retorna valores neutros
         return {
             'client_projects': 0,
             'client_quotes': 0,
             'pending_requests': 0,
             'client_investment': 0,
+            'recent_projects': [],
+            'recent_quotes': [],
         }
 
 def get_admin_stats():

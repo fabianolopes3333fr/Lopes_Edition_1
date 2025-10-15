@@ -6,12 +6,9 @@ from functools import wraps
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
-from projects.models import Project
-from profiles.models import UserProfile
 
 
 def superuser_required(
@@ -49,19 +46,29 @@ def permission_required(perm):
 
 def can_edit_project(view_func):
     """
-    Decorator para verificar se o usuário pode editar um projeto específico
+    Decorator para verificar se o usuário pode editar um projeto específico.
+    Faz import lazy do modelo Project para evitar dependências duras.
     """
 
     @wraps(view_func)
     def _wrapped_view(request, project_id, *args, **kwargs):
+        # Import lazy para evitar erro caso o app não exista
+        try:
+            from projects.models import Project  # type: ignore
+        except Exception:
+            try:
+                from projetos.models import Projeto as Project  # type: ignore
+            except Exception:
+                raise PermissionDenied
+
         project = get_object_or_404(Project, id=project_id)
 
         # Superuser pode editar qualquer projeto
         if request.user.is_superuser:
             return view_func(request, project_id, *args, **kwargs)
 
-        # Usuário normal só pode editar seus próprios projetos
-        if project.user == request.user:
+        # Usuário normal só pode editar seus próprios projetos (ajuste conforme seu modelo)
+        if getattr(project, "user", None) == request.user or getattr(project, "cliente", None) == request.user:
             return view_func(request, project_id, *args, **kwargs)
 
         raise PermissionDenied

@@ -1,6 +1,6 @@
 # 🎨 LOPES PEINTURE - Sistema de Gestão
 
-Sistema web completo para gestão de clientes, colaboradores e projetos da empresa LOPES PEINTURE.
+Sistema web completo para gestão de clientes, colaboradores, projetos e orçamentos da empresa LOPES PEINTURE.
 
 ## 🚀 Funcionalidades
 
@@ -10,566 +10,422 @@ Sistema web completo para gestão de clientes, colaboradores e projetos da empre
 - ✅ Perfis completos com foto e informações de contato
 - ✅ Dashboard personalizado por tipo de usuário
 
+### 📊 Gestão de Projetos
+- ✅ Lista de projetos com filtros avançados
+- ✅ Criação e edição com validações robustas
+- ✅ Controle de status (pendente, em andamento, concluído)
+- ✅ Dashboard com estatísticas em tempo real
+
+### 💰 Gestão de Orçamentos (Devis)
+- ✅ Criação de orçamentos com linhas detalhadas
+- ✅ Envio automático para clientes
+- ✅ Sistema de aceitação/recusa pelo cliente
+- ✅ Duplicação de orçamentos existentes
+- ✅ Relatórios e estatísticas completas
+
+### 📦 Gestão de Produtos
+- ✅ Cadastro com código auto-gerado
+- ✅ Controle de estoque e preços
+- ✅ Importação/exportação via CSV
+- ✅ Busca AJAX em tempo real
+- ✅ Atualização em massa
+
+### 🏢 Gestão de Clientes
+- ✅ Cadastro completo de empresas e particulares
+- ✅ Múltiplos endereços (entrega, canteiro, transportador)
+- ✅ Histórico de projetos e orçamentos
+- ✅ Notas e observações
+- ✅ Controle de status (ativo, inativo, suspenso)
+
+### ⚙️ Configuração do Sistema (System Config)
+- ✅ **Informações da Empresa**:
+  - Coordonnées complètes (SIRET, APE, RCS, TVA)
+  - Responsable/Gérant da empresa
+  - Expert-Comptable e dados do cabinet
+  
+- ✅ **Parâmetros Auto-Entrepreneur**:
+  - Configuração de charges (cotisations sociales, impôts, formation, CCI)
+  - Separação Biens/Services
+  - Cálculo automático de totais
+  
+- ✅ **Interface do Sistema**:
+  - Upload de logo da empresa
+  - Imagem de fundo personalizada
+  - Preview visual em tempo real
+  
+- ✅ **Configuração de Email (SMTP)**:
+  - Servidor SMTP configurável
+  - Suporte TLS/SSL
+  - Exemplos de configuração (Gmail, Outlook, Yahoo, OVH)
+  - Teste de conexão
+  
+- ✅ **Listas de Referência**:
+  - Civilités (M., Mme, Mlle, etc.)
+  - Formes Juridiques (SARL, SAS, EI, Auto-Entrepreneur)
+  - Modes de Règlement (Chèque, Virement, Carte, Espèces)
+  - Taux de Taxes (TVA 5.5%, 10%, 20%)
+  - Conditions de Paiement (Immédiat, 30j, 45j)
+
 ### 🔐 Segurança
 - ✅ Autenticação baseada em email
 - ✅ Grupos e permissões personalizados
 - ✅ Validações de formulário avançadas
 - ✅ Proteção CSRF e XSS
+- ✅ Sistema de auditoria (logs)
 
 ### 🎨 Interface
-- ✅ Design moderno com Tailwind CSS
+- ✅ Design moderno com Tailwind CSS (via CDN)
 - ✅ Responsivo para mobile/tablet/desktop
 - ✅ Animações e transições suaves
-- ✅ Dark mode pronto (estrutura)
+- ✅ Ícones Font Awesome
+- ✅ Paleta de cores consistente
+- ✅ Componentes reutilizáveis
 
-### ⚙️ Administração
-- ✅ Admin personalizado com estatísticas
-- ✅ Dashboard com métricas em tempo real
-- ✅ Gestão visual de usuários e perfis
-- ✅ Relatórios e exportações
+### 📊 Dashboards
+- ✅ Dashboard principal com estatísticas
+- ✅ Projetos ativos com barras de progresso
+- ✅ Devis recentes com ações rápidas
+- ✅ Timeline de atividades
+- ✅ Sistema de notificações
+- ✅ Ações rápidas contextuais
 
 ## 🛠️ Tecnologias
 
-- **Backend**: Django 4.2+, Python 3.11+
-- **Frontend**: Tailwind CSS, JavaScript ES6+
+- **Backend**: Django 4.2+, Python 3.12
+- **Frontend**: Tailwind CSS (CDN), JavaScript ES6+
 - **Banco**: SQLite (desenvolvimento), PostgreSQL (produção)
 - **Media**: Pillow para processamento de imagens
-- **Testes**: pytest, coverage
-
-### 📊 Resumo das melhorias commitadas:
-- 🧪 Testing Infrastructure:
-- ✅ 48 testes automatizados
-- ✅ Pytest configurado com Django
-- ✅ Fixtures reutilizáveis
-- ✅ Coverage completa
-- 🐛 Bug Fixes:
-- ✅ ProfileForm salvando corretamente
-- ✅ Botão submit funcionando
-- ✅ Validações robustas
-- 🔧 Code Quality:
-- ✅ Logging implementado
-- ✅ Error handling melhorado
-- ✅ Debug tools adicionados
-- 🎨 User Experience:
-- ✅ Interface mais responsiva
-- ✅ Feedback visual claro
-- ✅ Mensagens informativas
-
-
-## 🎯 Resumo completo das Views implementadas:
-- 
-- ## ✅ VIEWS DE PROJECTS:
-- ProjectListView - Lista com filtros avançados
-- ProjectDetailView - Detalhes completos com ações
-- ProjectCreateView - Criação com validações
-- ProjectUpdateView - Edição com restrições
-- ProjectDeleteView - Exclusão com verificações
-- request_quote - Solicitação de orçamento
-- update_project_status - Mudança de status (staff)
-- project_dashboard - Dashboard com estatísticas
-## ✅ VIEWS DE DEVIS:
-- DevisListView - Lista com filtros
-- DevisDetailView - Detalhes com registro de visualizações
-- DevisCreateView - Criação com formset de linhas
-- DevisUpdateView - Edição com validações
-- DevisDeleteView - Exclusão com restrições
-- send_devis - Envio para cliente
-- update_devis_status - Mudança de status
-- respond_to_devis - Resposta do cliente
-- duplicate_devis - Duplicação de orçamentos
-## ✅ VIEWS DE PRODUCTS:
-- ProductListView - Lista com filtros
-- ProductDetailView - Detalhes com estatísticas de uso
-- ProductCreateView - Criação com auto-geração de código
-- ProductUpdateView - Edição completa
-- ProductDeleteView - Exclusão com verificações
-- toggle_product_status - Ativar/desativar
-- product_import - Importação via CSV
-- product_bulk_update - Atualização em massa
-- product_export_csv - Exportação
-- product_ajax_search - Busca AJAX
-- reports_dashboard - Relatórios e estatísticas
-
-## 📊 SEÇÕES DO DASHBOARD:
-
-- 🎯 Welcome Banner - Mensagem personalizada de boas-vindas
-- 📈 Estatísticas - Total, ativos, devis, terminados
-- 🎨 Projetos Ativos - Com barras de progresso e ações
-- 📋 Devis Recentes - Status e ações (aceitar/recusar)
-- 📅 Atividade Recente - Timeline com histórico
-- ⚡ Actions Rapides - Atalhos para funções principais
-- 🔔 Notificações - Sistema interativo
-- 🌤️ Météo - Informações para trabalhos externos
-- 💡 Conseils - Dicas diárias de manutenção
-- ☎️ Support - Informações de contato
-- 🎨 FUNCIONALIDADES ESPECIAIS:
-- 🎭 Animações suaves no carregamento
-- 📱 Design responsivo completo
-- ⌨️ Keyboard shortcuts (N=novo, P=projetos, D=devis)
-- 🔄 Auto-refresh notifications
-- 💬 Welcome message para novos usuários
-- 📊 Progress tracking visual
-- 🎯 Actions contextuelles por status
-
-### 📚 DOCUMENTAÇÃO - SISTEMA DE TEMPLATES E VIEWS COMPLETO
-## 🎯 VISÃO GERAL DA ETAPA
-Esta etapa focou na criação completa dos templates HTML e views Django para o sistema de gestão de projetos e devis da LOPES PEINTURE. Implementamos interfaces modernas com Tailwind CSS e funcionalidades avançadas para gerenciamento completo do ciclo de vida dos projetos.
-
-## 📋 ÍNDICE
-- Templates Criados
-- Views Implementadas
-- Funcionalidades Principais
-- Segurança e Validações
-- Estrutura de Arquivos
-- Próximos Passos
-## 🎨 TEMPLATES CRIADOS
-### 📁 Base Templates
-- base_dashboard.html - Template base com navegação e sidebar
-- Layout responsivo com Tailwind CSS
-- Navegação contextual (cliente vs staff)
-- Sistema de mensagens integrado
-## 📊 Dashboard Templates
-- user_dashboard.html - Dashboard para clientes
-- admin_dashboard.html - Dashboard administrativo
-- Estatísticas em tempo real
-- Cards interativos e informativos
-- Ações rápidas e shortcuts
-### 🎨 Project Templates
-- project_list.html - Lista de projetos com filtros
-- project_detail.html - Detalhes completos do projeto
-- project_create.html - Criação de novos projetos
-- project_edit.html - Edição de projetos existentes
-- project_delete.html - Confirmação de exclusão segura
-### 💼 Devis Templates
-- devis_list.html - Lista de devis com filtros avançados
-- devis_detail.html - Visualização detalhada do devis
-- devis_create.html - Criação de novos devis
-- devis_edit.html - Edição de devis (formset para items)
-- devis_delete.html - Exclusão com validações rigorosas
-- devis_history.html - Histórico completo de alterações
-- devis_compare.html - Comparação entre versões
-- devis_respond.html - Interface de resposta do cliente
-
-## ⚙️ VIEWS IMPLEMENTADAS
-### 🏠 Dashboard Views
-```
-@login_required
-def dashboard_projects(request)
-#### Dashboard principal para clientes
-
-@user_passes_test(is_staff)
-def admin_dashboard(request)
-#### Dashboard administrativo com estatísticas
-
-# 🎨 Project Views
-
-class ProjectListView(LoginRequiredMixin, ListView)
-#### Lista paginada com filtros
-
-class ProjectDetailView(LoginRequiredMixin, DetailView)
-#### Detalhes com permissões contextuais
-
-class ProjectCreateView(LoginRequiredMixin, CreateView)
-#### Criação com validações
-
-class ProjectUpdateView(LoginRequiredMixin, UpdateView)
-#### Edição com verificações de status
-
-class ProjectDeleteView(LoginRequiredMixin, DeleteView)
-#### Exclusão com validações rigorosas
-
-## 💼 Devis Views
-
-class DevisListView(LoginRequiredMixin, ListView)
-#### Lista com filtros por projeto/status
-
-class DevisDetailView(LoginRequiredMixin, DetailView)
-#### Visualização com histórico
-
-class DevisDeleteView(LoginRequiredMixin, DeleteView)
-#### Exclusão com audit trail
-
-#### Funções específicas
-devis_create(request, project_pk)
-devis_edit(request, pk)
-devis_send(request, pk)
-devis_accept(request, pk)
-devis_refuse(request, pk)
-devis_archive(request, pk)
-devis_pdf(request, pk)
-devis_history(request, pk)
-devis_compare(request, pk)
-devis_duplicate(request, pk)
-```
-## 🔧 Utility Views
-```
-ajax_product_price(request, pk)
-#### Preços via AJAX
-
-ajax_project_stats(request)
-#### Estatísticas dinâmicas
-
-project_request_quote(request, pk)
-
-```
-#### Solicitação de orçamento
-
-## 🚀 FUNCIONALIDADES PRINCIPAIS
-# 👤 Para Clientes
-- ✅ Dashboard personalizado com estatísticas
-- ✅ Gestão completa de projetos (CRUD)
-- ✅ Visualização de devis recebidos
-- ✅ Aceitação/recusa de devis online
-- ✅ Histórico detalhado de todas as ações
-- ✅ Download de PDFs dos devis
-- ✅ Notificações em tempo real
-- ✅ Sistema de filtros avançados
-## 👨‍💼 Para Staff/Admin
-- ✅ Dashboard administrativo com métricas
-- ✅ Gestão completa de devis (criar/editar/enviar)
-- ✅ Controle de status dos projetos
-- ✅ Gestão de produtos e preços
-- ✅ Comparação de versões de devis
-- ✅ Duplicação de devis existentes
-- ✅ Arquivamento ao invés de exclusão
-- ✅ Audit trail completo
-## 🎨 Interface & UX
-- ✅ Design responsivo com Tailwind CSS
-- ✅ Animações suaves e transições
-- ✅ Feedback visual em tempo real
-- ✅ Loading states e indicators
-- ✅ Tooltips e help text
-- ✅ Keyboard shortcuts (N=novo, P=projetos, D=devis)
-- ✅ Dark mode support preparado
-- ✅ Acessibilidade (ARIA labels)
-## 🔒 SEGURANÇA E VALIDAÇÕES
-
-### Decorators implementados
-@login_required
-@user_passes_test(is_staff)
-@require_http_methods(["POST"])
-@csrf_protect
-```
-### Verificações contextuais
-def can_edit_project(user, project):
-    return user == project.user or user.is_staff
-```
-### 🛡️ Controle de Acesso
-✅ Validações de Business Logic
-```
-# No modelo Project
-def can_be_deleted(self):
-    if self.devis.exclude(status='brouillon').exists():
-        return False
-    return self.status in ['brouillon', 'nouveau', 'refuse']
-
-# No modelo Devis  
-def can_be_deleted(self):
-    if self.status == 'accepte':
-        return False
-    return self.status in ['brouillon', 'refuse']
-```
-# 📋 Validações de Formulário
-- ✅ Confirmação por digitação (título/referência)
-- ✅ Múltiplas checkboxes de confirmação
-- ✅ Razões obrigatórias para exclusões
-- ✅ Comentários explicativos para audit
-- ✅ Countdown de segurança antes exclusões críticas
-
-## 📁 ESTRUTURA DE ARQUIVOS
-```
-site_lopes_peinture/
-├── templates/
-│   ├── base_dashboard.html
-│   └── projects/
-│       ├── dashboard.html (cliente)
-│       ├── admin_dashboard.html
-│       ├── user_dashboard.html
-│       ├── project_list.html
-│       ├── project_detail.html
-│       ├── project_create.html
-│       ├── project_edit.html
-│       ├── project_delete.html
-│       ├── devis_list.html
-│       ├── devis_detail.html
-│       ├── devis_create.html
-│       ├── devis_edit.html
-│       ├── devis_delete.html
-│       ├── devis_history.html
-│       ├── devis_compare.html
-│       └── devis_respond.html
-├── projects/
-│   ├── views.py (750+ linhas)
-│   ├── urls.py (40+ rotas)
-│   ├── models.py
-│   └── forms.py
-└── static/
-    ├── css/
-    ├── js/
-    └── images/
-```
-## 🔄 FLUXO DE TRABALHO IMPLEMENTADO
-### 📋 Ciclo de Vida do Projeto
-- Cliente cria projeto → Status: Nouveau
-- Cliente solicita devis → Status: Devis demandé
-- Staff analisa → Status: En examen
-- Staff cria devis → Status: Devis créé
-- Staff envia devis → Status: Devis envoyé
-- Cliente visualiza → Status: Devis consulté
-- Cliente aceita/recusa → Status: Accepté/Refusé
-- Projeto inicia → Status: En cours
-- Projeto termina → Status: Terminé
-### 💼 Ciclo de Vida do Devis
-- Criação → Status: Brouillon
-- Envio → Status: Envoyé
-- Visualização → Status: Consulté
-- Resposta → Status: Accepté/Refusé
-- - Arquivamento → Status: Archivé
-## 📊 MÉTRICAS E ESTATÍSTICAS
-## 📈 Dashboard do Cliente
-- Total de projetos
-- Projetos ativos
-- Devis recebidos
-- Projetos terminados
-- Taxa de satisfação
-- Progresso por projeto
-## 📊 Dashboard Administrativo
-- Total de projetos por status
-- Total de devis por status
-- Número de clientes ativos
-- Receita total/mensal
-- Projetos urgentes
-- Performance da equipe
-## 🎯 PRÓXIMOS PASSOS
-### 🔧 Funcionalidades Pendentes
-- Sistema de notificações por email
-- Geração de PDF real (WeasyPrint/ReportLab)
-- Sistema de comentários nos projetos
-- Upload de fotos nos projetos
-- Calendário de agendamentos
-- Chat em tempo real cliente-staff
-- Sistema de avaliações pós-projeto
-- Relatórios em PDF/Excel
-## 🎨 Melhorias de UI/UX
-- Animações mais avançadas
-- PWA (Progressive Web App)
-- Modo offline básico
-- Push notifications
-- Temas customizáveis
-- Widgets do dashboard
-## 🔒 Segurança Adicional
-- 2FA (Two-Factor Authentication)
-- Rate limiting nas APIs
-- Captcha em formulários sensíveis
-- Logs detalhados de auditoria
-- Backup automático
-## 📱 Mobile & Performance
-- App mobile nativa (React Native/Flutter)
-- Cache inteligente
-- Lazy loading de imagens
-- Service Workers
-- CDN para assets estáticos
-## 🏆 RESULTADOS ALCANÇADOS
-### ✅ Interface Completa
-- 15+ templates responsivos
-- Design moderno com Tailwind CSS
-- UX otimizada para diferentes tipos de usuário
-### ✅ Funcionalidades Robustas
-- CRUD completo para projetos e devis
-- Sistema de permissões granular
-- Validações de segurança rigorosas
-### ✅ Performance
-- Queries otimizadas com select_related
-- Paginação inteligente
-- AJAX para operações rápidas
-### ✅ Manutenibilidade
-- Código bem documentado
-- Separação clara de responsabilidades
-- Padrões Django seguidos
-## 📞 SUPORTE E MANUTENÇÃO
-- Para manutenção do sistema:
-#### Para manutenção do sistema:
-- Logs estão configurados em views.py
-- Mensagens de erro são user-friendly
-- Debug information está disponível para staff
-- Backup dos dados é essencial antes updates
-🎉 O sistema está pronto para produção com funcionalidades completas de gestão de projetos e devis!
-
-## 📦 Instalação
-
-### 1. Clone o repositório
-```bash
-git clone <repository-url>
-cd site_lopes_peinture
-```
-
-### 2. Crie ambiente virtual
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-# ou
-source venv/bin/activate  # Linux/Mac
-```
-
-### 3. Instale dependências
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Setup completo
-```bash
-# Windows
-setup_complete.bat
-
-# Ou manualmente
-python manage.py setup_site
-```
-
-### 5. Execute o servidor
-```bash
-python manage.py runserver
-```
-
-Acesse: http://127.0.0.1:8000/
-
-## 🔑 Credenciais Padrão
-
-### Superusuário
-- **Email**: admin@lopespeinture.com
-- **Senha**: admin123
-- ⚠️ **Mude após primeiro login!**
-
-### Usuários de Teste
-- **Clientes**: jean.dupont@email.com, marie.martin@email.com
-- **Colaboradores**: paul.peintre@lopespeinture.com, ana.assistante@lopespeinture.com
-- **Senha**: test123
-
-## 🧪 Testes
-
-```bash
-# Executar todos os testes
-python manage.py test
-
-# Com cobertura
-coverage run --source='.' manage.py test
-coverage report -m
-coverage html
-
-# Script automático
-run_tests.bat
-```
+- **Testes**: pytest, pytest-django, coverage
 
 ## 📁 Estrutura do Projeto
 
 ```
-site_lopes_peinture/
-├── accounts/           # App de usuários
-│   ├── models.py      # Modelo User personalizado
-│   ├── forms.py       # Formulários de auth
-│   ├── views.py       # Views de login/registro
-│   └── admin.py       # Admin personalizado
-├── profiles/          # App de perfis
-│   ├── models.py      # Modelo Profile
-│   ├── forms.py       # Formulário de perfil
-│   └── views.py       # Views de perfil
-├── core/              # Configurações do projeto
-├── templates/         # Templates HTML
-├── static/            # Arquivos estáticos
-├── media/             # Uploads de usuários
-└── requirements.txt   # Dependências
+LopesPeinture/
+│
+├── 📁 accounts/                    # Sistema de Autenticação e Usuários
+│   ├── management/                 # Comandos personalizados do Django
+│   ├── migrations/                 # Migrações do banco de dados
+│   ├── tests/                      # Testes unitários e integração
+│   ├── adapters.py                 # Adaptadores de autenticação social
+│   ├── admin.py                    # Configuração do Django Admin
+│   ├── admin_dashboard.py          # Dashboard administrativo
+│   ├── admin_groups.py             # Gestão de grupos e permissões
+│   ├── backends.py                 # Backends de autenticação customizados
+│   ├── decorators.py               # Decoradores de permissão
+│   ├── forms.py                    # Formulários de registro/login
+│   ├── models.py                   # Models de usuário customizado
+│   ├── permissions.py              # Sistema de permissões
+│   ├── settings_views.py           # Views de configurações
+│   ├── signals.py                  # Signals do Django
+│   ├── social_views.py             # Views para login social
+│   ├── urls.py                     # Rotas de autenticação
+│   ├── utils.py                    # Funções utilitárias
+│   └── views.py                    # Views principais
+│
+├── 📁 blog/                        # Sistema de Blog (opcional)
+│   ├── migrations/
+│   ├── admin.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+│
+├── 📁 clientes/                    # ⭐ Gestão de Clientes
+│   ├── migrations/
+│   ├── admin.py                    # Admin customizado para clientes
+│   ├── forms.py                    # Formulários de cliente e endereços
+│   ├── models.py                   # Cliente, AdresseLivraison, AdresseChantier
+│   ├── signals.py                  # Signals de auditoria
+│   ├── urls.py                     # Rotas CRUD de clientes
+│   └── views.py                    # Views de listagem, criação, edição
+│
+├── 📁 contato/                     # Formulário de Contato
+│   ├── migrations/
+│   ├── admin.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+│
+├── 📁 core/                        # ⚙️ Configurações Django
+│   ├── __pycache__/
+│   ├── asgi.py                     # Configuração ASGI
+│   ├── settings.py                 # Settings principal do Django
+│   ├── urls.py                     # URLs raiz do projeto
+│   └── wsgi.py                     # Configuração WSGI
+│
+├── 📁 docs/                        # 📚 Documentação
+│   ├── COMANDOS_ORFAOS.md
+│   ├── COMO_LIMPAR_MIGRACOES.md
+│   ├── CORRECAO_FINAL_TESTE_ORCAMENTO.md
+│   ├── CORRECOES_FINAIS_TESTES.md
+│   ├── CORRECOES_TESTES_FINAIS.md
+│   ├── CORRECOES_TESTES_ORCAMENTOS_ORFAOS.md
+│   ├── CORRECOES_WARNINGS.md
+│   ├── DOCUMENTACAO_FLUXO_ACOMPTES_DEVIS_FACTURES.md
+│   ├── DOCUMENTACAO_TESTES_AUDITORIA.md
+│   ├── RELATORIO_MELHORIAS_CLIENTES.md
+│   ├── SOCIAL_LOGIN_GUIDE.md
+│   └── STATUS_FINAL_TESTES_ORCAMENTOS.md
+│
+├── 📁 home/                        # Página Inicial
+│   ├── migrations/
+│   ├── admin.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+│
+├── 📁 logs/                        # 📋 Logs do Sistema
+│   ├── testes/
+│   ├── accounts.log
+│   └── auditoria_orcamentos.log
+│
+├── 📁 media/                       # 📸 Arquivos de Mídia (uploads)
+│   ├── avatars/                    # Fotos de perfil
+│   ├── produtos/                   # Imagens de produtos
+│   └── projetos/                   # Documentos de projetos
+│
+├── 📁 orcamentos/                  # 💰 Sistema de Orçamentos (Devis)
+│   ├── migrations/
+│   ├── acompte_views.py            # Views de acomptes (pagamentos)
+│   ├── admin.py                    # Admin de devis
+│   ├── auditoria.py                # Sistema de auditoria
+│   ├── config_auditoria.py         # Configuração de logs
+│   ├── forms.py                    # Formulários de devis e linhas
+│   ├── middleware.py               # Middleware de auditoria
+│   ├── models.py                   # Devis, LigneDevis, Acompte
+│   ├── urls.py                     # Rotas de orçamentos
+│   └── views.py                    # Views CRUD de devis
+│
+├── 📁 profiles/                    # 👤 Perfis de Usuários
+│   ├── migrations/
+│   ├── admin.py
+│   ├── forms.py                    # Formulário de edição de perfil
+│   ├── models.py                   # Profile com foto e contatos
+│   ├── urls.py
+│   └── views.py                    # Views de perfil (detail, edit)
+│
+├── 📁 projetos/                    # 🏗️ Gestão de Projetos
+│   ├── migrations/
+│   ├── admin.py
+│   ├── forms.py                    # Formulários de projeto
+│   ├── models.py                   # Projeto, Status, Timeline
+│   ├── urls.py
+│   └── views.py                    # Views CRUD e dashboard
+│
+├── 📁 scripts/                     # 🔧 Scripts Utilitários
+│   └── (scripts de manutenção)
+│
+├── 📁 static/                      # 🎨 Arquivos Estáticos
+│   ├── admin/                      # CSS/JS do Django Admin
+│   ├── config/                     # Configurações frontend
+│   ├── css/
+│   │   ├── input.css               # CSS de entrada do Tailwind
+│   │   ├── output.css              # CSS compilado do Tailwind
+│   │   └── dashboard.css           # CSS customizado
+│   ├── img/                        # Imagens estáticas
+│   └── js/                         # JavaScript customizado
+│
+├── 📁 system_config/               # ⭐ Configuração do Sistema (NOVO)
+│   ├── migrations/
+│   ├── __pycache__/
+│   ├── admin.py                    # Admin de configurações
+│   ├── apps.py                     # Config da app
+│   ├── forms.py                    # Forms estilizados (Company, Auto, Email)
+│   ├── models.py                   # Models de configuração
+│   │                               # - CompanySettings
+│   │                               # - AutoEntrepreneurParameters
+│   │                               # - InterfaceSettings
+│   │                               # - EmailSettings
+│   │                               # - Civilite, LegalForm, PaymentMode
+│   │                               # - TaxRate, PaymentCondition
+│   ├── urls.py                     # Rotas de configuração
+│   └── views.py                    # Views (4 páginas + CRUD)
+│
+├── 📁 templates/                   # 🎨 Templates HTML
+│   ├── accounts/                   # Templates de autenticação
+│   ├── admin/                      # Templates do Django Admin
+│   ├── clientes/                   # Templates de clientes
+│   │   ├── form_cliente.html
+│   │   └── lista_clientes.html
+│   ├── components/                 # Componentes reutilizáveis
+│   ├── contato/                    # Template de contato
+│   ├── dashboard/                  # Dashboard principal
+│   ├── emails/                     # Templates de email
+│   ├── orcamentos/                 # Templates de devis
+│   ├── pages/                      # Páginas estáticas
+│   ├── partials_dashboard/         # Partials do dashboard
+│   ├── profiles/                   # Templates de perfil
+│   ├── socialaccount/              # Login social
+│   ├── system_config/              # ⭐ Templates de configuração
+│   │   ├── configuration_home.html # Dashboard de config
+│   │   ├── company_settings.html   # Info da empresa (4 abas)
+│   │   ├── parameters.html         # Parâmetros sistema (3 abas)
+│   │   └── list_generic.html       # CRUD de listas
+│   ├── base.html                   # Template base público
+│   └── base_dashboard.html         # Template base do dashboard
+│
+├── 📁 utils/                       # 🛠️ Utilitários Globais
+│   └── (funções auxiliares)
+│
+├── 📁 .venv/                       # Ambiente virtual Python
+├── 📁 node_modules/                # Dependências Node.js
+│
+├── 📄 .env                         # Variáveis de ambiente (não versionado)
+├── 📄 .env.example                 # Exemplo de configuração
+├── 📄 .gitignore                   # Arquivos ignorados pelo Git
+├── 📄 conftest.py                  # Configuração de testes Pytest
+├── 📄 db.sqlite3                   # Banco de dados (desenvolvimento)
+├── 📄 manage.py                    # CLI do Django
+├── 📄 package.json                 # Dependências Node.js (Tailwind)
+├── 📄 pytest.ini                   # Configuração Pytest
+├── 📄 README.md                    # Este arquivo
+├── 📄 requirements.txt             # Dependências Python
+└── 📄 tailwind.config.js           # Configuração Tailwind CSS
 ```
 
-## 🎯 Comandos Úteis
+### 📊 Estatísticas do Projeto
 
-### Desenvolvimento
+- **Apps Django**: 10 apps principais
+- **Models**: ~30 models implementados
+- **Views**: ~80+ views (CBV + FBV)
+- **Templates**: ~60+ templates HTML
+- **Testes**: 48 testes automatizados
+- **Linhas de Código**: ~15.000+ LOC
+
+### 🎯 Apps Principais
+
+| App | Descrição | Status |
+|-----|-----------|--------|
+| `accounts` | Autenticação e usuários | ✅ Completo |
+| `clientes` | Gestão de clientes | ✅ Completo |
+| `projetos` | Gestão de projetos | ✅ Completo |
+| `orcamentos` | Devis e orçamentos | ✅ Completo |
+| `profiles` | Perfis de usuários | ✅ Completo |
+| `system_config` | Configuração do sistema | ⭐ Novo (v2.0) |
+| `home` | Página inicial | ✅ Completo |
+| `contato` | Formulário de contato | ✅ Completo |
+| `blog` | Sistema de blog | 🚧 Opcional |
+| `core` | Configurações Django | ✅ Completo |
+
+## 🧪 Testes
+
+- ✅ **48 testes automatizados**
+- ✅ Pytest configurado com Django
+- ✅ Fixtures reutilizáveis
+- ✅ Coverage completa
+- ✅ Testes de integração
+
+## 🚀 Como Executar
+
+### Pré-requisitos
 ```bash
-# Servidor de desenvolvimento
-python manage.py runserver
+Python 3.12+
+pip
+virtualenv
+```
 
-# Shell Django
-python manage.py shell
+### Instalação
 
-# Criar migrações
-python manage.py makemigrations
+1. Clone o repositório:
+```bash
+git clone <repository-url>
+cd LopesPeinture
+```
 
-# Aplicar migrações
+2. Crie o ambiente virtual:
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+```
+
+3. Instale as dependências:
+```bash
+pip install -r requirements.txt
+```
+
+4. Execute as migrações:
+```bash
 python manage.py migrate
 ```
 
-### Gestão de Usuários
+5. Crie um superusuário:
 ```bash
-# Criar usuários de teste
-python manage.py create_test_users --count=5
-
-# Reset completo do banco
-python manage.py reset_db --confirm
+python manage.py createsuperuser
 ```
 
-### Validação
+6. Execute o servidor:
 ```bash
-# Verificar projeto
-python validate_project.py
-
-# Verificar configurações
-python manage.py check --deploy
+python manage.py runserver
 ```
 
-## 🚀 Deploy
+7. Acesse: `http://localhost:8000`
 
-### Preparação para produção
-1. Configure `ALLOWED_HOSTS` em settings
-2. Defina `DEBUG = False`
-3. Configure banco PostgreSQL
-4. Configure servidor de email
-5. Execute `python manage.py collectstatic`
+## 📝 Configuração Inicial
 
-### Variáveis de ambiente
-```bash
-SECRET_KEY=your-secret-key
-DEBUG=False
-DATABASE_URL=postgres://user:pass@host:port/db
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_HOST_USER=your-email
-EMAIL_HOST_PASSWORD=your-password
-```
+Após a primeira instalação, acesse:
 
-## 📈 Performance
+1. **Admin Django**: `/admin/` - Configure dados iniciais
+2. **System Config**: `/config/` - Configure sua empresa
+   - Preencha informações da empresa
+   - Configure parâmetros Auto-Entrepreneur
+   - Faça upload do logo
+   - Configure email SMTP
+   - Crie listas de referência (civilités, formes juridiques, etc.)
 
-- ✅ Consultas otimizadas com `select_related`
-- ✅ Cache de sessões configurado
-- ✅ Compressão de assets estáticos
-- ✅ Lazy loading de imagens
+## 🎨 Padrões de Design
 
-## 🔒 Segurança
+### Forms
+- Widgets com classes CSS aplicadas diretamente no `Meta.widgets`
+- Constantes para classes reutilizáveis (`INPUT_CLASSES`, `SELECT_CLASSES`, etc.)
+- Validações personalizadas nos clean methods
 
-- ✅ CSRF protection habilitado
-- ✅ SQL injection prevention
-- ✅ XSS protection
-- ✅ Secure headers configurados
-- ✅ Rate limiting pronto
+### Templates
+- Extensão de `base_dashboard.html`
+- Uso de `{{ form.field }}` ao invés de `render_field`
+- Ícones Font Awesome contextuais
+- Boxes informativos coloridos
+- Labels com ícones e textos de ajuda
 
-## 🤝 Contribuição
+### JavaScript
+- Vanilla JS (sem jQuery)
+- Event listeners modernos
+- Scroll suave
+- Cálculos em tempo real
+- Preview dinâmico
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+## 📊 Melhorias Recentes
 
-## 📝 Licença
+### v2.0 - System Config Module (Janeiro 2025)
+- ✅ Módulo completo de configuração do sistema
+- ✅ 4 templates profissionais redesenhados
+- ✅ Interface CRUD moderna para listas de referência
+- ✅ Formulários totalmente estilizados com Tailwind
+- ✅ JavaScript interativo (cálculos, previews, highlights)
+- ✅ Validações robustas em todos os formulários
+- ✅ Documentação completa inline
 
-Este projeto é propriedade da **LOPES PEINTURE**. Todos os direitos reservados.
+### v1.5 - Testing & Bug Fixes
+- ✅ 48 testes automatizados implementados
+- ✅ ProfileForm corrigido e funcionando
+- ✅ Validações melhoradas
+- ✅ Logging implementado
+- ✅ Error handling robusto
 
-## 📞 Suporte
+## 📄 Licença
 
-- **Email**: contact@lopespeinture.com
-- **Telefone**: +33 7 69 27 37 76
-- **Site**: https://lopespeinture.com
+Projeto proprietário - LOPES PEINTURE © 2024-2025
+
+## 👨‍💻 Desenvolvedor
+
+Sistema desenvolvido para LOPES PEINTURE
+- Gestão completa de projetos de pintura
+- Interface moderna e intuitiva
+- Performance otimizada
+- Código limpo e documentado
 
 ---
 
-**Desenvolvido com ❤️ para LOPES PEINTURE**
-
-
-
+**Status**: 🟢 Em Produção  
+**Versão**: 2.0  
+**Última Atualização**: Janeiro 2025

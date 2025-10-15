@@ -1,0 +1,9 @@
+{% extends "emails/base_email.html" %}
+{% block content %}
+  <h2>Nouvelle demande de devis</h2>
+  <p>Bonjour {{ user.get_full_name|default:user.email }},</p>
+  <p>Nous avons bien reçu votre demande de devis.</p>
+  <pre style="white-space: pre-wrap; background:#f9f9f9; padding:10px; border-radius:6px;">{{ quote_data|safe }}</pre>
+  <p style="font-size: 12px; color:#666;">{{ timestamp }}</p>
+{% endblock %}
+

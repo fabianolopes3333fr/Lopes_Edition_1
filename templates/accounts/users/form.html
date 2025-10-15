@@ -1,0 +1,323 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+  <div class="flex items-center gap-3">
+    <span class="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-rose-100 text-red-600 shadow-inner">
+      <i class="fas fa-user-cog"></i>
+    </span>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">{{ page_title }}</h1>
+      <p class="text-sm text-gray-500">Définissez les informations du compte utilisateur et ses permissions.</p>
+    </div>
+  </div>
+  <a href="{% url 'accounts:users_list' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition shadow-sm">
+    <i class="fas fa-arrow-left"></i> Retour à la liste
+  </a>
+</div>
+
+<!-- Info Box -->
+{% if is_create %}
+<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+  <div class="flex items-start gap-3">
+    <i class="fas fa-info-circle text-red-600 text-lg mt-0.5"></i>
+    <div class="text-sm text-gray-700">
+      <p class="font-semibold text-red-900 mb-1">Création d'un nouvel utilisateur</p>
+      <p class="text-xs">
+        Des emails seront envoyés automatiquement:
+        <br>- Un email de <strong>vérification de compte</strong> (obligatoire pour activer l'accès)
+        <br>- Un email pour <strong>définir le mot de passe</strong>
+        <br><em>Assurez-vous que l'adresse email est valide et accessible par l'utilisateur.</em>
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid lg:grid-cols-3 gap-8 mb-10">
+  <!-- Formulaire Principal -->
+  <div class="lg:col-span-2 space-y-6">
+    <form method="post" id="user-form">
+      {% csrf_token %}
+      {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+
+      <!-- Informations de Connexion -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-rose-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+                <i class="fas fa-id-card text-red-600"></i>
+                Informations de Connexion
+              </h2>
+              <p class="text-xs text-gray-500 mt-0.5">Identifiants et type de compte</p>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">Obligatoire</span>
+          </div>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope text-gray-500 mr-1"></i>
+                {{ form.email.label }}
+                {% if form.email.field.required %}<span class="text-red-500">*</span>{% endif %}
+              </label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                {% for e in form.email.errors %}
+                  <p class="mt-1 text-xs text-red-600 flex items-start gap-1">
+                    <i class="fas fa-exclamation-triangle mt-0.5"></i> {{ e }}
+                  </p>
+                {% endfor %}
+              {% else %}
+                <p class="mt-1 text-xs text-gray-500">
+                  <i class="fas fa-info-circle"></i>
+                  L'email servira d'identifiant de connexion
+                </p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.account_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user-tag text-gray-500 mr-1"></i>
+                {{ form.account_type.label }}
+                {% if form.account_type.field.required %}<span class="text-red-500">*</span>{% endif %}
+              </label>
+              {{ form.account_type }}
+              {% if form.account_type.errors %}
+                {% for e in form.account_type.errors %}
+                  <p class="mt-1 text-xs text-red-600 flex items-start gap-1">
+                    <i class="fas fa-exclamation-triangle mt-0.5"></i> {{ e }}
+                  </p>
+                {% endfor %}
+              {% else %}
+                <p class="mt-1 text-xs text-gray-500">
+                  <i class="fas fa-info-circle"></i>
+                  Détermine les permissions de base
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations Personnelles -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+            <i class="fas fa-user text-indigo-600"></i>
+            Informations Personnelles
+          </h2>
+          <p class="text-xs text-gray-500 mt-0.5">Nom et prénom de l'utilisateur</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user text-gray-500 mr-1"></i>
+                {{ form.first_name.label }}
+              </label>
+              {{ form.first_name }}
+              {% for e in form.first_name.errors %}
+                <p class="mt-1 text-xs text-red-600 flex items-start gap-1">
+                  <i class="fas fa-exclamation-triangle mt-0.5"></i> {{ e }}
+                </p>
+              {% endfor %}
+            </div>
+
+            <div>
+              <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user text-gray-500 mr-1"></i>
+                {{ form.last_name.label }}
+              </label>
+              {{ form.last_name }}
+              {% for e in form.last_name.errors %}
+                <p class="mt-1 text-xs text-red-600 flex items-start gap-1">
+                  <i class="fas fa-exclamation-triangle mt-0.5"></i> {{ e }}
+                </p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions et Groupes -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+          <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+            <i class="fas fa-shield-alt text-purple-600"></i>
+            Permissions et Accès
+          </h2>
+          <p class="text-xs text-gray-500 mt-0.5">Statut et groupes de permissions</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+          <!-- Status -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <i class="fas fa-toggle-on text-gray-500"></i>
+              Statut du Compte
+            </h3>
+            <div class="grid md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div class="flex items-center gap-3">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                  <i class="fas fa-user-check text-green-600 mr-1"></i>
+                  Compte Actif
+                </label>
+              </div>
+              <div class="flex items-center gap-3">
+                {{ form.is_staff }}
+                <label for="{{ form.is_staff.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                  <i class="fas fa-user-tie text-blue-600 mr-1"></i>
+                  Staff (Admin)
+                </label>
+              </div>
+              {% if form.fields.is_superuser %}
+              <div class="flex items-center gap-3">
+                {{ form.is_superuser }}
+                <label for="{{ form.is_superuser.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                  <i class="fas fa-crown text-purple-600 mr-1"></i>
+                  Superuser
+                </label>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Groupes -->
+          <div>
+            <label for="{{ form.groups.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-users-cog text-gray-500 mr-1"></i>
+              {{ form.groups.label }}
+            </label>
+            {{ form.groups }}
+            {% if form.groups.help_text %}
+              <p class="mt-1 text-xs text-gray-500">{{ form.groups.help_text }}</p>
+            {% endif %}
+            {% for e in form.groups.errors %}
+              <p class="mt-1 text-xs text-red-600 flex items-start gap-1">
+                <i class="fas fa-exclamation-triangle mt-0.5"></i> {{ e }}
+              </p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons d'Action -->
+      <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div class="text-sm text-gray-500 flex items-center gap-2">
+            <i class="fas fa-asterisk text-red-500 text-xs"></i>
+            <span>Les champs marqués d'un astérisque sont obligatoires</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="{% url 'accounts:users_list' %}" class="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-medium shadow-sm transition">
+              <i class="fas fa-times mr-1"></i>
+              Annuler
+            </a>
+            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg font-medium shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition transform hover:scale-[1.02]">
+              <i class="fas fa-save mr-2"></i>
+              Enregistrer l'utilisateur
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="space-y-6">
+    <!-- Actions Rapides (somente na edição) -->
+    {% if not is_create and user_obj %}
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+          <i class="fas fa-tools text-gray-500"></i>
+          Actions Rapides
+        </h3>
+      </div>
+      <div class="p-4 space-y-2">
+        <a href="{% url 'accounts:user_toggle_active' user_obj.id %}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium {% if user_obj.is_active %}bg-orange-600 hover:bg-orange-700 text-white{% else %}bg-green-600 hover:bg-green-700 text-white{% endif %} transition shadow-sm">
+          {% if user_obj.is_active %}
+            <i class="fas fa-user-slash"></i> Désactiver le compte
+          {% else %}
+            <i class="fas fa-user-check"></i> Activer le compte
+          {% endif %}
+        </a>
+        <a href="{% url 'accounts:user_send_reset' user_obj.id %}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm">
+          <i class="fas fa-key"></i> Réinitialiser mot de passe
+        </a>
+        <a href="{% url 'accounts:user_delete' user_obj.id %}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition shadow-sm" onclick="return confirm('⚠️ Confirmer la suppression de {{ user_obj.email }} ?\n\nCette action est irréversible et supprimera toutes les données associées.');">
+          <i class="fas fa-trash-alt"></i> Supprimer l'utilisateur
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Bonnes Pratiques -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="fas fa-lightbulb text-indigo-600 text-lg mt-0.5"></i>
+        <div class="text-sm text-gray-700">
+          <p class="font-semibold text-indigo-900 mb-2">Bonnes Pratiques</p>
+          <ul class="space-y-2 text-xs">
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check-circle text-indigo-600 mt-0.5"></i>
+              <span>Utilisez des emails professionnels pour les comptes internes</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check-circle text-indigo-600 mt-0.5"></i>
+              <span>Attribuez le type de compte minimal nécessaire</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check-circle text-indigo-600 mt-0.5"></i>
+              <span>Préférez l'envoi de lien pour définir les mots de passe</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check-circle text-indigo-600 mt-0.5"></i>
+              <span>Vérifiez régulièrement les permissions des utilisateurs</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aide Types de Compte -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <div class="flex items-start gap-3">
+        <i class="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
+        <div class="text-xs text-gray-700">
+          <p class="font-semibold text-blue-900 mb-2">Types de Compte</p>
+          <div class="space-y-2">
+            <div>
+              <p class="font-medium text-green-700">
+                <i class="fas fa-user"></i> Client
+              </p>
+              <p class="text-gray-600">Accès limité à ses propres projets et devis</p>
+            </div>
+            <div>
+              <p class="font-medium text-blue-700">
+                <i class="fas fa-user-tie"></i> Collaborateur
+              </p>
+              <p class="text-gray-600">Gestion des projets, clients et devis</p>
+            </div>
+            <div>
+              <p class="font-medium text-purple-700">
+                <i class="fas fa-user-shield"></i> Administrateur
+              </p>
+              <p class="text-gray-600">Accès complet incluant configuration</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

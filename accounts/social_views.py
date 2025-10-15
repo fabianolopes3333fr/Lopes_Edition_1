@@ -3,13 +3,10 @@ Views customizadas para login social
 """
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.urls import reverse
-from django.contrib.auth import login
 from django.http import JsonResponse
 from allauth.socialaccount.models import SocialAccount
-from allauth.socialaccount.helpers import complete_social_login
-from .models import User
 import logging
+from utils.emails.sistema_email import send_social_disconnect_email
 
 logger = logging.getLogger('accounts')
 
@@ -118,6 +115,12 @@ def disconnect_social_account(request, provider):
         )
 
         logger.info(f"Usuário {request.user.email} desconectou conta {provider}")
+
+        # Notificar por email (falha silenciosa)
+        try:
+            send_social_disconnect_email(request.user, provider, request)
+        except Exception:
+            pass
 
     except SocialAccount.DoesNotExist:
         messages.error(request, "Conta social não encontrada.")

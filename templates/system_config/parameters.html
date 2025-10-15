@@ -504,6 +504,7 @@
     </div>
   </div>
 </div>
+
 <script>
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach(btn => btn.addEventListener('click', () => {
@@ -519,8 +520,41 @@
   }));
 
   // Função para testar conexão email
-  function testEmailConnection() {
-    alert('Funcionalidade de teste em desenvolvimento.\nVerifique se os dados estão corretos e salve a configuração.');
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  async function testEmailConnection() {
+    const url = "{% url 'system_config:test_email' %}";
+    const csrftoken = getCookie('csrftoken');
+    const btn = event.currentTarget;
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Test en cours...';
+    try {
+      const res = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrftoken } });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(data.message || 'Test réussi.');
+      } else {
+        alert(data.message || 'Le test a échoué.');
+      }
+    } catch (e) {
+      alert('Erreur inattendue: ' + e);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
   }
 
   // Calcular totais automaticamente

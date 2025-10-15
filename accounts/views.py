@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 # Create your views here.
 import logging
 from django.shortcuts import render, redirect
@@ -27,7 +25,13 @@ from .forms import (
 from utils.emails.sistema_email import (
     send_password_reset_email,
     send_password_changed_email,
+    send_welcome_email,
 )
+# Novo: enviar verificação de email via allauth
+try:
+    from allauth.account.utils import send_email_confirmation
+except Exception:  # fallback se allauth indisponível
+    send_email_confirmation = None
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +68,21 @@ class RegisterView(CreateView):
             # Salvar usuário (signals criarão perfil e grupos automaticamente)
             user = form.save()
 
+            # Enviar email de boas-vindas (falha silenciosa se ocorrer erro)
+            try:
+                send_welcome_email(user, self.request)
+            except Exception as e:
+                logger.warning(f"Falha ao enviar email de boas-vindas para {user.email}: {e}")
+
+            # Enviar email de verificação (allauth), se disponível
+            try:
+                if send_email_confirmation is not None:
+                    send_email_confirmation(self.request, user)
+                else:
+                    logger.info("allauth não disponível para enviar verificação de email.")
+            except Exception as e:
+                logger.warning(f"Falha ao enviar email de verificação para {user.email}: {e}")
+
             # Log da criação
             logger.info(
                 f"Novo usuário criado: {user.email} - Tipo: {user.account_type}"
@@ -72,7 +91,7 @@ class RegisterView(CreateView):
             # Mensagem de sucesso
             messages.success(
                 self.request,
-                f"Compte créé avec succès! Bienvenue {user.first_name}. Vous pouvez maintenant vous connecter.",
+                f"Compte créé avec succès! Bienvenue {user.first_name}. Vérifiez votre email pour confirmer votre compte.",
             )
 
             return redirect(self.success_url)
@@ -290,7 +309,7 @@ def password_reset(request):
                     "Un email avec les instructions de réinitialisation a été envoyé."
                 )
 
-                return redirect("accounts:login")
+                return redirect("accounts:password_reset_done")
 
             except User.DoesNotExist:
                 # Por segurança, não revelar se o email existe
@@ -298,7 +317,7 @@ def password_reset(request):
                     request,
                     "Un email avec les instructions de réinitialisation a été envoyé."
                 )
-                return redirect("accounts:login")
+                return redirect("accounts:password_reset_done")
 
         else:
             messages.error(request, "Veuillez corriger les erreurs.")
@@ -335,10 +354,10 @@ def password_reset_confirm(request, uidb64, token):
         else:
             form = PasswordResetConfirmForm(user)
 
-        return render(request, "accounts/password_reset_confirm.html", {"form": form})
+        return render(request, "accounts/password_reset_confirm.html", {"form": form, "validlink": True})
     else:
-        messages.error(request, "Le lien de réinitialisation est invalide ou expiré.")
-        return redirect("accounts:password_reset")
+        # Renderizar o mesmo template em modo de link inválido para orientar o usuário
+        return render(request, "accounts/password_reset_confirm.html", {"validlink": False})
 
 
 @require_http_methods(["GET"])
@@ -380,6 +399,7 @@ def password_change(request):
 
 
 @require_http_methods(["GET"])
+
 def check_email_availability(request):
     """Verificar disponibilidade de email via AJAX"""
 

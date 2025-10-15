@@ -8,5 +8,5 @@ urlpatterns = [
     path('configuration/societe/', views.company_settings_view, name='company_settings'),
     path('configuration/listes/<slug:slug>/', views.list_generic, name='list_generic'),
     path('configuration/parametres/', views.parameters_view, name='parameters'),
+    path('configuration/parametres/test-email/', views.test_email_settings, name='test_email'),
 ]
-

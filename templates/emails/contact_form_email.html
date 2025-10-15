@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}
+{% block content %}
+  <h2>Nouveau message de contact</h2>
+  <p><strong>Nom:</strong> {{ name }}</p>
+  <p><strong>Email:</strong> {{ email }}</p>
+  <p><strong>Sujet:</strong> {{ subject }}</p>
+  <p><strong>Message:</strong></p>
+  <p style="white-space: pre-line;">{{ message }}</p>
+  <hr>
+  <p style="font-size: 12px; color:#666;">IP: {{ ip_address }} | {{ timestamp }}</p>
+{% endblock %}
+

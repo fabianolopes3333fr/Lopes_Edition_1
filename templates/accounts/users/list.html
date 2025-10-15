@@ -1,0 +1,336 @@
+{% extends 'base_dashboard.html' %}
+{% block title %}Utilisateurs{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+  <div class="flex items-center gap-3">
+    <span class="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-rose-100 text-red-600 shadow-inner">
+      <i class="fas fa-user-shield"></i>
+    </span>
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Utilisateurs</h1>
+      <p class="text-sm text-gray-500">Gérez les comptes, permissions et accès de la plateforme.</p>
+    </div>
+  </div>
+  <a href="{% url 'accounts:user_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition shadow-sm">
+    <i class="fas fa-user-plus"></i> Nouvel utilisateur
+  </a>
+</div>
+
+<!-- Info Box -->
+<div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+  <div class="flex items-start gap-3">
+    <i class="fas fa-shield-alt text-red-600 text-lg mt-0.5"></i>
+    <div class="text-sm text-gray-700">
+      <p class="font-semibold text-red-900 mb-1">Gestion des Utilisateurs</p>
+      <p class="text-xs">
+        Cette section vous permet de gérer tous les comptes utilisateurs du système. Vous pouvez créer, modifier, activer/désactiver et supprimer des comptes.
+        Attention: la suppression d'un utilisateur est irréversible.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-6">
+  <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-red-50 to-rose-50">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+        <i class="fas fa-filter text-red-600"></i>
+        Filtres de Recherche
+      </h2>
+      <span class="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 font-semibold">
+        {{ total_count }} résultat{{ total_count|pluralize }}
+      </span>
+    </div>
+  </div>
+  
+  <form method="get" class="p-6">
+    <div class="grid md:grid-cols-4 gap-4">
+      <div>
+        <label for="search-input" class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-search text-gray-500 mr-1"></i>
+          Recherche
+        </label>
+        <input
+          type="text"
+          id="search-input"
+          name="q"
+          value="{{ query }}"
+          placeholder="Nom, email ou username"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+        />
+      </div>
+      
+      <div>
+        <label for="type-select" class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-user-tag text-gray-500 mr-1"></i>
+          Type de compte
+        </label>
+        <select
+          name="type"
+          id="type-select"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+        >
+          <option value="">Tous les types</option>
+          <option value="CLIENT" {% if filter_type == 'CLIENT' %}selected{% endif %}>Client</option>
+          <option value="COLLABORATOR" {% if filter_type == 'COLLABORATOR' %}selected{% endif %}>Collaborateur</option>
+          <option value="ADMINISTRATOR" {% if filter_type == 'ADMINISTRATOR' %}selected{% endif %}>Administrateur</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="status-select" class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-toggle-on text-gray-500 mr-1"></i>
+          Statut
+        </label>
+        <select
+          name="status"
+          id="status-select"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+        >
+          <option value="">Tous les statuts</option>
+          <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Actif</option>
+          <option value="inactive" {% if filter_status == 'inactive' %}selected{% endif %}>Inactif</option>
+        </select>
+      </div>
+      
+      <div class="flex items-end gap-2">
+        <button type="submit" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium shadow-sm transition">
+          <i class="fas fa-search mr-2"></i>Filtrer
+        </button>
+        {% if query or filter_type or filter_status %}
+        <a href="{% url 'accounts:users_list' %}" class="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+          <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Tableau -->
+<div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-10">
+  <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+        <i class="fas fa-users text-red-600"></i>
+        Liste des Utilisateurs
+      </h2>
+      <div class="flex items-center gap-2 text-xs text-gray-500">
+        <i class="fas fa-info-circle"></i>
+        <span>Cliquez sur une action pour gérer l'utilisateur</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+        <tr class="divide-x divide-gray-200">
+          <th class="px-4 py-3 text-left font-semibold">
+            <i class="fas fa-user mr-1"></i> Utilisateur
+          </th>
+          <th class="px-4 py-3 text-left font-semibold">
+            <i class="fas fa-envelope mr-1"></i> Email
+          </th>
+          <th class="px-4 py-3 text-left font-semibold">
+            <i class="fas fa-tag mr-1"></i> Type
+          </th>
+          <th class="px-4 py-3 text-left font-semibold">
+            <i class="fas fa-users-cog mr-1"></i> Groupes
+          </th>
+          <th class="px-4 py-3 text-center font-semibold">
+            <i class="fas fa-toggle-on mr-1"></i> Statut
+          </th>
+          <th class="px-4 py-3 text-left font-semibold">
+            <i class="fas fa-calendar mr-1"></i> Créé
+          </th>
+          <th class="px-4 py-3 text-right font-semibold">
+            <i class="fas fa-cog mr-1"></i> Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100 bg-white">
+        {% for u in users %}
+        <tr class="hover:bg-red-50 transition-colors">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-red-100 to-rose-100 rounded-full flex items-center justify-center text-red-600 font-semibold">
+                {{ u.first_name.0|default:u.email.0|upper }}
+              </div>
+              <div>
+                <p class="font-medium text-gray-800">{{ u.get_full_name|default:u.username }}</p>
+                {% if u.is_superuser %}
+                  <span class="text-xs text-purple-600 flex items-center gap-1">
+                    <i class="fas fa-crown"></i> Superuser
+                  </span>
+                {% elif u.is_staff %}
+                  <span class="text-xs text-blue-600 flex items-center gap-1">
+                    <i class="fas fa-star"></i> Staff
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-gray-700">
+            <i class="fas fa-at text-gray-400 mr-1"></i>
+            {{ u.email }}
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold
+              {% if u.account_type == 'ADMINISTRATOR' %} bg-purple-100 text-purple-700
+              {% elif u.account_type == 'COLLABORATOR' %} bg-blue-100 text-blue-700
+              {% else %} bg-green-100 text-green-700{% endif %}">
+              {% if u.account_type == 'ADMINISTRATOR' %}
+                <i class="fas fa-user-shield"></i>
+              {% elif u.account_type == 'COLLABORATOR' %}
+                <i class="fas fa-user-tie"></i>
+              {% else %}
+                <i class="fas fa-user"></i>
+              {% endif %}
+              {{ u.get_account_type_display }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            {% if u.groups.all %}
+              <div class="flex flex-wrap gap-1">
+                {% for g in u.groups.all %}
+                  <span class="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded border border-gray-200">
+                    <i class="fas fa-users text-gray-500"></i> {{ g.name }}
+                  </span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <span class="text-xs text-gray-400 italic">Aucun groupe</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-center">
+            {% if u.is_active %}
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+              <i class="fas fa-check-circle"></i> Actif
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+              <i class="fas fa-times-circle"></i> Inactif
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 text-gray-600 text-xs">
+            <i class="fas fa-calendar-alt text-gray-400 mr-1"></i>
+            {{ u.date_joined|date:'d/m/Y' }}
+            <br>
+            <span class="text-gray-400">{{ u.date_joined|date:'H:i' }}</span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-end gap-1 flex-wrap">
+              <a href="{% url 'accounts:user_edit' u.id %}"
+                 class="inline-flex items-center gap-1 px-2 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
+                 title="Éditer l'utilisateur">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="{% url 'accounts:user_toggle_active' u.id %}"
+                 class="inline-flex items-center gap-1 px-2 py-1.5 text-xs {% if u.is_active %}bg-orange-600 hover:bg-orange-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white rounded-lg transition shadow-sm"
+                 title="{% if u.is_active %}Désactiver{% else %}Activer{% endif %}">
+                <i class="fas fa-{% if u.is_active %}user-slash{% else %}user-check{% endif %}"></i>
+              </a>
+              <a href="{% url 'accounts:user_send_reset' u.id %}"
+                 class="inline-flex items-center gap-1 px-2 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-sm"
+                 title="Réinitialiser le mot de passe">
+                <i class="fas fa-key"></i>
+              </a>
+              <a href="{% url 'accounts:user_delete' u.id %}"
+                 class="inline-flex items-center gap-1 px-2 py-1.5 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-sm"
+                 onclick="return confirm('⚠️ Confirmer la suppression de {{ u.email }} ?\n\nCette action est irréversible et supprimera toutes les données associées.');"
+                 title="Supprimer l'utilisateur">
+                <i class="fas fa-trash-alt"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-4 py-16">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-gray-400 text-2xl"></i>
+              </div>
+              <div class="text-center">
+                <p class="text-gray-600 font-medium">Aucun utilisateur trouvé</p>
+                <p class="text-xs text-gray-500 mt-1">
+                  {% if query or filter_type or filter_status %}
+                    Essayez de modifier vos critères de recherche
+                  {% else %}
+                    Commencez par créer un nouvel utilisateur
+                  {% endif %}
+                </p>
+              </div>
+              {% if not query and not filter_type and not filter_status %}
+              <a href="{% url 'accounts:user_create' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition shadow-sm mt-2">
+                <i class="fas fa-user-plus"></i> Créer le premier utilisateur
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Statistiques -->
+{% if users %}
+<div class="grid md:grid-cols-4 gap-4 mb-10">
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Total</p>
+        <p class="text-2xl font-bold text-gray-900">{{ total_count }}</p>
+      </div>
+      <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-users text-blue-600"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Actifs</p>
+        <p class="text-2xl font-bold text-green-600">{{ active_count }}</p>
+      </div>
+      <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-user-check text-green-600"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Admins</p>
+        <p class="text-2xl font-bold text-purple-600">{{ admins_count }}</p>
+      </div>
+      <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-user-shield text-purple-600"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wide">Clients</p>
+        <p class="text-2xl font-bold text-green-600">{{ clients_count }}</p>
+      </div>
+      <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-user text-green-600"></i>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

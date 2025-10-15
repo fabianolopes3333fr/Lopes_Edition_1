@@ -149,3 +149,22 @@ def add_user_to_group(user):
 
 # ✅ REMOVIDO: Signal que causava recursão
 # O signal de update_user_group_on_type_change foi removido para evitar loops
+
+# ==================== ATIVAÇÃO APÓS CONFIRMAÇÃO DE EMAIL (ALLAUTH) ====================
+try:
+    from allauth.account.signals import email_confirmed
+except Exception:
+    email_confirmed = None
+
+if email_confirmed is not None:
+    @receiver(email_confirmed)
+    def activate_user_on_email_confirm(sender, request, email_address, **kwargs):
+        """Ativa o usuário quando o email é confirmado via allauth."""
+        try:
+            user = email_address.user
+            if not user.is_active:
+                user.is_active = True
+                user.save(update_fields=["is_active"])
+                logger.info(f"Usuário {user.email} ativado após confirmação de email.")
+        except Exception as e:
+            logger.error(f"Erro ao ativar usuário após confirmação de email: {e}")

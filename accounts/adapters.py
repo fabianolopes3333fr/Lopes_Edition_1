@@ -9,6 +9,10 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from .models import User
 
+# Novo: usar nosso sistema de e-mails para verificação
+from utils.emails.sistema_email import send_verification_email
+from django.conf import settings
+
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     """
@@ -36,6 +40,33 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             user.save()
 
         return user
+
+    # Novo: enviar e-mail de confirmação via nosso sistema
+    def send_confirmation_mail(self, request, emailconfirmation, signup):  # type: ignore[override]
+        """
+        Envia o e-mail de confirmação usando nosso sistema de e-mails (HTML),
+        respeitando backends de teste/dev e SMTP do banco em produção.
+        """
+        user = emailconfirmation.email_address.user
+        # Construir URL de confirmação
+        try:
+            key = emailconfirmation.key
+            path = reverse("account_confirm_email", args=[key])
+            if hasattr(request, "build_absolute_uri"):
+                confirm_url = request.build_absolute_uri(path)
+            else:
+                site_url = getattr(settings, "SITE_URL", "")
+                confirm_url = f"{site_url.rstrip('/')}{path}"
+        except Exception:
+            # Fallback conservador
+            confirm_url = getattr(settings, "SITE_URL", "")
+
+        # Enviar email via nosso sistema (falha silenciosa registrada internamente)
+        try:
+            send_verification_email(user, confirm_url, request)
+        except Exception:
+            # Se algo sair errado, delegar ao comportamento padrão como fallback
+            super().send_confirmation_mail(request, emailconfirmation, signup)
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import social_views
 from . import settings_views
+from . import admin_users_views
 
 app_name = "accounts"
 
@@ -73,13 +74,21 @@ urlpatterns = [
     # ==================== DASHBOARD ====================
     # Dashboard principal
     path("dashboard/", views.dashboard, name="dashboard"),
-    # Perfil básico (redirecionará para profiles app)
+
+    # ==================== ADMIN - UTILISATEURS ====================
+    path("users/", admin_users_views.users_list, name="users_list"),
+    path("users/new/", admin_users_views.user_create, name="user_create"),
+    path("users/<int:user_id>/edit/", admin_users_views.user_edit, name="user_edit"),
+    path("users/<int:user_id>/toggle-active/", admin_users_views.user_toggle_active, name="user_toggle_active"),
+    path("users/<int:user_id>/send-reset/", admin_users_views.user_send_reset, name="user_send_reset"),
+    path("users/<int:user_id>/delete/", admin_users_views.user_delete, name="user_delete"),
 
     # ==================== AJAX ENDPOINTS ====================
     # Logout via AJAX
     path("ajax/logout/", views.ajax_logout, name="ajax_logout"),
     # Verificação de disponibilidade de email
     path("ajax/check-email/", views.check_email_availability, name="check_email"),
+
     # ==================== REDIRECTS ÚTEIS ====================
     # Redirect para dashboard (URL amigável)
     path("", views.dashboard, name="index"),

@@ -1,84 +1,13 @@
 {% extends 'base_dashboard.html' %} {% load static %} {% block title %}Modifier mon Profil - {{
 user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
 <style>
-  /* ✅ CORRIGIDO: CSS para evitar sobreposições */
-  .form-field {
-    position: relative;
-    margin-bottom: 1.5rem;
-  }
-
-  .form-field .field-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  .form-field.has-textarea .field-icon {
-    top: 1rem;
-    transform: none;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.75rem;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    background-color: white;
-  }
-
-  .form-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .form-input.error {
-    border-color: #ef4444;
-  }
-
-  .custom-file-upload {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
-    background-color: white;
-    color: #374151;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .custom-file-upload:hover {
-    background-color: #f9fafb;
-    border-color: #d1d5db;
-  }
-
-  .avatar-preview {
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid #e5e7eb;
-  }
-
-  .avatar-placeholder {
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 1.125rem;
-    border: 4px solid #e5e7eb;
-  }
+  /* Mantém somente estilos essenciais dos campos */
+  .form-field { position: relative; margin-bottom: 1.5rem; }
+  .form-field .field-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 10; pointer-events: none; }
+  .form-field.has-textarea .field-icon { top: 1rem; transform: none; }
+  .form-input { width: 100%; padding: 0.75rem 1rem 0.75rem 3rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 0.875rem; transition: all 0.2s; background-color: white; }
+  .form-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .form-input.error { border-color: #ef4444; }
 </style>
 {% endblock %} {% block content %}
 <div class="min-h-screen bg-gray-50 py-8">
@@ -144,45 +73,36 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
             <i class="fas fa-camera mr-3 text-blue-600"></i>
             Photo de profil
           </h2>
-          <p class="mt-1 text-sm text-gray-600">
-            Ajoutez une photo pour personnaliser votre profil
-          </p>
+          <p class="mt-1 text-sm text-gray-600">Ajoutez une photo pour personnaliser votre profil</p>
         </div>
 
         <div class="p-6">
-          <div class="flex items-center space-x-6">
+          <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
             <!-- Avatar atual -->
             <div class="flex-shrink-0">
               {% if profile.avatar %}
-              <img
-                id="avatar-preview"
-                class="avatar-preview"
-                src="{{ profile.avatar.url }}"
-                alt="{{ user.get_full_name }}"
-              />
+              <img id="avatar-preview" class="avatar-preview h-24 w-24 rounded-full object-cover border-4 border-gray-200 shadow" src="{{ profile.avatar.url }}" alt="{{ user.get_full_name }}" />
               {% else %}
-              <div id="avatar-preview" class="avatar-placeholder">{{ profile.initials }}</div>
+              <div id="avatar-preview" class="avatar-placeholder h-24 w-24 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-2xl font-semibold shadow">
+                {{ profile.initials }}
+              </div>
               {% endif %}
             </div>
 
-            <!-- Upload -->
-            <div class="flex-1">
-              <div class="form-field">
-                {{ form.avatar }}
-                <label for="{{ form.avatar.id_for_label }}" class="custom-file-upload">
-                  <i class="fas fa-upload mr-2"></i>
-                  Choisir une photo
-                </label>
-              </div>
-
-              <p class="mt-2 text-xs text-gray-500">{{ form.avatar.help_text }}</p>
+            <!-- Upload / Dropzone -->
+            <div class="flex-1 w-full">
+              <div class="hidden">{{ form.avatar }}</div>
+              <label for="{{ form.avatar.id_for_label }}" id="avatar-dropzone" class="cursor-pointer w-full border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center gap-3 text-center hover:border-blue-400 hover:bg-blue-50 transition">
+                <i class="fas fa-cloud-upload-alt text-3xl text-blue-500"></i>
+                <span class="text-sm font-medium text-gray-700">Cliquez ou déposez une image</span>
+                <span class="text-xs text-gray-500">JPG, PNG ou GIF • Max 2MB</span>
+              </label>
+              <p id="avatar-file-name" class="mt-2 text-xs text-gray-500"></p>
 
               {% if form.avatar.errors %}
               <div class="mt-2 text-sm text-red-600">
                 {% for error in form.avatar.errors %}
-                <p class="flex items-center">
-                  <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
-                </p>
+                <p class="flex items-center"><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</p>
                 {% endfor %}
               </div>
               {% endif %}
@@ -216,7 +136,7 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
               </label>
 
               <div class="form-field">
-                <i class="fas fa-phone field-icon"></i>
+                
                 <input
                   type="tel"
                   id="{{ form.phone.id_for_label }}"
@@ -255,7 +175,7 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
               </label>
 
               <div class="form-field has-textarea">
-                <i class="fas fa-map-marker-alt field-icon"></i>
+                
                 <textarea
                   id="{{ form.address.id_for_label }}"
                   name="{{ form.address.html_name }}"
@@ -294,7 +214,7 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
               </label>
 
               <div class="form-field">
-                <i class="fas fa-city field-icon"></i>
+                
                 <input
                   type="text"
                   id="{{ form.city.id_for_label }}"
@@ -331,7 +251,7 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
               </label>
 
               <div class="form-field">
-                <i class="fas fa-mail-bulk field-icon"></i>
+                
                 <input
                   type="text"
                   id="{{ form.postal_code.id_for_label }}"
@@ -372,7 +292,7 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
               </label>
 
               <div class="form-field">
-                <i class="fas fa-flag field-icon"></i>
+                
                 <input
                   type="text"
                   id="{{ form.country.id_for_label }}"
@@ -504,8 +424,9 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
                 <!-- Botão básico sem classes especiais -->
                 <input
                   type="submit"
+                  id="submit-button"
                   value="Enregistrer les modifications"
-                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 cursor-pointer"
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 cursor-pointer flex items-center gap-2"
                 />
               </div>
             </div>
@@ -537,125 +458,88 @@ user.get_full_name }} - {{ block.super }}{% endblock %} {% block extra_css %}
 </div>
 {% endblock %} {% block extra_js %}
 <script>
-  // ✅ CORRIGIDO: JavaScript sem conflitos
   document.addEventListener('DOMContentLoaded', function () {
-    // Preview da imagem do avatar
-    const avatarInput = document.getElementById('{{ form.avatar.id_for_label }}');
-    const avatarPreview = document.getElementById('avatar-preview');
+    const fileInput = document.getElementById('{{ form.avatar.id_for_label }}');
+    const dropzone = document.getElementById('avatar-dropzone');
+    const preview = document.getElementById('avatar-preview');
+    const fileNameLabel = document.getElementById('avatar-file-name');
 
-    if (avatarInput && avatarPreview) {
-      avatarInput.addEventListener('change', function (e) {
-        const file = e.target.files[0];
+    function validateFile(file){
+      if(!file.type.startsWith('image/')){ toast('Fichier non supporté','error'); if(fileInput) fileInput.value=''; return false; }
+      if(file.size > 2097152){ toast('Fichier trop volumineux (max 2MB)','error'); if(fileInput) fileInput.value=''; return false; }
+      return true;
+    }
 
-        if (file) {
-          // Verificar tipo de arquivo
-          if (!file.type.startsWith('image/')) {
-            alert('Veuillez sélectionner un fichier image valide.');
-            this.value = '';
-            return;
-          }
+    function updatePreview(file){
+      const reader = new FileReader();
+      reader.onload = e => {
+        if(preview.tagName === 'IMG'){
+          preview.src = e.target.result;
+        } else {
+          const img = document.createElement('img');
+            img.id = 'avatar-preview';
+            img.className = 'avatar-preview h-24 w-24 rounded-full object-cover border-4 border-gray-200 shadow';
+            img.src = e.target.result;
+            img.alt = '{{ user.get_full_name }}';
+            preview.parentNode.replaceChild(img, preview);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
 
-          // Verificar tamanho (2MB = 2097152 bytes)
-          if (file.size > 2097152) {
-            alert('La taille du fichier ne doit pas dépasser 2MB.');
-            this.value = '';
-            return;
-          }
+    function handleFiles(files){
+      if(!files || !files.length) return;
+      const file = files[0];
+      if(!validateFile(file)) return;
+      fileNameLabel.textContent = file.name;
+      updatePreview(file);
+    }
 
-          // Preview da imagem
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            // Criar ou atualizar img elemento
-            if (avatarPreview.tagName === 'DIV') {
-              // Substituir div por img
-              const img = document.createElement('img');
-              img.id = 'avatar-preview';
-              img.className = 'avatar-preview';
-              img.src = e.target.result;
-              img.alt = '{{ user.get_full_name }}';
-              avatarPreview.parentNode.replaceChild(img, avatarPreview);
-            } else {
-              // Atualizar img existente
-              avatarPreview.src = e.target.result;
-            }
-          };
-          reader.readAsDataURL(file);
+    if(fileInput){
+      // Garantir accept correto
+      fileInput.setAttribute('accept','image/*');
+      fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    }
+
+    // Drag & Drop
+    if(dropzone){
+      ['dragenter','dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('border-blue-400','bg-blue-50'); });
+      });
+      ['dragleave','drop'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('border-blue-400','bg-blue-50'); });
+      });
+      dropzone.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if(dt && dt.files){
+          fileInput.files = dt.files; // atribui arquivos
+          handleFiles(dt.files);
         }
       });
     }
 
-    // Auto-formatação do telefone francês
-    const phoneInput = document.getElementById('{{ form.phone.id_for_label }}');
-    if (phoneInput) {
-      phoneInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-
-        // Formatação automática
-        if (value.length === 10 && value.startsWith('0')) {
-          value = '+33' + value.substring(1);
-        }
-
-        if (value.startsWith('33') && !value.startsWith('+33')) {
-          value = '+' + value;
-        }
-
-        // Aplicar formatação: +33 1 23 45 67 89
-        if (value.startsWith('+33') && value.length >= 12) {
-          value = value.replace(/(\+33)(\d{1})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5 $6');
-        }
-
-        e.target.value = value;
-      });
+    // Toast simples reutilizável
+    function toast(msg,type='info'){
+      const existing = document.getElementById('simple-toast');
+      if(existing) existing.remove();
+      const colors = {success:'bg-green-600', error:'bg-red-600', info:'bg-blue-600'};
+      const div = document.createElement('div');
+      div.id='simple-toast';
+      div.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white text-sm shadow-lg ${colors[type]||colors.info} animate-fade`;
+      div.textContent = msg;
+      document.body.appendChild(div);
+      setTimeout(()=>{ div.classList.add('opacity-0'); setTimeout(()=>div.remove(),300); },3000);
     }
 
-    // Validação do código postal francês
-    const postalInput = document.getElementById('{{ form.postal_code.id_for_label }}');
-    if (postalInput) {
-      postalInput.addEventListener('input', function (e) {
-        // Permitir apenas números
-        e.target.value = e.target.value.replace(/\D/g, '');
-
-        // Limitar a 5 dígitos
-        if (e.target.value.length > 5) {
-          e.target.value = e.target.value.substring(0, 5);
-        }
-      });
-    }
-
-    // Loading no botão de submit
+    // Submissão (já existente) + melhorias
     const form = document.querySelector('form');
     const submitButton = document.getElementById('submit-button');
-
-    if (form && submitButton) {
-      form.addEventListener('submit', function (e) {
-        // Mostrar loading
+    if(form && submitButton){
+      form.addEventListener('submit', ()=>{
         submitButton.disabled = true;
-        submitButton.innerHTML =
-          '<i class="fas fa-spinner fa-spin mr-2"></i>Sauvegarde en cours...';
-
-        // Fallback para reativar botão
-        setTimeout(() => {
-          if (submitButton.disabled) {
-            submitButton.disabled = false;
-            submitButton.innerHTML =
-              '<i class="fas fa-save mr-2"></i>Sauvegarder les modifications';
-          }
-        }, 10000);
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
       });
     }
-
-    // Animações de foco nos inputs
-    const inputs = document.querySelectorAll('.form-input');
-    inputs.forEach((input) => {
-      input.addEventListener('focus', function () {
-        this.parentElement.classList.add('focused');
-      });
-
-      input.addEventListener('blur', function () {
-        this.parentElement.classList.remove('focused');
-      });
-    });
   });
 </script>
-
 {% endblock %}

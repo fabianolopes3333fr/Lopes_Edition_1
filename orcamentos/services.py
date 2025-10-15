@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.core.signing import TimestampSigner
 from .models import Notificacao, TipoNotificacao
+# Novo: usar conexão e remetente centralizados
+from utils.emails.sistema_email import _get_smtp_connection, _get_from_email
 
 User = get_user_model()
 
@@ -35,6 +37,10 @@ class NotificationService:
             'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
         }
 
+        # Conexão e from_email padronizados
+        connection = _get_smtp_connection()
+        from_email = _get_from_email() or settings.DEFAULT_FROM_EMAIL
+
         for admin in admins:
             # Criar notificação visual - URL corrigida
             NotificationService.criar_notificacao(
@@ -52,10 +58,11 @@ class NotificationService:
                 send_mail(
                     subject=f"Nouvelle demande de devis #{solicitacao.numero}",
                     message=f"Une nouvelle demande de devis a été reçue de {solicitacao.nome_solicitante}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    from_email=from_email,
                     recipient_list=[admin.email],
                     html_message=html_content,
-                    fail_silently=False
+                    fail_silently=False,
+                    connection=connection,
                 )
             except Exception as e:
                 print(f"Erro ao enviar email para {admin.email}: {e}")
@@ -101,16 +108,21 @@ class NotificationService:
                 orcamento=orcamento
             )
 
+        # Conexão e from_email padronizados
+        connection = _get_smtp_connection()
+        from_email = _get_from_email() or settings.DEFAULT_FROM_EMAIL
+
         # Enviar email (sempre para o email do solicitante)
         try:
             html_content = render_to_string('orcamentos/emails/orcamento_enviado_cliente.html', context)
             send_mail(
                 subject=f"Votre devis #{orcamento.numero} - LOPES PEINTURE",
                 message=f"Votre devis #{orcamento.numero} est maintenant disponible",
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=from_email,
                 recipient_list=[orcamento.solicitacao.email_solicitante],
                 html_message=html_content,
-                fail_silently=False
+                fail_silently=False,
+                connection=connection,
             )
         except Exception as e:
             print(f"Erro ao enviar email para {orcamento.solicitacao.email_solicitante}: {e}")
@@ -124,6 +136,9 @@ class NotificationService:
             'orcamento': orcamento,
             'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
         }
+
+        connection = _get_smtp_connection()
+        from_email = _get_from_email() or settings.DEFAULT_FROM_EMAIL
 
         for admin in admins:
             # Criar notificação visual - URL corrigida
@@ -142,10 +157,11 @@ class NotificationService:
                 send_mail(
                     subject=f"Devis #{orcamento.numero} accepté - LOPES PEINTURE",
                     message=f"Le devis #{orcamento.numero} a été accepté",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    from_email=from_email,
                     recipient_list=[admin.email],
                     html_message=html_content,
-                    fail_silently=False
+                    fail_silently=False,
+                    connection=connection,
                 )
             except Exception as e:
                 print(f"Erro ao enviar email para {admin.email}: {e}")
@@ -159,6 +175,9 @@ class NotificationService:
             'orcamento': orcamento,
             'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000')
         }
+
+        connection = _get_smtp_connection()
+        from_email = _get_from_email() or settings.DEFAULT_FROM_EMAIL
 
         for admin in admins:
             # Criar notificação visual - URL corrigida
@@ -177,10 +196,11 @@ class NotificationService:
                 send_mail(
                     subject=f"Devis #{orcamento.numero} refusé - LOPES PEINTURE",
                     message=f"Le devis #{orcamento.numero} a été refusé",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    from_email=from_email,
                     recipient_list=[admin.email],
                     html_message=html_content,
-                    fail_silently=False
+                    fail_silently=False,
+                    connection=connection,
                 )
             except Exception as e:
                 print(f"Erro ao enviar email para {admin.email}: {e}")
@@ -242,14 +262,18 @@ class NotificationService:
                 f"{'s' if plural else ''} à votre compte."
             )
 
+            connection = _get_smtp_connection()
+            from_email = _get_from_email() or settings.DEFAULT_FROM_EMAIL
+
             # Passar recipient_list e fail_silently como kwargs para satisfazer asserts dos testes
             send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+                from_email,
                 recipient_list=[usuario.email],
                 html_message=html_content,
-                fail_silently=True
+                fail_silently=True,
+                connection=connection,
             )
         except Exception as e:
             import logging

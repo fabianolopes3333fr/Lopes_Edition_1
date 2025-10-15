@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Compte supprimé - {{ site_name }}</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:0}
+    .container{max-width:640px;margin:0 auto;padding:24px}
+    .card{background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:24px}
+    .muted{color:#6b7280;font-size:12px;margin-top:16px}
+    h1{font-size:20px;margin:0 0 12px}
+    p{line-height:1.6;margin:8px 0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Confirmation de suppression de compte</h1>
+      <p>Votre compte a été supprimé de <strong>{{ site_name }}</strong>.</p>
+      <p>Si vous n'êtes pas à l'origine de cette action, veuillez nous contacter immédiatement.</p>
+      <p class="muted">IP: {{ ip_address }} | {{ timestamp|date:"Y-m-d H:i" }}</p>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -262,11 +262,15 @@ REST_FRAMEWORK = {
 }
 
 # Configurações de Email
-if DEBUG:
-    # Em desenvolvimento, mostrar emails no console
+# Prioridade: 1) EmailSettings do DB (se actif=True), 2) .env, 3) console (apenas se DEBUG e sem DB)
+EMAIL_FORCE_DB_SMTP = config("EMAIL_FORCE_DB_SMTP", default=True, cast=bool)  # Mudado para True por padrão
+
+# Se não forçar DB ou se DB não disponível, usar configuração padrão
+if DEBUG and not EMAIL_FORCE_DB_SMTP:
+    # Em desenvolvimento SEM forçar DB, mostrar emails no console
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    # Em produção, usar SMTP real
+    # Usar SMTP real (do DB ou settings)
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
     EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
@@ -278,7 +282,6 @@ DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL", default="contact@lopespeinture.fr"
 )
 SERVER_EMAIL = config("SERVER_EMAIL", default="contact@lopespeinture.fr")
-
 
 # Emails de contato
 CONTACT_EMAIL = config("CONTACT_EMAIL", default="contact@lopespeinture.fr")

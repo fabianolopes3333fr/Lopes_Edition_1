@@ -4,7 +4,51 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="" />
+    <list default="true" id="80bef784-0e7a-4161-a743-e746341f60eb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/accounts/admin_users_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/management/commands/test_email.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_email_system.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_password_reset_flow.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_sidebar_users_menu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_user_create_flow.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_users_list_render.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/accounts/tests/test_users_views_permissions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/emails/account_deleted_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/emails/account_status_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/emails/email_changed_notification.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/emails/social_disconnected_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/emails/two_factor_status_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/users/form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/accounts/users/list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/emails/contact_form_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/emails/quote_request_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/adapters.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/adapters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/decorators.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/decorators.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/settings_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/settings_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/social_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/social_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/orcamentos/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/orcamentos/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/output.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/output.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system_config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/system_config/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system_config/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/system_config/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/accounts/emails/password_reset_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/accounts/emails/password_reset_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base_dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/partials_dashboard/parametros.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials_dashboard/parametros.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles/detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles/detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/profiles/edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/profiles/edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/system_config/parameters.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/system_config/parameters.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_form_styling.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_form_styling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_html_render.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_html_render.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/emails/sistema_email.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/emails/sistema_email.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -104,7 +148,7 @@
       <workItem from="1760133093147" duration="33609000" />
       <workItem from="1760217971189" duration="11280000" />
       <workItem from="1760265867223" duration="31135000" />
-      <workItem from="1760372452289" duration="18454000" />
+      <workItem from="1760372452289" duration="51959000" />
     </task>
     <servers />
   </component>

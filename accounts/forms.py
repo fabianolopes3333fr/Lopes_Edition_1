@@ -345,3 +345,73 @@ class PasswordResetConfirmForm(forms.Form):
         if commit:
             self.user.save()
         return self.user
+
+
+# ==================== ADMIN USER FORM ====================
+class AdminUserForm(forms.ModelForm):
+    """
+    Formulário para criação/edição de usuários pelo administrador.
+    - Criação: senha não é solicitada; usuário recebe email para definir sua própria senha.
+    - Edição: senha não é alterável aqui; use ação de reset dedicada.
+    - Campo is_superuser só visível/alterável por superuser.
+    """
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "account_type",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "groups",
+        ]
+        widgets = {
+            "email": forms.EmailInput(attrs={"class": "form-input", "placeholder": "email@exemple.com"}),
+            "first_name": forms.TextInput(attrs={"class": "form-input", "placeholder": _("Prénom")}),
+            "last_name": forms.TextInput(attrs={"class": "form-input", "placeholder": _("Nom")}),
+            "account_type": forms.Select(attrs={"class": "form-input"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+            "is_staff": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+            "is_superuser": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+            "groups": forms.SelectMultiple(attrs={"class": "form-multiselect"}),
+        }
+
+    def __init__(self, *args, request=None, **kwargs):
+        self.request = request
+        super().__init__(*args, **kwargs)
+
+        # Apenas superuser pode ver/alterar is_superuser
+        if not (self.request and self.request.user and self.request.user.is_superuser):
+            self.fields.pop("is_superuser", None)
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").lower().strip()
+        if not email:
+            raise ValidationError(_("Email requis"))
+        qs = User.objects.filter(email=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError(_("Cet email est déjà utilisé."))
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Normalizar nomes
+        user.first_name = (self.cleaned_data.get("first_name") or "").strip().title()
+        user.last_name = (self.cleaned_data.get("last_name") or "").strip().title()
+
+        creating = not bool(user.pk)
+
+        if commit:
+            if creating:
+                # Na criação, definir senha inutilizável
+                # O usuário definirá via email de reset
+                user.set_unusable_password()
+            user.save()
+            self.save_m2m()
+
+        return user
